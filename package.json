@@ -1,0 +1,59 @@
+{
+  "name": "shardwire",
+  "version": "1.0.0",
+  "description": "Lightweight Discord-hosted WebSocket bridge for commands and events.",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
+    "build": "tsup src/index.ts --format esm,cjs --dts --sourcemap",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "example:host": "tsx examples/host-basic.ts",
+    "example:consumer": "tsx examples/consumer-basic.ts",
+    "verify": "pnpm test && pnpm typecheck && pnpm build",
+    "prepublishOnly": "pnpm verify"
+  },
+  "keywords": [
+    "discord",
+    "websocket",
+    "realtime",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=18.18"
+  },
+  "peerDependencies": {
+    "discord.js": "^14.0.0"
+  },
+  "peerDependenciesMeta": {
+    "discord.js": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.5.2",
+    "@types/ws": "^8.18.1",
+    "tsx": "^4.20.6",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  },
+  "packageManager": "pnpm@10.22.0"
+}
