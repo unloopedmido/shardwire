@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented in this file.
 
+## 1.3.0
+
+- Added `check:changelog` script and wired it into `verify` and publish workflow so the current package version cannot remain marked `(unreleased)` in `CHANGELOG.md`.
+- Replaced broken `SECURITY.md` README link with in-README vulnerability reporting and secret rotation guidance.
+- Added **startup lifecycle** documentation and expanded transport/idempotency/metrics notes in the README.
+- Added optional bridge `server.idempotencyScope` (`connection` \| `secret`) and `server.idempotencyTtlMs` for cross-connection idempotent retries.
+- Surfaced Discord rate-limit `retry_after` as `details.retryAfterMs` on `SERVICE_UNAVAILABLE` failures and forwarded `discordStatus` / `discordCode` / `retryAfterMs` to `metrics.onActionComplete` when present.
+- Added integration coverage for secret-scoped idempotency, action queue timeouts, interaction/read actions, `maxPayloadBytes` enforcement, and `DiscordAPIError` 429 mapping.
+- Added operational docs (`docs/deployment.md`, `docs/troubleshooting.md`, `docs/patterns.md`) and production-style examples (`examples/bot-production.ts`, `examples/app-moderation.ts`, `examples/app-interaction.ts`) with matching npm scripts.
+
 ## 1.2.0
 
 - Added new built-in events: `guildCreate`, `guildDelete`, `guildMemberUpdate`, `threadCreate`, `threadUpdate`, and `threadDelete`.
