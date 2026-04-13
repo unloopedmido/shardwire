@@ -321,6 +321,139 @@ describe('discord-first bridge validation', () => {
 		expect(result.ok).toBe(false);
 		if (!result.ok) {
 			expect(result.error.code).toBe('FORBIDDEN');
+			const details = result.error.details as { reasonCode?: string; action?: string };
+			expect(details.reasonCode).toBe('action_not_in_capabilities');
+			expect(details.action).toBe('deleteMessage');
+		}
+
+		await app.close();
+		await bot.close();
+	});
+
+	it('preflight succeeds when desired caps match negotiated secret scope', async () => {
+		const port = await getFreePort();
+		const runtime = new FakeDiscordRuntime();
+		const bot = createBotBridgeWithRuntime(
+			{
+				token: 'fake-token',
+				intents: ['Guilds', 'GuildMessages'],
+				server: {
+					port,
+					secrets: [
+						{
+							id: 'scoped',
+							value: 'secret',
+							allow: {
+								events: ['messageCreate'],
+								actions: ['sendMessage'],
+							},
+						},
+					],
+				},
+			},
+			runtime,
+		);
+
+		const app = connectBotBridge({
+			url: `ws://127.0.0.1:${port}/shardwire`,
+			secret: 'secret',
+			secretId: 'scoped',
+		});
+
+		await bot.ready();
+		const report = await app.preflight({
+			events: ['messageCreate'],
+			actions: ['sendMessage'],
+		});
+		expect(report.ok).toBe(true);
+		expect(report.connected).toBe(true);
+		expect(report.capabilities?.events).toContain('messageCreate');
+
+		await app.close();
+		await bot.close();
+	});
+
+	it('preflight reports desired events outside negotiated capabilities', async () => {
+		const port = await getFreePort();
+		const runtime = new FakeDiscordRuntime();
+		const bot = createBotBridgeWithRuntime(
+			{
+				token: 'fake-token',
+				intents: ['Guilds', 'GuildMessages'],
+				server: {
+					port,
+					secrets: [
+						{
+							id: 'scoped',
+							value: 'secret',
+							allow: {
+								events: ['messageCreate'],
+								actions: ['sendMessage'],
+							},
+						},
+					],
+				},
+			},
+			runtime,
+		);
+
+		const app = connectBotBridge({
+			url: `ws://127.0.0.1:${port}/shardwire`,
+			secret: 'secret',
+			secretId: 'scoped',
+		});
+
+		await bot.ready();
+		const report = await app.preflight({
+			events: ['guildCreate'],
+		});
+		expect(report.ok).toBe(false);
+		expect(report.issues.some((i) => i.code === 'desired_event_not_allowed')).toBe(true);
+
+		await app.close();
+		await bot.close();
+	});
+
+	it('BridgeCapabilityError includes structured details for disallowed subscriptions', async () => {
+		const port = await getFreePort();
+		const runtime = new FakeDiscordRuntime();
+		const bot = createBotBridgeWithRuntime(
+			{
+				token: 'fake-token',
+				intents: ['Guilds'],
+				server: {
+					port,
+					secrets: [
+						{
+							id: 'limited',
+							value: 'secret',
+							allow: {
+								events: ['ready'],
+							},
+						},
+					],
+				},
+			},
+			runtime,
+		);
+
+		const app = connectBotBridge({
+			url: `ws://127.0.0.1:${port}/shardwire`,
+			secret: 'secret',
+			secretId: 'limited',
+		});
+
+		app.on('messageCreate', () => undefined);
+
+		await bot.ready();
+		try {
+			await app.ready();
+			expect.fail('expected BridgeCapabilityError');
+		} catch (error) {
+			expect(error).toBeInstanceOf(BridgeCapabilityError);
+			const err = error as BridgeCapabilityError;
+			expect(err.details?.reasonCode).toBe('not_in_capabilities');
+			expect(err.details?.requiredIntents).toEqual(['GuildMessages']);
 		}
 
 		await app.close();

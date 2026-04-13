@@ -106,7 +106,7 @@ app.on(
 ## Startup lifecycle
 
 - **`createBotBridge(...)`** starts the WebSocket server immediately; `await bridge.ready()` resolves when the Discord client has finished its initial `ready` handshake (same timing you would expect from a normal bot login).
-- **Register `app.on(...)` handlers before `await app.ready()`** so subscriptions are known when the app authenticates. `ready()` connects, completes auth, negotiates capabilities from intents + secret scope, then throws `BridgeCapabilityError` if any registered handler targets an event the app is not allowed to receive.
+- **Register `app.on(...)` handlers before `await app.ready()`** so subscriptions are known when the app authenticates. `ready()` connects, completes auth, negotiates capabilities from intents + secret scope, then throws `BridgeCapabilityError` if any registered handler targets an event the app is not allowed to receive. To probe connectivity and negotiated caps first (and validate a planned surface with `desired`), use **`await app.preflight(desired)`** before registering handlers.
 - **Sticky `ready`**: if the bot was already ready before the app connected, the bridge replays the latest `ready` payload to matching subscriptions after auth.
 
 ## Built-In Events
@@ -270,6 +270,16 @@ const capabilities = app.capabilities();
 console.log(capabilities.events, capabilities.actions);
 ```
 
+### Discovery, preflight, and workflow helpers
+
+- **`app.catalog()`** — static list of built-in events (with required gateway intents), actions, and subscription filter keys (no connection required).
+- **`getShardwireCatalog()`** — same data without an `AppBridge` instance.
+- **`app.explainCapability({ kind: 'event' | 'action', name })`** — whether a name is built-in and, after connect, whether the negotiated bridge allows it.
+- **`app.preflight(desired?)`** — awaits auth, returns `issues[]` (errors/warnings) for transport hints, `desired` vs negotiated caps, and subscription/capability mismatches. Prefer calling **before** `app.on(...)` if you want to validate `desired.events` / `desired.actions` without registering handlers yet.
+- **Workflows** — `deferThenEditInteractionReply`, `deferUpdateThenEditInteractionReply`, `createThreadThenSendMessage` chain common action sequences.
+
+`FORBIDDEN` results for actions outside negotiated capabilities include `error.details.reasonCode === 'action_not_in_capabilities'`. `BridgeCapabilityError` from `ready()` / `on()` may include `details.requiredIntents` for disallowed event subscriptions.
+
 ## Run the Included Examples
 
 ### Minimal (single shared secret)
@@ -319,13 +329,21 @@ SHARDWIRE_SECRET_MODERATION=moderation-secret \
 ## Public API
 
 ```ts
-import { createBotBridge, connectBotBridge } from 'shardwire';
+import {
+	connectBotBridge,
+	createBotBridge,
+	createThreadThenSendMessage,
+	deferThenEditInteractionReply,
+	getShardwireCatalog,
+} from 'shardwire';
 ```
 
 Main exports include:
 
 - `createBotBridge(options)`
 - `connectBotBridge(options)`
+- `getShardwireCatalog()`
+- `deferThenEditInteractionReply`, `deferUpdateThenEditInteractionReply`, `createThreadThenSendMessage`
 - `BridgeCapabilityError`
 - bot/app option types
 - normalized event payload types (for example `BridgeMessage`, `BridgeInteraction`, `BridgeGuildMember`)

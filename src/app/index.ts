@@ -14,6 +14,8 @@ import type {
 	EventSubscription,
 	EventSubscriptionFilter,
 	EventHandler,
+	PreflightDesired,
+	PreflightReport,
 } from '../discord/types';
 import { BridgeCapabilityError } from '../discord/types';
 import { matchesEventSubscription, serializeEventSubscription } from '../bridge/subscriptions';
@@ -27,6 +29,12 @@ import {
 	type AuthOkPayload,
 } from '../bridge/transport/protocol';
 import { assertAppBridgeOptions } from '../bridge/validation';
+import {
+	buildBridgeCapabilityErrorDetails,
+	explainCapability as explainShardwireCapability,
+} from '../dx/explain-capability';
+import { buildPreflightReport } from '../dx/preflight';
+import { getShardwireCatalog } from '../dx/shardwire-catalog';
 import { createRequestId } from '../utils/id';
 import { getBackoffDelay } from '../utils/backoff';
 import { withLogger } from '../utils/logger';
@@ -177,7 +185,12 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
 		const firstInvalid = invalidEvents[0];
 		capabilityError =
 			firstInvalid !== undefined
-				? new BridgeCapabilityError('event', firstInvalid, `Event "${firstInvalid}" is not available for this app.`)
+				? new BridgeCapabilityError(
+						'event',
+						firstInvalid,
+						`Event "${firstInvalid}" is not available for this app.`,
+						buildBridgeCapabilityErrorDetails('event', firstInvalid),
+					)
 				: null;
 
 		for (const [eventName, handlers] of eventHandlers.entries()) {
@@ -377,6 +390,12 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
 				error: {
 					code: 'FORBIDDEN',
 					message: `Action "${name}" is not available for this app.`,
+					details: {
+						reasonCode: 'action_not_in_capabilities',
+						action: name,
+						remediation:
+							'Add gateway intents on the bot bridge and/or include this action in the scoped secret `allow.actions`.',
+					},
 				},
 			} satisfies ActionFailure;
 		}
@@ -531,9 +550,53 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
 				actions: [...currentCapabilities.actions],
 			};
 		},
+		catalog() {
+			return getShardwireCatalog();
+		},
+		explainCapability(query) {
+			const connected = Boolean(socket && socket.readyState === 1 && isAuthed);
+			const caps: BridgeCapabilities | null = connected
+				? { events: [...currentCapabilities.events], actions: [...currentCapabilities.actions] }
+				: null;
+			return explainShardwireCapability(connected, caps, query);
+		},
+		async preflight(desired?: PreflightDesired): Promise<PreflightReport> {
+			try {
+				await connect();
+			} catch (error) {
+				return {
+					ok: false,
+					connected: false,
+					capabilities: null,
+					issues: [
+						{
+							severity: 'error',
+							code: 'connection_failed',
+							message: error instanceof Error ? error.message : 'Failed to connect or authenticate.',
+							remediation: 'Verify `url` and `secret`, and ensure the bot bridge is running and reachable.',
+						},
+					],
+				};
+			}
+			return buildPreflightReport({
+				connected: Boolean(socket && socket.readyState === 1 && isAuthed),
+				capabilities: isAuthed
+					? { events: [...currentCapabilities.events], actions: [...currentCapabilities.actions] }
+					: null,
+				appUrl: options.url,
+				...(desired !== undefined ? { desired } : {}),
+				subscriptionCapabilityMessage: capabilityError?.message ?? null,
+				subscriptionCapabilityRemediation: capabilityError?.details?.remediation ?? null,
+			});
+		},
 		on(name, handler, filter?: EventSubscriptionFilter) {
 			if (currentCapabilities.events.length > 0 && !currentCapabilities.events.includes(name)) {
-				throw new BridgeCapabilityError('event', name, `Event "${name}" is not available for this app.`);
+				throw new BridgeCapabilityError(
+					'event',
+					name,
+					`Event "${name}" is not available for this app.`,
+					buildBridgeCapabilityErrorDetails('event', name),
+				);
 			}
 			const casted = handler as EventHandler<BotEventName>;
 			const subscription: EventSubscription = filter ? { name, filter } : { name };

@@ -564,6 +564,61 @@ export interface EventSubscriptionFilter {
 	threadId?: Snowflake | readonly Snowflake[];
 }
 
+/** Keys supported on `EventSubscriptionFilter` for `app.on(..., filter)`. */
+export type ShardwireSubscriptionFilterKey = keyof EventSubscriptionFilter;
+
+/** One built-in event and its gateway intent requirements (for `app.catalog()`). */
+export interface ShardwireCatalogEvent {
+	name: BotEventName;
+	requiredIntents: readonly BotIntentName[];
+}
+
+/** Static discovery surface for built-in events, actions, and subscription filters. */
+export interface ShardwireCatalog {
+	events: readonly ShardwireCatalogEvent[];
+	actions: readonly BotActionName[];
+	subscriptionFilters: readonly ShardwireSubscriptionFilterKey[];
+}
+
+export type CapabilityExplanationKind = 'event' | 'action';
+
+export type CapabilityExplanationReasonCode = 'unknown_name' | 'not_negotiated' | 'allowed' | 'denied_by_bridge';
+
+/** Result of `app.explainCapability(...)`. */
+export interface CapabilityExplanation {
+	kind: CapabilityExplanationKind;
+	name: string;
+	/** Whether this name is a built-in Shardwire event or action. */
+	known: boolean;
+	/** Required gateway intents when `kind` is `event` and `known`. */
+	requiredIntents?: readonly BotIntentName[];
+	/** After authentication, whether the bridge allows this capability. */
+	allowedByBridge?: boolean;
+	reasonCode: CapabilityExplanationReasonCode;
+	remediation?: string;
+}
+
+export type PreflightIssueSeverity = 'error' | 'warning';
+
+export interface PreflightIssue {
+	severity: PreflightIssueSeverity;
+	code: string;
+	message: string;
+	remediation?: string;
+}
+
+export interface PreflightReport {
+	ok: boolean;
+	connected: boolean;
+	capabilities: BridgeCapabilities | null;
+	issues: PreflightIssue[];
+}
+
+export interface PreflightDesired {
+	events?: readonly BotEventName[];
+	actions?: readonly BotActionName[];
+}
+
 export interface EventSubscription<K extends BotEventName = BotEventName> {
 	name: K;
 	filter?: EventSubscriptionFilter;
@@ -681,11 +736,21 @@ export interface ActionFailure {
 
 export type ActionResult<T> = ActionSuccess<T> | ActionFailure;
 
+/** Structured context on `BridgeCapabilityError` and capability-related action failures. */
+export interface BridgeCapabilityErrorDetails {
+	reasonCode: 'not_in_capabilities' | 'unknown_event' | 'unknown_action';
+	kind?: 'event' | 'action';
+	name?: string;
+	remediation: string;
+	requiredIntents?: readonly BotIntentName[];
+}
+
 export class BridgeCapabilityError extends Error {
 	constructor(
 		public readonly kind: 'event' | 'action',
 		public readonly name: string,
 		message?: string,
+		public readonly details?: BridgeCapabilityErrorDetails,
 	) {
 		super(message ?? `Capability "${name}" is not available for ${kind}.`);
 		this.name = 'BridgeCapabilityError';
@@ -721,6 +786,23 @@ export interface AppBridge {
 	connected(): boolean;
 	connectionId(): string | null;
 	capabilities(): BridgeCapabilities;
+	/**
+	 * Static discovery: built-in events (with intent hints), actions, and subscription filter keys.
+	 * Does not require a connection.
+	 */
+	catalog(): ShardwireCatalog;
+	/**
+	 * Explain whether an event or action is built-in and whether the current connection allows it.
+	 * Call after `await app.ready()` for `allowedByBridge` / `reasonCode` beyond `not_negotiated`.
+	 */
+	explainCapability(
+		query: { kind: 'event'; name: BotEventName } | { kind: 'action'; name: BotActionName },
+	): CapabilityExplanation;
+	/**
+	 * Run startup diagnostics after authenticating. Does not throw on subscription/capability mismatches;
+	 * use `report.ok` and `report.issues`. Call before `app.on(...)` to validate `desired` against negotiated caps.
+	 */
+	preflight(desired?: PreflightDesired): Promise<PreflightReport>;
 	on<K extends BotEventName>(name: K, handler: EventHandler<K>, filter?: EventSubscriptionFilter): Unsubscribe;
 	off<K extends BotEventName>(name: K, handler: EventHandler<K>): void;
 }

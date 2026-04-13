@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented in this file.
 
+## 1.4.5
+
+- Added `app.catalog()` for static discovery of built-in events (with intent hints), actions, and subscription filter keys.
+- Added `app.explainCapability(...)` to inspect whether an event or action is built-in and allowed by the current negotiated bridge.
+- Added `app.preflight(desired?)` for startup diagnostics (connection, transport hints, desired vs negotiated capabilities, subscription mismatches) without throwing on capability issues.
+- Added structured `details` on `FORBIDDEN` action results when an action is not in negotiated capabilities; `BridgeCapabilityError` now carries optional `details` (including `requiredIntents` for disallowed event subscriptions).
+- Exported `getShardwireCatalog()` for the same static catalog without an app instance.
+- Added workflow helpers: `deferThenEditInteractionReply`, `deferUpdateThenEditInteractionReply`, and `createThreadThenSendMessage`.
+
 ## 1.4.0
 
 - Added built-in events: `channelCreate`, `channelUpdate`, `channelDelete`, and `messageBulkDelete`.

@@ -60,7 +60,8 @@ export const BOT_INTENT_BITS: Record<BotIntentName, number> = Object.fromEntries
 	DISCORD_GATEWAY_INTENT_ENTRIES,
 ) as Record<BotIntentName, number>;
 
-const EVENT_REQUIRED_INTENTS: Record<BotEventName, readonly BotIntentName[]> = {
+/** Gateway intents required for each built-in event (empty = none). */
+export const EVENT_REQUIRED_INTENTS: Record<BotEventName, readonly BotIntentName[]> = {
 	ready: [],
 	interactionCreate: [],
 	messageCreate: ['GuildMessages'],
@@ -81,6 +82,21 @@ const EVENT_REQUIRED_INTENTS: Record<BotEventName, readonly BotIntentName[]> = {
 	channelUpdate: ['Guilds'],
 	channelDelete: ['Guilds'],
 };
+
+/** Keys supported on `EventSubscriptionFilter` for `app.on(..., filter)`. */
+export const SUBSCRIPTION_FILTER_KEYS = [
+	'guildId',
+	'channelId',
+	'userId',
+	'commandName',
+	'customId',
+	'interactionKind',
+	'channelType',
+	'parentChannelId',
+	'threadId',
+] as const;
+
+export type SubscriptionFilterKey = (typeof SUBSCRIPTION_FILTER_KEYS)[number];
 
 export function getAvailableEvents(intents: readonly BotIntentName[]): BotEventName[] {
 	const enabled = new Set(intents);
