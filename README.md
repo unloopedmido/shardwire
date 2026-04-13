@@ -1,14 +1,74 @@
 # shardwire
 
-Lightweight TypeScript library that turns a Discord bot host into a WebSocket command/event bridge.
+> Lightweight TypeScript library for building a Discord-hosted WebSocket command and event bridge.
 
-## Install
+[![npm version](https://img.shields.io/npm/v/shardwire?style=flat-square)](https://www.npmjs.com/package/shardwire)
+[![npm downloads](https://img.shields.io/npm/dm/shardwire?style=flat-square)](https://www.npmjs.com/package/shardwire)
+[![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18.18-3c873a?style=flat-square)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178c6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](./LICENSE)
+
+`shardwire` helps you expose strongly-typed bot capabilities over WebSocket so dashboards, admin tools, and backend services can send commands to your Discord bot host and subscribe to events in real time.
+
+[Quick Start](#quick-start) • [Why shardwire](#why-shardwire) • [Host Setup](#host-setup) • [Consumer Setup](#consumer-setup) • [API Overview](#api-overview) • [Configuration](#configuration) • [Security Notes](#security-notes)
+
+## Table of Contents
+
+- [Why shardwire](#why-shardwire)
+- [Features](#features)
+- [Quick Start](#quick-start)
+- [Host Setup](#host-setup)
+- [Consumer Setup](#consumer-setup)
+- [Token-Only Host (No Existing discord.js Client)](#token-only-host-no-existing-discordjs-client)
+- [Reconnect and Timeout Hardening](#reconnect-and-timeout-hardening)
+- [API Overview](#api-overview)
+- [Configuration](#configuration)
+- [Error Model](#error-model)
+- [Local Development](#local-development)
+- [Compatibility](#compatibility)
+- [Security Notes](#security-notes)
+- [Roadmap Constraints (v1)](#roadmap-constraints-v1)
+
+## Why shardwire
+
+Running bot logic inside your Discord host process while orchestrating it from external services is a common pattern, but wiring this safely and ergonomically takes time. `shardwire` gives you a focused transport layer with a typed contract so you can:
+
+- call bot-hosted commands from apps and services,
+- stream real-time events back to consumers,
+- keep payloads typed end-to-end with TypeScript,
+- start quickly without deploying extra infrastructure.
+
+## Features
+
+- **Typed command RPC** from consumers to host (`send` -> `CommandResult`).
+- **Real-time pub/sub events** from host to all authenticated consumers.
+- **Single factory API** (`createShardwire`) with host and consumer overloads.
+- **Built-in reliability controls** with reconnect backoff, jitter, and timeouts.
+- **Runtime input validation** for config, names, and JSON-serializable payloads.
+- **Optional token-only Discord mode** where shardwire can own client lifecycle.
+- **Dual package output** for ESM and CJS consumers.
+
+## Quick Start
+
+Install:
 
 ```bash
 pnpm add shardwire
 ```
 
-## Host mode
+Define shared message contracts:
+
+```ts
+type Commands = {
+  "ban-user": { userId: string };
+};
+
+type Events = {
+  "member-joined": { userId: string; guildId: string };
+};
+```
+
+## Host Setup
 
 ```ts
 import { createShardwire } from "shardwire";
@@ -27,17 +87,18 @@ const wire = createShardwire<Commands, Events>({
     port: 3001,
     secret: process.env.SHARDWIRE_SECRET!,
   },
+  name: "bot-host",
 });
 
 wire.onCommand("ban-user", async ({ userId }) => {
   await guild.members.ban(userId);
-  return { banned: true };
+  return { banned: true, userId };
 });
 
 wire.emitEvent("member-joined", { userId: "123", guildId: "456" });
 ```
 
-## Consumer mode
+## Consumer Setup
 
 ```ts
 import { createShardwire } from "shardwire";
@@ -57,85 +118,152 @@ const wire = createShardwire<Commands, Events>({
 
 const result = await wire.send("ban-user", { userId: "123" });
 
-wire.on("member-joined", (payload) => {
-  console.log(payload.guildId);
+if (result.ok) {
+  console.log("Command succeeded:", result.data);
+} else {
+  console.error("Command failed:", result.error.code, result.error.message);
+}
+
+wire.on("member-joined", (payload, meta) => {
+  console.log("event", payload, meta.ts);
 });
 ```
 
-## Local examples
+## Token-Only Host (No Existing discord.js Client)
 
-Run a local host and consumer in two terminals:
+If you do not already manage a `discord.js` client, provide a bot token and shardwire can initialize and own the client lifecycle.
 
-1. Start host:
-   - `pnpm example:host`
-2. Start consumer:
-   - `pnpm example:consumer`
+```ts
+const wire = createShardwire<Commands, Events>({
+  token: process.env.DISCORD_BOT_TOKEN!,
+  server: {
+    port: 3001,
+    secret: process.env.SHARDWIRE_SECRET!,
+  },
+});
+```
 
-Environment overrides:
+> [!IMPORTANT]
+> Keep `DISCORD_BOT_TOKEN` and `SHARDWIRE_SECRET` in environment variables. Never commit them.
 
-- `SHARDWIRE_SECRET` (default: `local-dev-secret`)
-- `SHARDWIRE_PORT` for host (default: `3001`)
-- `SHARDWIRE_URL` for consumer (default: `ws://localhost:3001/shardwire`)
+## Reconnect and Timeout Hardening
 
-## API quick reference
+For unstable networks, tune reconnect behavior and request timeout explicitly:
 
-### Host
+```ts
+const wire = createShardwire({
+  url: "ws://bot-host:3001/shardwire",
+  secret: process.env.SHARDWIRE_SECRET!,
+  requestTimeoutMs: 10_000,
+  reconnect: {
+    enabled: true,
+    initialDelayMs: 500,
+    maxDelayMs: 10_000,
+    jitter: true,
+  },
+});
+```
+
+## API Overview
+
+### Host API
 
 - `wire.onCommand(name, handler)` register a command handler.
 - `wire.emitEvent(name, payload)` emit an event to all connected consumers.
 - `wire.broadcast(name, payload)` alias of `emitEvent`.
-- `wire.close()` stop websocket server and close connections.
+- `wire.close()` close the server and active sockets.
 
-### Consumer
+### Consumer API
 
-- `wire.send(name, payload, options?)` send command request and await typed result.
+- `wire.send(name, payload, options?)` send command and await typed result.
 - `wire.on(name, handler)` subscribe to events.
-- `wire.off(name, handler)` remove specific event handler.
+- `wire.off(name, handler)` unsubscribe a specific handler.
 - `wire.connected()` check authenticated connection state.
 - `wire.close()` close socket and stop reconnect attempts.
 
-### Command result shape
+## Configuration
+
+### Host options
+
+- `server.port` required port.
+- `server.secret` shared secret for authentication.
+- `server.path` optional WebSocket path (default `/shardwire`).
+- `server.host` optional bind host.
+- `server.heartbeatMs` heartbeat interval.
+- `server.commandTimeoutMs` command execution timeout.
+- `server.maxPayloadBytes` WebSocket payload size limit.
+- `server.corsOrigins` CORS allowlist for browser clients.
+- `client` existing `discord.js` client (optional).
+- `token` Discord bot token (optional, enables token-only mode).
+
+### Consumer options
+
+- `url` host endpoint (for example `ws://localhost:3001/shardwire`).
+- `secret` shared secret matching host.
+- `requestTimeoutMs` default timeout for `send`.
+- `reconnect` reconnect policy (`enabled`, delays, jitter).
+- `webSocketFactory` optional custom client implementation.
+
+> [!NOTE]
+> Invalid configuration, empty command/event names, or non-serializable payloads throw synchronously with clear errors.
+
+## Error Model
 
 `send()` resolves to:
 
 - success: `{ ok: true, requestId, ts, data }`
-- failure: `{ ok: false, requestId, ts, error: { code, message, details? } }`
+- failure: `{ ok: false, requestId, ts, error }`
 
-Error codes: `AUTH_ERROR`, `TIMEOUT`, `COMMAND_NOT_FOUND`, `VALIDATION_ERROR`, `INTERNAL_ERROR`.
+Failure codes:
 
-## Runtime validation behavior
+- `AUTH_ERROR`
+- `TIMEOUT`
+- `COMMAND_NOT_FOUND`
+- `VALIDATION_ERROR`
+- `INTERNAL_ERROR`
 
-- Host config requires a valid `server` block (`port`, `secret`, and positive numeric limits).
-- Consumer config requires non-empty `url` and `secret`.
-- Command/event names must be non-empty strings.
-- Command/event payloads must be JSON-serializable.
+## Local Development
 
-Invalid input throws synchronously with a descriptive `Error`.
+Run host and consumer examples in separate terminals:
 
-## Compatibility matrix
+```bash
+pnpm install
+pnpm example:host
+```
 
-- Node.js: `>=18.18`
-- TypeScript: `>=5.x` (consumer project)
-- discord.js: `^14` (optional peer dependency)
-- Module support: ESM + CJS exports
+```bash
+pnpm example:consumer
+```
 
-## Security and operations notes
+Environment overrides:
 
-- Keep `secret` in environment variables, never commit it.
-- v1 uses static shared secret (restart host to rotate).
-- Use `server.corsOrigins` when browser clients connect.
-- Set `server.maxPayloadBytes` and `requestTimeoutMs` for your workload profile.
+- `SHARDWIRE_SECRET` (default: `local-dev-secret`)
+- `SHARDWIRE_PORT` (default: `3001`)
+- `SHARDWIRE_URL` (default: `ws://localhost:3001/shardwire`)
 
-## CI and release workflow
+Verify before publishing:
 
-- CI runs `pnpm verify` (`test`, `typecheck`, `build`) on pushes and pull requests.
-- Local verification: `pnpm verify`
-- Release guide: see `RELEASING.md`
-- Change history: see `CHANGELOG.md`
+```bash
+pnpm verify
+```
 
-## v1 constraints
+## Compatibility
 
-- Single package, no external services required.
-- Single host process only (no cross-host sharding in v1).
-- Shared-secret auth for host/consumer handshake.
-- In-memory command dedupe and pending request tracking.
+- Node.js `>=18.18`
+- TypeScript-first API
+- `discord.js` `^14` as optional peer dependency
+- ESM + CJS package exports
+
+## Security Notes
+
+- Use strong, rotated secrets via environment variables.
+- v1 secret rotation is static (restart host after rotation).
+- Set payload and timeout limits appropriate for your workload.
+- Configure `server.corsOrigins` when exposing browser consumers.
+
+## Roadmap Constraints (v1)
+
+- Single npm package, no external infrastructure requirement.
+- Host process embeds WebSocket server.
+- Single-host process model (no cross-host sharding in v1).
+- Shared-secret handshake with in-memory dedupe and pending-request tracking.
