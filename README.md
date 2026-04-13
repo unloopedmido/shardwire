@@ -24,7 +24,6 @@
 - [API Overview](#api-overview)
 - [Configuration](#configuration)
 - [Error Model](#error-model)
-- [Local Development](#local-development)
 - [Compatibility](#compatibility)
 - [Security Notes](#security-notes)
 - [Roadmap Constraints (v1)](#roadmap-constraints-v1)
@@ -221,31 +220,6 @@ Failure codes:
 - `COMMAND_NOT_FOUND`
 - `VALIDATION_ERROR`
 - `INTERNAL_ERROR`
-
-## Local Development
-
-Run host and consumer examples in separate terminals:
-
-```bash
-pnpm install
-pnpm example:host
-```
-
-```bash
-pnpm example:consumer
-```
-
-Environment overrides:
-
-- `SHARDWIRE_SECRET` (default: `local-dev-secret`)
-- `SHARDWIRE_PORT` (default: `3001`)
-- `SHARDWIRE_URL` (default: `ws://localhost:3001/shardwire`)
-
-Verify before publishing:
-
-```bash
-pnpm verify
-```
 
 ## Compatibility
 
