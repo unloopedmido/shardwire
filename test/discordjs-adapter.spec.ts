@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { DiscordAPIError } from "discord.js";
 import { mapDiscordErrorToActionExecutionError } from "../src/discord/runtime/discordjs-adapter";
 
 describe("discord.js adapter error mapping", () => {
@@ -41,6 +42,24 @@ describe("discord.js adapter error mapping", () => {
     });
     expect(mapped?.code).toBe("SERVICE_UNAVAILABLE");
     expect(mapped?.details).toMatchObject({ retryable: true, discordStatus: 429 });
+  });
+
+  it("maps DiscordAPIError 429 with retry_after into details", () => {
+    const err = new DiscordAPIError(
+      { message: "slow", retry_after: 1.25 },
+      0,
+      429,
+      "GET",
+      "https://discord.com/api/v10/channels/x",
+      { files: undefined, body: undefined },
+    );
+    const mapped = mapDiscordErrorToActionExecutionError(err);
+    expect(mapped?.code).toBe("SERVICE_UNAVAILABLE");
+    expect(mapped?.details).toMatchObject({
+      retryable: true,
+      discordStatus: 429,
+      retryAfterMs: 1250,
+    });
   });
 
   it("returns null for unmapped errors", () => {
