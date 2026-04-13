@@ -1,5 +1,6 @@
 import { createServer } from "node:net";
 import { describe, expect, it } from "vitest";
+import WebSocket from "ws";
 import { connectBotBridge } from "../src";
 import { createBotBridgeWithRuntime } from "../src/bot";
 import { FakeDiscordRuntime } from "./helpers/fake-runtime";
@@ -534,6 +535,248 @@ describe("discord-first bridge integration", () => {
     expect(calls).toBe(1);
 
     await app.close();
+    await bot.close();
+  });
+
+  it("deduplicates idempotency keys across connections when server uses secret scope", async () => {
+    const port = await getFreePort();
+    const runtime = new FakeDiscordRuntime();
+    const bot = createBotBridgeWithRuntime(
+      {
+        token: "fake-token",
+        intents: ["Guilds", "GuildMessages"],
+        server: {
+          port,
+          secrets: ["shared-secret"],
+          idempotencyScope: "secret",
+        },
+      },
+      runtime,
+    );
+
+    let calls = 0;
+    runtime.setActionHandler("sendMessage", async ({ channelId, content }) => {
+      calls += 1;
+      return {
+        id: "msg-cross",
+        channelId,
+        content,
+        attachments: [],
+        embeds: [],
+      };
+    });
+
+    const appA = connectBotBridge({
+      url: `ws://127.0.0.1:${port}/shardwire`,
+      secret: "shared-secret",
+    });
+    const appB = connectBotBridge({
+      url: `ws://127.0.0.1:${port}/shardwire`,
+      secret: "shared-secret",
+    });
+
+    await Promise.all([bot.ready(), appA.ready(), appB.ready()]);
+
+    const first = await appA.actions.sendMessage(
+      { channelId: "channel-1", content: "hello" },
+      { idempotencyKey: "cross-conn" },
+    );
+    const second = await appB.actions.sendMessage(
+      { channelId: "channel-1", content: "hello" },
+      { idempotencyKey: "cross-conn" },
+    );
+
+    expect(first.ok).toBe(true);
+    expect(second.ok).toBe(true);
+    expect(calls).toBe(1);
+
+    await appA.close();
+    await appB.close();
+    await bot.close();
+  });
+
+  it("fails queued actions when concurrency is saturated past queue timeout", async () => {
+    const port = await getFreePort();
+    const runtime = new FakeDiscordRuntime();
+    const bot = createBotBridgeWithRuntime(
+      {
+        token: "fake-token",
+        intents: ["Guilds", "GuildMessages"],
+        server: {
+          port,
+          secrets: ["shared-secret"],
+          maxConcurrentActions: 1,
+          actionQueueTimeoutMs: 80,
+        },
+      },
+      runtime,
+    );
+
+    runtime.setActionHandler("sendMessage", async ({ channelId, content }) => {
+      await new Promise((resolve) => setTimeout(resolve, 250));
+      return {
+        id: "msg-slow",
+        channelId,
+        content,
+        attachments: [],
+        embeds: [],
+      };
+    });
+
+    const app = connectBotBridge({
+      url: `ws://127.0.0.1:${port}/shardwire`,
+      secret: "shared-secret",
+    });
+
+    await Promise.all([bot.ready(), app.ready()]);
+
+    const [a, b] = await Promise.all([
+      app.actions.sendMessage({ channelId: "c1", content: "a" }),
+      app.actions.sendMessage({ channelId: "c1", content: "b" }),
+    ]);
+
+    const okCount = [a, b].filter((r) => r.ok).length;
+    const failCount = [a, b].filter((r) => !r.ok).length;
+    expect(okCount).toBe(1);
+    expect(failCount).toBe(1);
+    const failed = !a.ok ? a : b;
+    if (!failed.ok) {
+      expect(failed.error.code).toBe("SERVICE_UNAVAILABLE");
+      expect(failed.error.message).toMatch(/ACTION_QUEUE_TIMEOUT|queue/i);
+    }
+
+    await app.close();
+    await bot.close();
+  });
+
+  it("round-trips interaction helpers and read actions", async () => {
+    const port = await getFreePort();
+    const runtime = new FakeDiscordRuntime();
+    const bot = createBotBridgeWithRuntime(
+      {
+        token: "fake-token",
+        intents: ["Guilds", "GuildMessages", "GuildMembers"],
+        server: {
+          port,
+          secrets: ["shared-secret"],
+        },
+      },
+      runtime,
+    );
+
+    runtime.setActionHandler("deferInteraction", async ({ interactionId }) => ({
+      deferred: true,
+      interactionId,
+    }));
+    runtime.setActionHandler("replyToInteraction", async ({ content }) => ({
+      id: "reply-1",
+      channelId: "ch-1",
+      content: content ?? "ok",
+      attachments: [],
+      embeds: [],
+    }));
+    runtime.setActionHandler("showModal", async ({ interactionId: id }) => ({
+      shown: true,
+      interactionId: id,
+    }));
+    runtime.setActionHandler("fetchMessage", async ({ channelId, messageId }) => ({
+      id: messageId,
+      channelId,
+      content: "fetched",
+      attachments: [],
+      embeds: [],
+    }));
+    runtime.setActionHandler("fetchMember", async ({ guildId, userId }) => ({
+      id: userId,
+      guildId,
+      roles: ["role-1"],
+    }));
+
+    const app = connectBotBridge({
+      url: `ws://127.0.0.1:${port}/shardwire`,
+      secret: "shared-secret",
+    });
+
+    await Promise.all([bot.ready(), app.ready()]);
+
+    const deferResult = await app.actions.deferInteraction({ interactionId: "int-1" });
+    const replyResult = await app.actions.replyToInteraction({
+      interactionId: "int-1",
+      content: "hello",
+    });
+    const modalResult = await app.actions.showModal({
+      interactionId: "int-1",
+      title: "Title",
+      customId: "modal-1",
+      components: [],
+    });
+    const msgResult = await app.actions.fetchMessage({ channelId: "ch-1", messageId: "m-1" });
+    const memberResult = await app.actions.fetchMember({ guildId: "g-1", userId: "u-1" });
+
+    expect(deferResult.ok).toBe(true);
+    expect(replyResult.ok).toBe(true);
+    expect(modalResult.ok).toBe(true);
+    expect(msgResult.ok).toBe(true);
+    expect(memberResult.ok).toBe(true);
+    if (deferResult.ok) {
+      expect(deferResult.data.interactionId).toBe("int-1");
+    }
+    if (msgResult.ok) {
+      expect(msgResult.data.content).toBe("fetched");
+    }
+    if (memberResult.ok) {
+      expect(memberResult.data.roles).toEqual(["role-1"]);
+    }
+
+    await app.close();
+    await bot.close();
+  });
+
+  it("closes connections that exceed maxPayloadBytes", async () => {
+    const port = await getFreePort();
+    const runtime = new FakeDiscordRuntime();
+    const bot = createBotBridgeWithRuntime(
+      {
+        token: "fake-token",
+        intents: ["Guilds"],
+        server: {
+          port,
+          secrets: ["shared-secret"],
+          maxPayloadBytes: 1024,
+        },
+      },
+      runtime,
+    );
+
+    await bot.ready();
+
+    await new Promise<void>((resolve, reject) => {
+      const ws = new WebSocket(`ws://127.0.0.1:${port}/shardwire`);
+      const timer = setTimeout(() => {
+        ws.terminate();
+        reject(new Error("Timed out waiting for close on oversized payload."));
+      }, 4000);
+      ws.once("open", () => {
+        const padding = "z".repeat(3000);
+        ws.send(
+          JSON.stringify({
+            v: 2,
+            type: "auth.hello",
+            ts: Date.now(),
+            payload: { secret: "shared-secret", appName: "big", padding },
+          }),
+        );
+      });
+      ws.once("close", () => {
+        clearTimeout(timer);
+        resolve();
+      });
+      ws.once("error", () => {
+        clearTimeout(timer);
+        resolve();
+      });
+    });
+
     await bot.close();
   });
 });
