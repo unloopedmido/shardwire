@@ -9,8 +9,14 @@ export const BOT_EVENT_NAMES = [
   "messageDelete",
   "messageReactionAdd",
   "messageReactionRemove",
+  "guildCreate",
+  "guildDelete",
   "guildMemberAdd",
   "guildMemberRemove",
+  "guildMemberUpdate",
+  "threadCreate",
+  "threadUpdate",
+  "threadDelete",
 ] as const satisfies readonly BotEventName[];
 
 export const BOT_ACTION_NAMES = [
@@ -19,7 +25,14 @@ export const BOT_ACTION_NAMES = [
   "deleteMessage",
   "replyToInteraction",
   "deferInteraction",
+  "deferUpdateInteraction",
   "followUpInteraction",
+  "editInteractionReply",
+  "deleteInteractionReply",
+  "updateInteraction",
+  "showModal",
+  "fetchMessage",
+  "fetchMember",
   "banMember",
   "kickMember",
   "addMemberRole",
@@ -44,8 +57,14 @@ const EVENT_REQUIRED_INTENTS: Record<BotEventName, readonly BotIntentName[]> = {
   messageDelete: ["GuildMessages"],
   messageReactionAdd: ["GuildMessageReactions"],
   messageReactionRemove: ["GuildMessageReactions"],
+  guildCreate: ["Guilds"],
+  guildDelete: ["Guilds"],
   guildMemberAdd: ["GuildMembers"],
   guildMemberRemove: ["GuildMembers"],
+  guildMemberUpdate: ["GuildMembers"],
+  threadCreate: ["Guilds"],
+  threadUpdate: ["Guilds"],
+  threadDelete: ["Guilds"],
 };
 
 export function getAvailableEvents(intents: readonly BotIntentName[]): BotEventName[] {

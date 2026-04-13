@@ -1,8 +1,9 @@
-import type { APIAllowedMentions, APIEmbed, Snowflake } from "discord-api-types/v10";
+import type { Snowflake } from "discord-api-types/v10";
 import {
   Client,
   DiscordAPIError,
   Events,
+  type Guild,
   type GuildMember,
   type Interaction,
   type Message,
@@ -12,6 +13,8 @@ import {
   type PartialUser,
   type PartialMessage,
   type PartialGuildMember,
+  type MessageComponentInteraction,
+  type ThreadChannel,
   type User,
 } from "discord.js";
 import { BOT_INTENT_BITS } from "../catalog";
@@ -22,6 +25,7 @@ import type {
   BotEventName,
   BotEventPayloadMap,
   BridgeMessageInput,
+  EventEnvelopeBase,
   Unsubscribe,
 } from "../types";
 import { withLogger } from "../../utils/logger";
@@ -29,10 +33,12 @@ import { DedupeCache } from "../../utils/cache";
 import { ActionExecutionError, type DiscordRuntimeAdapter, type DiscordRuntimeOptions } from "./adapter";
 import {
   serializeDeletedMessage,
+  serializeGuild,
   serializeGuildMember,
   serializeInteraction,
   serializeMessageReaction,
   serializeMessage,
+  serializeThread,
   serializeUser,
 } from "./serializers";
 
@@ -42,10 +48,12 @@ type ReplyCapableInteraction = Interaction & {
   reply(options: unknown): Promise<unknown>;
   deferReply(options?: unknown): Promise<unknown>;
   followUp(options: unknown): Promise<unknown>;
+  editReply(options: unknown): Promise<unknown>;
+  deleteReply(): Promise<unknown>;
 };
 
 interface SendCapableChannel {
-  send(options: BridgeMessageInput): Promise<Message>;
+  send(options: Record<string, unknown>): Promise<Message>;
 }
 
 interface MessageManageableChannel extends SendCapableChannel {
@@ -71,15 +79,14 @@ function isMessageManageableChannel(channel: unknown): channel is MessageManagea
   return Boolean(messages && typeof messages.fetch === "function");
 }
 
-function toSendOptions(input: BridgeMessageInput): {
-  content?: string;
-  embeds?: APIEmbed[];
-  allowedMentions?: APIAllowedMentions;
-} {
+function toSendOptions(input: BridgeMessageInput): Record<string, unknown> {
   return {
     ...(input.content !== undefined ? { content: input.content } : {}),
     ...(input.embeds !== undefined ? { embeds: input.embeds } : {}),
     ...(input.allowedMentions !== undefined ? { allowedMentions: input.allowedMentions } : {}),
+    ...(input.components !== undefined ? { components: input.components } : {}),
+    ...(input.flags !== undefined ? { flags: input.flags } : {}),
+    ...(input.stickerIds !== undefined ? { stickers: input.stickerIds } : {}),
   };
 }
 
@@ -106,23 +113,35 @@ export function mapDiscordErrorToActionExecutionError(error: unknown): ActionExe
   const details = extractDiscordErrorDetails(error);
   const message = details.message ?? (error instanceof Error ? error.message : "Discord action failed.");
 
+  const detailPayload = {
+    ...(typeof details.status === "number" ? { discordStatus: details.status } : {}),
+    ...(typeof details.code === "number" ? { discordCode: details.code } : {}),
+  };
+
   if (
     details.status === 403 ||
     (details.code !== undefined && DISCORD_FORBIDDEN_CODES.has(details.code))
   ) {
-    return new ActionExecutionError("FORBIDDEN", message);
+    return new ActionExecutionError("FORBIDDEN", message, detailPayload);
   }
   if (
     details.status === 404 ||
     (details.code !== undefined && DISCORD_NOT_FOUND_CODES.has(details.code))
   ) {
-    return new ActionExecutionError("NOT_FOUND", message);
+    return new ActionExecutionError("NOT_FOUND", message, detailPayload);
   }
   if (
     details.status === 400 ||
     (details.code !== undefined && DISCORD_INVALID_REQUEST_CODES.has(details.code))
   ) {
-    return new ActionExecutionError("INVALID_REQUEST", message);
+    return new ActionExecutionError("INVALID_REQUEST", message, detailPayload);
+  }
+  if (details.status === 429) {
+    return new ActionExecutionError("SERVICE_UNAVAILABLE", message, {
+      discordStatus: 429,
+      retryable: true,
+      ...(details.code !== undefined ? { discordCode: details.code } : {}),
+    });
   }
   return null;
 }
@@ -130,7 +149,7 @@ export function mapDiscordErrorToActionExecutionError(error: unknown): ActionExe
 export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
   private readonly client: Client;
   private readonly logger;
-  private readonly interactionCache = new DedupeCache<ReplyCapableInteraction>(INTERACTION_CACHE_TTL_MS);
+  private readonly interactionCache = new DedupeCache<Interaction>(INTERACTION_CACHE_TTL_MS);
   private readonly actionHandlers: {
     [K in BotActionName]: (payload: BotActionPayloadMap[K]) => Promise<BotActionResultDataMap[K]>;
   };
@@ -152,7 +171,14 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
       deleteMessage: (payload) => this.deleteMessage(payload),
       replyToInteraction: (payload) => this.replyToInteraction(payload),
       deferInteraction: (payload) => this.deferInteraction(payload),
+      deferUpdateInteraction: (payload) => this.deferUpdateInteraction(payload),
       followUpInteraction: (payload) => this.followUpInteraction(payload),
+      editInteractionReply: (payload) => this.editInteractionReply(payload),
+      deleteInteractionReply: (payload) => this.deleteInteractionReply(payload),
+      updateInteraction: (payload) => this.updateInteraction(payload),
+      showModal: (payload) => this.showModal(payload),
+      fetchMessage: (payload) => this.fetchMessage(payload),
+      fetchMember: (payload) => this.fetchMember(payload),
       banMember: (payload) => this.banMember(payload),
       kickMember: (payload) => this.kickMember(payload),
       addMemberRole: (payload) => this.addMemberRole(payload),
@@ -160,6 +186,11 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
       addMessageReaction: (payload) => this.addMessageReaction(payload),
       removeOwnMessageReaction: (payload) => this.removeOwnMessageReaction(payload),
     };
+  }
+
+  private shardEnvelope(): Pick<EventEnvelopeBase, "shardId"> {
+    const shardId = this.client.shard?.ids?.[0];
+    return shardId !== undefined ? { shardId } : {};
   }
 
   isReady(): boolean {
@@ -214,6 +245,7 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
           }
           handler({
             receivedAt: Date.now(),
+            ...this.shardEnvelope(),
             user: serializeUser(this.client.user),
           } as BotEventPayloadMap[K]);
         };
@@ -227,11 +259,10 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
       }
       case "interactionCreate": {
         const listener = (interaction: Interaction) => {
-          if (isReplyCapableInteraction(interaction)) {
-            this.interactionCache.set(interaction.id, interaction);
-          }
+          this.interactionCache.set(interaction.id, interaction);
           handler({
             receivedAt: Date.now(),
+            ...this.shardEnvelope(),
             interaction: serializeInteraction(interaction),
           } as BotEventPayloadMap[K]);
         };
@@ -244,6 +275,7 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
         const listener = (message: Message) => {
           handler({
             receivedAt: Date.now(),
+            ...this.shardEnvelope(),
             message: serializeMessage(message),
           } as BotEventPayloadMap[K]);
         };
@@ -256,6 +288,7 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
         const listener = (oldMessage: Message | PartialMessage, newMessage: Message | PartialMessage) => {
           handler({
             receivedAt: Date.now(),
+            ...this.shardEnvelope(),
             oldMessage: serializeMessage(oldMessage),
             message: serializeMessage(newMessage),
           } as BotEventPayloadMap[K]);
@@ -269,6 +302,7 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
         const listener = (message: Message | PartialMessage) => {
           handler({
             receivedAt: Date.now(),
+            ...this.shardEnvelope(),
             message: serializeDeletedMessage(message),
           } as BotEventPayloadMap[K]);
         };
@@ -281,6 +315,7 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
         const listener = (reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser) => {
           handler({
             receivedAt: Date.now(),
+            ...this.shardEnvelope(),
             reaction: serializeMessageReaction(reaction, user),
           } as BotEventPayloadMap[K]);
         };
@@ -293,6 +328,7 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
         const listener = (reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser) => {
           handler({
             receivedAt: Date.now(),
+            ...this.shardEnvelope(),
             reaction: serializeMessageReaction(reaction, user),
           } as BotEventPayloadMap[K]);
         };
@@ -305,6 +341,7 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
         const listener = (member: GuildMember) => {
           handler({
             receivedAt: Date.now(),
+            ...this.shardEnvelope(),
             member: serializeGuildMember(member),
           } as BotEventPayloadMap[K]);
         };
@@ -317,12 +354,98 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
         const listener = (member: GuildMember | PartialGuildMember) => {
           handler({
             receivedAt: Date.now(),
+            ...this.shardEnvelope(),
             member: serializeGuildMember(member),
           } as BotEventPayloadMap[K]);
         };
         this.client.on(Events.GuildMemberRemove, listener);
         return () => {
           this.client.off(Events.GuildMemberRemove, listener);
+        };
+      }
+      case "guildMemberUpdate": {
+        const listener = (oldMember: GuildMember | PartialGuildMember, newMember: GuildMember) => {
+          handler({
+            receivedAt: Date.now(),
+            ...this.shardEnvelope(),
+            oldMember: serializeGuildMember(oldMember),
+            member: serializeGuildMember(newMember),
+          } as BotEventPayloadMap[K]);
+        };
+        this.client.on(Events.GuildMemberUpdate, listener);
+        return () => {
+          this.client.off(Events.GuildMemberUpdate, listener);
+        };
+      }
+      case "guildCreate": {
+        const listener = (guild: Guild) => {
+          handler({
+            receivedAt: Date.now(),
+            ...this.shardEnvelope(),
+            guild: serializeGuild(guild),
+          } as BotEventPayloadMap[K]);
+        };
+        this.client.on(Events.GuildCreate, listener);
+        return () => {
+          this.client.off(Events.GuildCreate, listener);
+        };
+      }
+      case "guildDelete": {
+        const listener = (guild: Guild) => {
+          handler({
+            receivedAt: Date.now(),
+            ...this.shardEnvelope(),
+            guild: {
+              id: guild.id,
+              name: guild.name ?? "Unknown",
+              icon: guild.icon,
+              ...(guild.ownerId ? { ownerId: guild.ownerId } : {}),
+            },
+          } as BotEventPayloadMap[K]);
+        };
+        this.client.on(Events.GuildDelete, listener);
+        return () => {
+          this.client.off(Events.GuildDelete, listener);
+        };
+      }
+      case "threadCreate": {
+        const listener = (thread: ThreadChannel) => {
+          handler({
+            receivedAt: Date.now(),
+            ...this.shardEnvelope(),
+            thread: serializeThread(thread),
+          } as BotEventPayloadMap[K]);
+        };
+        this.client.on(Events.ThreadCreate, listener);
+        return () => {
+          this.client.off(Events.ThreadCreate, listener);
+        };
+      }
+      case "threadUpdate": {
+        const listener = (oldThread: ThreadChannel, newThread: ThreadChannel) => {
+          handler({
+            receivedAt: Date.now(),
+            ...this.shardEnvelope(),
+            oldThread: serializeThread(oldThread),
+            thread: serializeThread(newThread),
+          } as BotEventPayloadMap[K]);
+        };
+        this.client.on(Events.ThreadUpdate, listener);
+        return () => {
+          this.client.off(Events.ThreadUpdate, listener);
+        };
+      }
+      case "threadDelete": {
+        const listener = (thread: ThreadChannel) => {
+          handler({
+            receivedAt: Date.now(),
+            ...this.shardEnvelope(),
+            thread: serializeThread(thread),
+          } as BotEventPayloadMap[K]);
+        };
+        this.client.on(Events.ThreadDelete, listener);
+        return () => {
+          this.client.off(Events.ThreadDelete, listener);
         };
       }
       default:
@@ -367,10 +490,32 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
     return channel;
   }
 
-  private getInteraction(interactionId: Snowflake): ReplyCapableInteraction {
+  private getInteraction(interactionId: Snowflake): Interaction {
     const interaction = this.interactionCache.get(interactionId);
     if (!interaction) {
       throw new ActionExecutionError("NOT_FOUND", `Interaction "${interactionId}" is no longer available.`);
+    }
+    return interaction;
+  }
+
+  private getReplyCapableInteraction(interactionId: Snowflake): ReplyCapableInteraction {
+    const interaction = this.getInteraction(interactionId);
+    if (!isReplyCapableInteraction(interaction)) {
+      throw new ActionExecutionError(
+        "INVALID_REQUEST",
+        `Interaction "${interactionId}" does not support reply-style acknowledgements.`,
+      );
+    }
+    return interaction;
+  }
+
+  private getMessageComponentInteraction(interactionId: Snowflake): MessageComponentInteraction {
+    const interaction = this.getInteraction(interactionId);
+    if (!interaction.isMessageComponent()) {
+      throw new ActionExecutionError(
+        "INVALID_REQUEST",
+        `Interaction "${interactionId}" is not a message component interaction.`,
+      );
     }
     return interaction;
   }
@@ -400,7 +545,7 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
   }
 
   private async replyToInteraction(payload: BotActionPayloadMap["replyToInteraction"]) {
-    const interaction = this.getInteraction(payload.interactionId);
+    const interaction = this.getReplyCapableInteraction(payload.interactionId);
     if (interaction.replied || interaction.deferred) {
       throw new ActionExecutionError("INVALID_REQUEST", `Interaction "${payload.interactionId}" has already been acknowledged.`);
     }
@@ -413,7 +558,7 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
   }
 
   private async deferInteraction(payload: BotActionPayloadMap["deferInteraction"]) {
-    const interaction = this.getInteraction(payload.interactionId);
+    const interaction = this.getReplyCapableInteraction(payload.interactionId);
     if (interaction.replied) {
       throw new ActionExecutionError("INVALID_REQUEST", `Interaction "${payload.interactionId}" has already been replied to.`);
     }
@@ -428,8 +573,17 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
     } as const;
   }
 
+  private async deferUpdateInteraction(payload: BotActionPayloadMap["deferUpdateInteraction"]) {
+    const interaction = this.getMessageComponentInteraction(payload.interactionId);
+    await interaction.deferUpdate();
+    return {
+      deferred: true,
+      interactionId: payload.interactionId,
+    } as const;
+  }
+
   private async followUpInteraction(payload: BotActionPayloadMap["followUpInteraction"]) {
-    const interaction = this.getInteraction(payload.interactionId);
+    const interaction = this.getReplyCapableInteraction(payload.interactionId);
     if (!interaction.replied && !interaction.deferred) {
       throw new ActionExecutionError("INVALID_REQUEST", `Interaction "${payload.interactionId}" has not been acknowledged yet.`);
     }
@@ -438,6 +592,58 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
       ...(payload.ephemeral ? { flags: MessageFlags.Ephemeral } : {}),
     });
     return serializeMessage(followUp as Message);
+  }
+
+  private async editInteractionReply(payload: BotActionPayloadMap["editInteractionReply"]) {
+    const interaction = this.getReplyCapableInteraction(payload.interactionId);
+    const updated = await interaction.editReply({
+      ...toSendOptions(payload),
+      fetchReply: true,
+    });
+    return serializeMessage(updated as Message);
+  }
+
+  private async deleteInteractionReply(payload: BotActionPayloadMap["deleteInteractionReply"]) {
+    const interaction = this.getReplyCapableInteraction(payload.interactionId);
+    await interaction.deleteReply();
+    return {
+      deleted: true,
+      interactionId: payload.interactionId,
+    } as const;
+  }
+
+  private async updateInteraction(payload: BotActionPayloadMap["updateInteraction"]) {
+    const interaction = this.getMessageComponentInteraction(payload.interactionId);
+    const updated = await interaction.update({
+      ...toSendOptions(payload),
+      fetchReply: true,
+    });
+    return serializeMessage(updated);
+  }
+
+  private async showModal(payload: BotActionPayloadMap["showModal"]) {
+    const interaction = this.getMessageComponentInteraction(payload.interactionId);
+    await interaction.showModal({
+      title: payload.title,
+      customId: payload.customId,
+      components: payload.components,
+    } as never);
+    return {
+      shown: true,
+      interactionId: payload.interactionId,
+    } as const;
+  }
+
+  private async fetchMessage(payload: BotActionPayloadMap["fetchMessage"]) {
+    const channel = await this.fetchMessageChannel(payload.channelId);
+    const message = await channel.messages.fetch(payload.messageId);
+    return serializeMessage(message);
+  }
+
+  private async fetchMember(payload: BotActionPayloadMap["fetchMember"]) {
+    const guild = await this.client.guilds.fetch(payload.guildId);
+    const member = await guild.members.fetch(payload.userId);
+    return serializeGuildMember(member);
   }
 
   private async banMember(payload: BotActionPayloadMap["banMember"]) {
@@ -526,6 +732,8 @@ function isReplyCapableInteraction(interaction: Interaction): interaction is Rep
     interaction.isRepliable() &&
     typeof (interaction as { reply?: unknown }).reply === "function" &&
     typeof (interaction as { deferReply?: unknown }).deferReply === "function" &&
-    typeof (interaction as { followUp?: unknown }).followUp === "function"
+    typeof (interaction as { followUp?: unknown }).followUp === "function" &&
+    typeof (interaction as { editReply?: unknown }).editReply === "function" &&
+    typeof (interaction as { deleteReply?: unknown }).deleteReply === "function"
   );
 }
