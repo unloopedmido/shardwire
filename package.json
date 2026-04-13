@@ -32,8 +32,8 @@
     "example:consumer": "tsx examples/consumer-basic.ts",
     "example:host:schema": "tsx examples/host-schema-zod.ts",
     "example:consumer:schema": "tsx examples/consumer-schema-zod.ts",
-    "verify": "pnpm test && pnpm typecheck && pnpm build",
-    "prepublishOnly": "pnpm verify"
+    "verify": "npm run test && npm run typecheck && npm run build",
+    "prepublishOnly": "npm run verify"
   },
   "keywords": [
     "discord",
@@ -72,6 +72,7 @@
     "@eslint/js": "^9.39.4",
     "@types/node": "^25.6.0",
     "@types/ws": "^8.18.1",
+    "discord.js": "^14.26.2",
     "eslint": "^10.2.0",
     "globals": "^17.5.0",
     "tsup": "^8.5.1",
@@ -82,6 +83,5 @@
   },
   "publishConfig": {
     "access": "public"
-  },
-  "packageManager": "pnpm@10.22.0"
+  }
 }
