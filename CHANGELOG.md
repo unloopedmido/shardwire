@@ -2,6 +2,10 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.0.3
+
+- Adjusted package.json to include more keywords and metadata.
+
 ## 0.0.2
 
 - Breaking: replaced host `server.secret` with `server.secrets` and added optional `server.primarySecretId`.

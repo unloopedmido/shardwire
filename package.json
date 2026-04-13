@@ -1,7 +1,16 @@
 {
   "name": "shardwire",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Lightweight Discord-hosted WebSocket bridge for commands and events.",
+  "homepage": "https://www.npmjs.com/package/shardwire",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/unloopedmido/shardwire.git"
+  },
+  "bugs": {
+    "url": "https://github.com/unloopedmido/shardwire/issues",
+    "email": "cored.developments@gmail.com"
+  },
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -24,11 +33,18 @@
   },
   "keywords": [
     "discord",
+    "discord-bot",
     "websocket",
+    "websocket-bridge",
     "realtime",
-    "typescript"
+    "typescript",
+    "rpc",
+    "command-bus",
+    "event-stream",
+    "typed-events",
+    "discord-api"
   ],
-  "author": "",
+  "author": "Mohammed Haism <cored.developments@gmail.com>",
   "license": "MIT",
   "files": [
     "dist"
@@ -54,6 +70,9 @@
     "tsup": "^8.5.0",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "packageManager": "pnpm@10.22.0"
 }
