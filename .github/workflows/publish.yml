@@ -52,21 +52,17 @@ jobs:
           echo "version=${NEW}" >> "$GITHUB_OUTPUT"
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
 
-      - name: Install pnpm
-        if: steps.meta.outputs.publish == 'true'
-        uses: pnpm/action-setup@v5
-
       - name: Set up Node.js
         if: steps.meta.outputs.publish == 'true'
         uses: actions/setup-node@v6
         with:
           node-version: 24
-          cache: pnpm
+          cache: npm
           registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
         if: steps.meta.outputs.publish == 'true'
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Push version tag
         if: steps.meta.outputs.publish == 'true'
