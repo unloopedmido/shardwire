@@ -30,6 +30,12 @@ Shardwire is built for a common architecture: your Discord bot runs in one proce
 npm install shardwire
 ```
 
+## Documentation
+
+- [Deployment (TLS, nginx, limits, shutdown)](./docs/deployment.md)
+- [Troubleshooting (auth, capabilities, action errors)](./docs/troubleshooting.md)
+- [Patterns (moderation, interactions, multi-secret)](./docs/patterns.md)
+
 ## Quick Start
 
 ### 1) Start the bot bridge process
@@ -259,7 +265,7 @@ console.log(capabilities.events, capabilities.actions);
 
 ## Run the Included Examples
 
-In two terminals:
+### Minimal (single shared secret)
 
 ```bash
 # terminal 1
@@ -271,10 +277,37 @@ DISCORD_TOKEN=your-token SHARDWIRE_SECRET=dev-secret npm run example:bot
 SHARDWIRE_SECRET=dev-secret npm run example:app
 ```
 
-Examples:
+- Bot bridge: [`examples/bot-basic.ts`](./examples/bot-basic.ts)
+- App client: [`examples/app-basic.ts`](./examples/app-basic.ts)
 
-- Bot bridge: `examples/bot-basic.ts`
-- App client: `examples/app-basic.ts`
+### Production-style (scoped secrets + moderation + interactions)
+
+Use **two different** secret strings (bridge rejects duplicate values across scoped entries).
+
+```bash
+# terminal 1 — bot with dashboard + moderation scopes
+DISCORD_TOKEN=your-token \
+  SHARDWIRE_SECRET_DASHBOARD=dashboard-secret \
+  SHARDWIRE_SECRET_MODERATION=moderation-secret \
+  npm run example:bot:prod
+```
+
+```bash
+# terminal 2 — delete messages that contain the demo trigger (optional channel filter)
+SHARDWIRE_SECRET_MODERATION=moderation-secret \
+  MOD_ALERT_CHANNEL_ID=123456789012345678 \
+  npm run example:app:moderation
+```
+
+```bash
+# terminal 3 — defer + edit reply for `customId: shardwire.demo.btn` buttons
+SHARDWIRE_SECRET_MODERATION=moderation-secret \
+  npm run example:app:interaction
+```
+
+- [`examples/bot-production.ts`](./examples/bot-production.ts)
+- [`examples/app-moderation.ts`](./examples/app-moderation.ts)
+- [`examples/app-interaction.ts`](./examples/app-interaction.ts)
 
 ## Public API
 
