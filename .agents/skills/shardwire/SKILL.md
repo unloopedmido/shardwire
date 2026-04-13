@@ -1,6 +1,6 @@
 ---
 name: shardwire
-description: Use when developers ask how to integrate the Shardwire npm package in real apps: setting up bot-hosted websocket servers, connecting dashboard/backend consumers, defining typed command/event maps, configuring auth/reconnect, handling CommandResult errors, or troubleshooting host-consumer connectivity.
+description: "Use when developers ask how to integrate the Shardwire npm package in real apps: setting up bot-hosted websocket servers, connecting dashboard/backend consumers, defining typed command/event maps, configuring auth/reconnect, handling CommandResult errors, or troubleshooting host-consumer connectivity."
 ---
 
 # Shardwire Skill
