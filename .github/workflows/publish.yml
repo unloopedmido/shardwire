@@ -64,6 +64,14 @@ jobs:
         if: steps.meta.outputs.publish == 'true'
         run: npm ci
 
+      - name: Run verification
+        if: steps.meta.outputs.publish == 'true'
+        run: npm run verify
+
+      - name: Check changelog includes current version
+        if: steps.meta.outputs.publish == 'true'
+        run: node -e "const fs=require('fs');const v=require('./package.json').version;const c=fs.readFileSync('CHANGELOG.md','utf8');if(!c.includes('## '+v)&&!c.includes('## '+v+' ')){process.exit(1)}"
+
       - name: Push version tag
         if: steps.meta.outputs.publish == 'true'
         run: |
@@ -74,4 +82,4 @@ jobs:
 
       - name: Publish to npm
         if: steps.meta.outputs.publish == 'true'
-        run: npm publish --access public
+        run: npm publish --provenance --access public
