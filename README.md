@@ -30,43 +30,49 @@ Shardwire is built for a common architecture: your Discord bot runs in one proce
 npm install shardwire
 ```
 
+## Documentation
+
+- [Deployment (TLS, nginx, limits, shutdown)](./docs/deployment.md)
+- [Troubleshooting (auth, capabilities, action errors)](./docs/troubleshooting.md)
+- [Patterns (moderation, interactions, multi-secret)](./docs/patterns.md)
+
 ## Quick Start
 
 ### 1) Start the bot bridge process
 
 ```ts
-import { createBotBridge } from "shardwire";
+import { createBotBridge } from 'shardwire';
 
 const bridge = createBotBridge({
-  token: process.env.DISCORD_TOKEN!,
-  intents: ["Guilds", "GuildMessages", "GuildMessageReactions", "MessageContent", "GuildMembers"],
-  server: {
-    port: 3001,
-    secrets: [process.env.SHARDWIRE_SECRET!],
-  },
+	token: process.env.DISCORD_TOKEN!,
+	intents: ['Guilds', 'GuildMessages', 'GuildMessageReactions', 'MessageContent', 'GuildMembers'],
+	server: {
+		port: 3001,
+		secrets: [process.env.SHARDWIRE_SECRET!],
+	},
 });
 
 await bridge.ready();
-console.log("Bot bridge listening on ws://127.0.0.1:3001/shardwire");
+console.log('Bot bridge listening on ws://127.0.0.1:3001/shardwire');
 ```
 
 ### 2) Connect from your app process
 
 ```ts
-import { connectBotBridge } from "shardwire";
+import { connectBotBridge } from 'shardwire';
 
 const app = connectBotBridge({
-  url: "ws://127.0.0.1:3001/shardwire",
-  secret: process.env.SHARDWIRE_SECRET!,
-  appName: "dashboard",
+	url: 'ws://127.0.0.1:3001/shardwire',
+	secret: process.env.SHARDWIRE_SECRET!,
+	appName: 'dashboard',
 });
 
-app.on("ready", ({ user }) => {
-  console.log("Bot ready as", user.username);
+app.on('ready', ({ user }) => {
+	console.log('Bot ready as', user.username);
 });
 
-app.on("messageCreate", ({ message }) => {
-  console.log(message.channelId, message.content);
+app.on('messageCreate', ({ message }) => {
+	console.log(message.channelId, message.content);
 });
 
 await app.ready();
@@ -76,12 +82,12 @@ await app.ready();
 
 ```ts
 const result = await app.actions.sendMessage({
-  channelId: "123456789012345678",
-  content: "Hello from app side",
+	channelId: '123456789012345678',
+	content: 'Hello from app side',
 });
 
 if (!result.ok) {
-  console.error(result.error.code, result.error.message);
+	console.error(result.error.code, result.error.message);
 }
 ```
 
@@ -89,13 +95,19 @@ if (!result.ok) {
 
 ```ts
 app.on(
-  "messageCreate",
-  ({ message }) => {
-    console.log("Only this channel:", message.content);
-  },
-  { channelId: "123456789012345678" },
+	'messageCreate',
+	({ message }) => {
+		console.log('Only this channel:', message.content);
+	},
+	{ channelId: '123456789012345678' },
 );
 ```
+
+## Startup lifecycle
+
+- **`createBotBridge(...)`** starts the WebSocket server immediately; `await bridge.ready()` resolves when the Discord client has finished its initial `ready` handshake (same timing you would expect from a normal bot login).
+- **Register `app.on(...)` handlers before `await app.ready()`** so subscriptions are known when the app authenticates. `ready()` connects, completes auth, negotiates capabilities from intents + secret scope, then throws `BridgeCapabilityError` if any registered handler targets an event the app is not allowed to receive.
+- **Sticky `ready`**: if the bot was already ready before the app connected, the bridge replays the latest `ready` payload to matching subscriptions after auth.
 
 ## Built-In Events
 
@@ -162,34 +174,51 @@ All actions return:
 
 ```ts
 type ActionResult<T> =
-  | { ok: true; requestId: string; ts: number; data: T }
-  | { ok: false; requestId: string; ts: number; error: { code: string; message: string; details?: unknown } };
+	| { ok: true; requestId: string; ts: number; data: T }
+	| { ok: false; requestId: string; ts: number; error: { code: string; message: string; details?: unknown } };
 ```
 
 ### Idempotency for safe retries
 
-You can provide an `idempotencyKey` in action options to dedupe repeated requests on the same connection:
+You can provide an `idempotencyKey` in action options so repeated calls return the first result while the server-side entry is still valid (default TTL **120s**).
+
+- **Default scope (`connection`)**: dedupe is per WebSocket connection (a reconnect is a new connection and does not replay prior keys).
+- **Optional scope (`secret`)**: set `server.idempotencyScope: "secret"` on the bot bridge to dedupe by configured secret id across connections (useful when the app reconnects and retries the same logical operation).
 
 ```ts
 await app.actions.sendMessage(
-  { channelId: "123456789012345678", content: "Hello once" },
-  { idempotencyKey: "notify:order:123" },
+	{ channelId: '123456789012345678', content: 'Hello once' },
+	{ idempotencyKey: 'notify:order:123' },
 );
+```
+
+Tune limits on the bot bridge when needed:
+
+```ts
+server: {
+  port: 3001,
+  secrets: [process.env.SHARDWIRE_SECRET!],
+  maxPayloadBytes: 65536, // per-frame JSON limit (default 65536)
+  idempotencyScope: "secret",
+  idempotencyTtlMs: 120_000,
+},
 ```
 
 ### App-side action metrics
 
 ```ts
 const app = connectBotBridge({
-  url: "ws://127.0.0.1:3001/shardwire",
-  secret: process.env.SHARDWIRE_SECRET!,
-  metrics: {
-    onActionComplete(meta) {
-      console.log(meta.name, meta.durationMs, meta.ok, meta.errorCode);
-    },
-  },
+	url: 'ws://127.0.0.1:3001/shardwire',
+	secret: process.env.SHARDWIRE_SECRET!,
+	metrics: {
+		onActionComplete(meta) {
+			console.log(meta.name, meta.durationMs, meta.ok, meta.errorCode, meta.discordStatus, meta.retryAfterMs);
+		},
+	},
 });
 ```
+
+On Discord **429** responses, failed actions surface `SERVICE_UNAVAILABLE` with `details.retryAfterMs` (when Discord provides `retry_after`) and the metrics hook receives `retryAfterMs` / `discordStatus` for backoff and dashboards.
 
 ## Secret Scopes
 
@@ -229,7 +258,7 @@ console.log(capabilities.events, capabilities.actions);
 
 ## Run the Included Examples
 
-In two terminals:
+### Minimal (single shared secret)
 
 ```bash
 # terminal 1
@@ -241,15 +270,42 @@ DISCORD_TOKEN=your-token SHARDWIRE_SECRET=dev-secret npm run example:bot
 SHARDWIRE_SECRET=dev-secret npm run example:app
 ```
 
-Examples:
+- Bot bridge: [`examples/bot-basic.ts`](./examples/bot-basic.ts)
+- App client: [`examples/app-basic.ts`](./examples/app-basic.ts)
 
-- Bot bridge: `examples/bot-basic.ts`
-- App client: `examples/app-basic.ts`
+### Production-style (scoped secrets + moderation + interactions)
+
+Use **two different** secret strings (bridge rejects duplicate values across scoped entries).
+
+```bash
+# terminal 1 — bot with dashboard + moderation scopes
+DISCORD_TOKEN=your-token \
+  SHARDWIRE_SECRET_DASHBOARD=dashboard-secret \
+  SHARDWIRE_SECRET_MODERATION=moderation-secret \
+  npm run example:bot:prod
+```
+
+```bash
+# terminal 2 — delete messages that contain the demo trigger (optional channel filter)
+SHARDWIRE_SECRET_MODERATION=moderation-secret \
+  MOD_ALERT_CHANNEL_ID=123456789012345678 \
+  npm run example:app:moderation
+```
+
+```bash
+# terminal 3 — defer + edit reply for `customId: shardwire.demo.btn` buttons
+SHARDWIRE_SECRET_MODERATION=moderation-secret \
+  npm run example:app:interaction
+```
+
+- [`examples/bot-production.ts`](./examples/bot-production.ts)
+- [`examples/app-moderation.ts`](./examples/app-moderation.ts)
+- [`examples/app-interaction.ts`](./examples/app-interaction.ts)
 
 ## Public API
 
 ```ts
-import { createBotBridge, connectBotBridge } from "shardwire";
+import { createBotBridge, connectBotBridge } from 'shardwire';
 ```
 
 Main exports include:
@@ -266,7 +322,10 @@ Main exports include:
 - Use `wss://` for non-loopback deployments.
 - `ws://` is only accepted for loopback hosts (`127.0.0.1`, `localhost`, `::1`).
 - Event availability depends on enabled intents and secret scope.
-- For vulnerability reporting and security policy, see [`SECURITY.md`](./SECURITY.md).
+
+**Reporting vulnerabilities:** email [cored.developments@gmail.com](mailto:cored.developments@gmail.com) with enough detail to reproduce the issue (versions, config shape, and steps). Do not open a public issue for undisclosed security problems.
+
+**Rotating bridge secrets without downtime:** configure **two** entries in `server.secrets` (old + new values), roll the app env to the new secret, then remove the old entry on the next deploy. Scoped secrets should keep **distinct** `id` values so apps can pin `secretId` during rotation.
 
 ## Contributing
 

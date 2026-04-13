@@ -1,284 +1,284 @@
-import type { APIEmbed } from "discord-api-types/v10";
+import type { APIEmbed } from 'discord-api-types/v10';
 import type {
-  AnySelectMenuInteraction,
-  ChatInputCommandInteraction,
-  Guild,
-  GuildMember,
-  Interaction,
-  Message,
-  MessageReaction,
-  ModalSubmitInteraction,
-  PartialGuildMember,
-  PartialMessage,
-  PartialMessageReaction,
-  PartialUser,
-  ThreadChannel,
-  User,
-} from "discord.js";
+	AnySelectMenuInteraction,
+	ChatInputCommandInteraction,
+	Guild,
+	GuildMember,
+	Interaction,
+	Message,
+	MessageReaction,
+	ModalSubmitInteraction,
+	PartialGuildMember,
+	PartialMessage,
+	PartialMessageReaction,
+	PartialUser,
+	ThreadChannel,
+	User,
+} from 'discord.js';
 import type {
-  BridgeDeletedMessage,
-  BridgeGuild,
-  BridgeGuildMember,
-  BridgeInteraction,
-  BridgeMessage,
-  BridgeMessageReaction,
-  BridgeReactionEmoji,
-  BridgeThread,
-  BridgeUser,
-} from "../types";
+	BridgeDeletedMessage,
+	BridgeGuild,
+	BridgeGuildMember,
+	BridgeInteraction,
+	BridgeMessage,
+	BridgeMessageReaction,
+	BridgeReactionEmoji,
+	BridgeThread,
+	BridgeUser,
+} from '../types';
 
 function serializeEmbeds(message: Message | PartialMessage): APIEmbed[] {
-  return message.embeds.map((embed) => embed.toJSON());
+	return message.embeds.map((embed) => embed.toJSON());
 }
 
 export function serializeUser(user: User | PartialUser): BridgeUser {
-  return {
-    id: user.id,
-    username: user.username ?? "unknown",
-    discriminator: user.discriminator ?? "0",
-    ...(user.globalName !== undefined ? { globalName: user.globalName } : {}),
-    avatarUrl: user.displayAvatarURL() || null,
-    bot: user.bot ?? false,
-    system: user.system ?? false,
-  };
+	return {
+		id: user.id,
+		username: user.username ?? 'unknown',
+		discriminator: user.discriminator ?? '0',
+		...(user.globalName !== undefined ? { globalName: user.globalName } : {}),
+		avatarUrl: user.displayAvatarURL() || null,
+		bot: user.bot ?? false,
+		system: user.system ?? false,
+	};
 }
 
 export function serializeGuildMember(member: GuildMember | PartialGuildMember): BridgeGuildMember {
-  return {
-    id: member.id,
-    guildId: member.guild.id,
-    ...("user" in member && member.user ? { user: serializeUser(member.user) } : {}),
-    ...("displayName" in member && typeof member.displayName === "string" ? { displayName: member.displayName } : {}),
-    ...("nickname" in member ? { nickname: member.nickname ?? null } : {}),
-    roles: "roles" in member && "cache" in member.roles ? [...member.roles.cache.keys()] : [],
-    ...("joinedAt" in member ? { joinedAt: member.joinedAt?.toISOString() ?? null } : {}),
-    ...("premiumSince" in member ? { premiumSince: member.premiumSince?.toISOString() ?? null } : {}),
-    ...("pending" in member && typeof member.pending === "boolean" ? { pending: member.pending } : {}),
-    ...(
-      "communicationDisabledUntil" in member
-        ? { communicationDisabledUntil: member.communicationDisabledUntil?.toISOString() ?? null }
-        : {}
-    ),
-  };
+	return {
+		id: member.id,
+		guildId: member.guild.id,
+		...('user' in member && member.user ? { user: serializeUser(member.user) } : {}),
+		...('displayName' in member && typeof member.displayName === 'string' ? { displayName: member.displayName } : {}),
+		...('nickname' in member ? { nickname: member.nickname ?? null } : {}),
+		roles: 'roles' in member && 'cache' in member.roles ? [...member.roles.cache.keys()] : [],
+		...('joinedAt' in member ? { joinedAt: member.joinedAt?.toISOString() ?? null } : {}),
+		...('premiumSince' in member ? { premiumSince: member.premiumSince?.toISOString() ?? null } : {}),
+		...('pending' in member && typeof member.pending === 'boolean' ? { pending: member.pending } : {}),
+		...('communicationDisabledUntil' in member
+			? { communicationDisabledUntil: member.communicationDisabledUntil?.toISOString() ?? null }
+			: {}),
+	};
 }
 
 export function serializeMessage(message: Message | PartialMessage): BridgeMessage {
-  const reference = message.reference
-    ? {
-        ...(message.reference.messageId ? { messageId: message.reference.messageId } : {}),
-        ...(message.reference.channelId ? { channelId: message.reference.channelId } : {}),
-        ...(message.reference.guildId ? { guildId: message.reference.guildId } : {}),
-      }
-    : undefined;
+	const reference = message.reference
+		? {
+				...(message.reference.messageId ? { messageId: message.reference.messageId } : {}),
+				...(message.reference.channelId ? { channelId: message.reference.channelId } : {}),
+				...(message.reference.guildId ? { guildId: message.reference.guildId } : {}),
+			}
+		: undefined;
 
-  const components =
-    "components" in message && message.components && message.components.length > 0
-      ? message.components.map((row) => row.toJSON())
-      : undefined;
+	const components =
+		'components' in message && message.components && message.components.length > 0
+			? message.components.map((row) => row.toJSON())
+			: undefined;
 
-  return {
-    id: message.id,
-    channelId: message.channelId,
-    ...(message.guildId ? { guildId: message.guildId } : {}),
-    ...("author" in message && message.author ? { author: serializeUser(message.author) } : {}),
-    ...("member" in message && message.member ? { member: serializeGuildMember(message.member) } : {}),
-    ...("content" in message && typeof message.content === "string" ? { content: message.content } : {}),
-    ...("createdAt" in message ? { createdAt: message.createdAt.toISOString() } : {}),
-    ...("editedAt" in message ? { editedAt: message.editedAt ? message.editedAt.toISOString() : null } : {}),
-    attachments:
-      "attachments" in message
-        ? [...message.attachments.values()].map((attachment) => ({
-            id: attachment.id,
-            name: attachment.name,
-            url: attachment.url,
-            ...(attachment.contentType !== undefined ? { contentType: attachment.contentType } : {}),
-            size: attachment.size,
-          }))
-        : [],
-    embeds: serializeEmbeds(message),
-    ...(components ? { components } : {}),
-    ...(reference ? { reference } : {}),
-  } as BridgeMessage;
+	return {
+		id: message.id,
+		channelId: message.channelId,
+		...(message.guildId ? { guildId: message.guildId } : {}),
+		...('author' in message && message.author ? { author: serializeUser(message.author) } : {}),
+		...('member' in message && message.member ? { member: serializeGuildMember(message.member) } : {}),
+		...('content' in message && typeof message.content === 'string' ? { content: message.content } : {}),
+		...('createdAt' in message ? { createdAt: message.createdAt.toISOString() } : {}),
+		...('editedAt' in message ? { editedAt: message.editedAt ? message.editedAt.toISOString() : null } : {}),
+		attachments:
+			'attachments' in message
+				? [...message.attachments.values()].map((attachment) => ({
+						id: attachment.id,
+						name: attachment.name,
+						url: attachment.url,
+						...(attachment.contentType !== undefined ? { contentType: attachment.contentType } : {}),
+						size: attachment.size,
+					}))
+				: [],
+		embeds: serializeEmbeds(message),
+		...(components ? { components } : {}),
+		...(reference ? { reference } : {}),
+	} as BridgeMessage;
 }
 
 export function serializeGuild(guild: Guild): BridgeGuild {
-  return {
-    id: guild.id,
-    name: guild.name,
-    ...(guild.icon !== null && guild.icon !== undefined ? { icon: guild.icon } : { icon: null }),
-    ownerId: guild.ownerId,
-  };
+	return {
+		id: guild.id,
+		name: guild.name,
+		...(guild.icon !== null && guild.icon !== undefined ? { icon: guild.icon } : { icon: null }),
+		ownerId: guild.ownerId,
+	};
 }
 
 export function serializeThread(thread: ThreadChannel): BridgeThread {
-  return {
-    id: thread.id,
-    guildId: thread.guildId,
-    parentId: thread.parentId,
-    name: thread.name,
-    type: thread.type,
-    ...(typeof thread.archived === "boolean" ? { archived: thread.archived } : {}),
-    ...(typeof thread.locked === "boolean" ? { locked: thread.locked } : {}),
-  };
+	return {
+		id: thread.id,
+		guildId: thread.guildId,
+		parentId: thread.parentId,
+		name: thread.name,
+		type: thread.type,
+		...(typeof thread.archived === 'boolean' ? { archived: thread.archived } : {}),
+		...(typeof thread.locked === 'boolean' ? { locked: thread.locked } : {}),
+	};
 }
 
 export function serializeDeletedMessage(message: Message | PartialMessage): BridgeDeletedMessage {
-  return {
-    id: message.id,
-    channelId: message.channelId,
-    ...(message.guildId ? { guildId: message.guildId } : {}),
-    deletedAt: new Date().toISOString(),
-  };
+	return {
+		id: message.id,
+		channelId: message.channelId,
+		...(message.guildId ? { guildId: message.guildId } : {}),
+		deletedAt: new Date().toISOString(),
+	};
 }
 
 function serializeReactionEmoji(reaction: MessageReaction | PartialMessageReaction): BridgeReactionEmoji {
-  return {
-    ...(reaction.emoji.id ? { id: reaction.emoji.id } : {}),
-    ...(reaction.emoji.name !== undefined ? { name: reaction.emoji.name } : {}),
-    ...(typeof reaction.emoji.animated === "boolean" ? { animated: reaction.emoji.animated } : {}),
-  };
+	return {
+		...(reaction.emoji.id ? { id: reaction.emoji.id } : {}),
+		...(reaction.emoji.name !== undefined ? { name: reaction.emoji.name } : {}),
+		...(typeof reaction.emoji.animated === 'boolean' ? { animated: reaction.emoji.animated } : {}),
+	};
 }
 
 export function serializeMessageReaction(
-  reaction: MessageReaction | PartialMessageReaction,
-  user?: User | PartialUser,
+	reaction: MessageReaction | PartialMessageReaction,
+	user?: User | PartialUser,
 ): BridgeMessageReaction {
-  return {
-    messageId: reaction.message.id,
-    channelId: reaction.message.channelId,
-    ...(reaction.message.guildId ? { guildId: reaction.message.guildId } : {}),
-    ...(user ? { user: serializeUser(user) } : {}),
-    emoji: serializeReactionEmoji(reaction),
-  };
+	return {
+		messageId: reaction.message.id,
+		channelId: reaction.message.channelId,
+		...(reaction.message.guildId ? { guildId: reaction.message.guildId } : {}),
+		...(user ? { user: serializeUser(user) } : {}),
+		emoji: serializeReactionEmoji(reaction),
+	};
 }
 
 function serializeChatInputOptions(interaction: ChatInputCommandInteraction): Record<string, unknown> {
-  const options: Record<string, unknown> = {};
-  for (const option of interaction.options.data) {
-    if (option.options && option.options.length > 0) {
-      options[option.name] = option.options.map((child) => child.value);
-      continue;
-    }
-    options[option.name] = option.value ?? null;
-  }
-  return options;
+	const options: Record<string, unknown> = {};
+	for (const option of interaction.options.data) {
+		if (option.options && option.options.length > 0) {
+			options[option.name] = option.options.map((child) => child.value);
+			continue;
+		}
+		options[option.name] = option.value ?? null;
+	}
+	return options;
 }
 
-function serializeSelectMenu(interaction: AnySelectMenuInteraction): Pick<BridgeInteraction, "customId" | "values"> {
-  return {
-    customId: interaction.customId,
-    values: [...interaction.values],
-  };
+function serializeSelectMenu(interaction: AnySelectMenuInteraction): Pick<BridgeInteraction, 'customId' | 'values'> {
+	return {
+		customId: interaction.customId,
+		values: [...interaction.values],
+	};
 }
 
 function serializeModalFields(interaction: ModalSubmitInteraction): Record<string, string> {
-  const fields: Record<string, string> = {};
-  for (const field of interaction.fields.fields.values()) {
-    if ("value" in field && typeof field.value === "string") {
-      fields[field.customId] = field.value;
-      continue;
-    }
-    if ("values" in field && Array.isArray(field.values)) {
-      fields[field.customId] = field.values.join(",");
-    }
-  }
-  return fields;
+	const fields: Record<string, string> = {};
+	for (const field of interaction.fields.fields.values()) {
+		if ('value' in field && typeof field.value === 'string') {
+			fields[field.customId] = field.value;
+			continue;
+		}
+		if ('values' in field && Array.isArray(field.values)) {
+			fields[field.customId] = field.values.join(',');
+		}
+	}
+	return fields;
 }
 
 function serializeInteractionMessage(interaction: Interaction): BridgeMessage | undefined {
-  if ("message" in interaction && interaction.message) {
-    return serializeMessage(interaction.message);
-  }
-  return undefined;
+	if ('message' in interaction && interaction.message) {
+		return serializeMessage(interaction.message);
+	}
+	return undefined;
 }
 
 export function serializeInteraction(interaction: Interaction): BridgeInteraction {
-  const base: BridgeInteraction = {
-    id: interaction.id,
-    applicationId: interaction.applicationId,
-    kind: "unknown",
-    ...(interaction.guildId ? { guildId: interaction.guildId } : {}),
-    ...(interaction.channelId ? { channelId: interaction.channelId } : {}),
-    user: serializeUser(interaction.user),
-    ...(interaction.member && "guild" in interaction.member ? { member: serializeGuildMember(interaction.member) } : {}),
-  };
+	const base: BridgeInteraction = {
+		id: interaction.id,
+		applicationId: interaction.applicationId,
+		kind: 'unknown',
+		...(interaction.guildId ? { guildId: interaction.guildId } : {}),
+		...(interaction.channelId ? { channelId: interaction.channelId } : {}),
+		user: serializeUser(interaction.user),
+		...(interaction.member && 'guild' in interaction.member
+			? { member: serializeGuildMember(interaction.member) }
+			: {}),
+	};
 
-  if (interaction.isChatInputCommand()) {
-    return {
-      ...base,
-      kind: "chatInput",
-      commandName: interaction.commandName,
-      options: serializeChatInputOptions(interaction),
-    };
-  }
-  if (interaction.isContextMenuCommand()) {
-    return {
-      ...base,
-      kind: "contextMenu",
-      commandName: interaction.commandName,
-    };
-  }
-  if (interaction.isButton()) {
-    const message = serializeInteractionMessage(interaction);
-    return {
-      ...base,
-      kind: "button",
-      customId: interaction.customId,
-      ...(message ? { message } : {}),
-    };
-  }
-  if (interaction.isStringSelectMenu()) {
-    const message = serializeInteractionMessage(interaction);
-    return {
-      ...base,
-      kind: "stringSelect",
-      ...serializeSelectMenu(interaction),
-      ...(message ? { message } : {}),
-    };
-  }
-  if (interaction.isUserSelectMenu()) {
-    const message = serializeInteractionMessage(interaction);
-    return {
-      ...base,
-      kind: "userSelect",
-      ...serializeSelectMenu(interaction),
-      ...(message ? { message } : {}),
-    };
-  }
-  if (interaction.isRoleSelectMenu()) {
-    const message = serializeInteractionMessage(interaction);
-    return {
-      ...base,
-      kind: "roleSelect",
-      ...serializeSelectMenu(interaction),
-      ...(message ? { message } : {}),
-    };
-  }
-  if (interaction.isMentionableSelectMenu()) {
-    const message = serializeInteractionMessage(interaction);
-    return {
-      ...base,
-      kind: "mentionableSelect",
-      ...serializeSelectMenu(interaction),
-      ...(message ? { message } : {}),
-    };
-  }
-  if (interaction.isChannelSelectMenu()) {
-    const message = serializeInteractionMessage(interaction);
-    return {
-      ...base,
-      kind: "channelSelect",
-      ...serializeSelectMenu(interaction),
-      ...(message ? { message } : {}),
-    };
-  }
-  if (interaction.isModalSubmit()) {
-    return {
-      ...base,
-      kind: "modalSubmit",
-      customId: interaction.customId,
-      fields: serializeModalFields(interaction),
-    };
-  }
-  return base;
+	if (interaction.isChatInputCommand()) {
+		return {
+			...base,
+			kind: 'chatInput',
+			commandName: interaction.commandName,
+			options: serializeChatInputOptions(interaction),
+		};
+	}
+	if (interaction.isContextMenuCommand()) {
+		return {
+			...base,
+			kind: 'contextMenu',
+			commandName: interaction.commandName,
+		};
+	}
+	if (interaction.isButton()) {
+		const message = serializeInteractionMessage(interaction);
+		return {
+			...base,
+			kind: 'button',
+			customId: interaction.customId,
+			...(message ? { message } : {}),
+		};
+	}
+	if (interaction.isStringSelectMenu()) {
+		const message = serializeInteractionMessage(interaction);
+		return {
+			...base,
+			kind: 'stringSelect',
+			...serializeSelectMenu(interaction),
+			...(message ? { message } : {}),
+		};
+	}
+	if (interaction.isUserSelectMenu()) {
+		const message = serializeInteractionMessage(interaction);
+		return {
+			...base,
+			kind: 'userSelect',
+			...serializeSelectMenu(interaction),
+			...(message ? { message } : {}),
+		};
+	}
+	if (interaction.isRoleSelectMenu()) {
+		const message = serializeInteractionMessage(interaction);
+		return {
+			...base,
+			kind: 'roleSelect',
+			...serializeSelectMenu(interaction),
+			...(message ? { message } : {}),
+		};
+	}
+	if (interaction.isMentionableSelectMenu()) {
+		const message = serializeInteractionMessage(interaction);
+		return {
+			...base,
+			kind: 'mentionableSelect',
+			...serializeSelectMenu(interaction),
+			...(message ? { message } : {}),
+		};
+	}
+	if (interaction.isChannelSelectMenu()) {
+		const message = serializeInteractionMessage(interaction);
+		return {
+			...base,
+			kind: 'channelSelect',
+			...serializeSelectMenu(interaction),
+			...(message ? { message } : {}),
+		};
+	}
+	if (interaction.isModalSubmit()) {
+		return {
+			...base,
+			kind: 'modalSubmit',
+			customId: interaction.customId,
+			fields: serializeModalFields(interaction),
+		};
+	}
+	return base;
 }
