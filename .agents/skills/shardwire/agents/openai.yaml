@@ -1,4 +1,0 @@
-interface:
-  display_name: "Shardwire"
-  short_description: "Discord-first Shardwire guide"
-  default_prompt: "Use $shardwire to integrate a Discord bot and app with Shardwire."

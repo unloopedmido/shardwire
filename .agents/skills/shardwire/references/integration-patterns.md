@@ -1,146 +1,90 @@
-# Integration Patterns
+# Shardwire Integration Patterns
 
-Use this file for copy-paste setup patterns and common failure handling.
+## Canonical two-process setup
 
-## Basic bot setup
+1. Bot process
+   - Initialize `createBotBridge(...)` with Discord token, intents, and server secrets.
+   - Wait for `await bridge.ready()`.
+
+2. App process
+   - Connect using `connectBotBridge(...)` to `ws://.../shardwire` (or `wss://...` for non-loopback).
+   - Register `app.on(...)` handlers.
+   - Wait for `await app.ready()`.
+
+3. Action calls
+   - Invoke `app.actions.*(...)`.
+   - Handle both success and failure `ActionResult`.
+
+## Minimal bootstrap examples
+
+Bot side:
 
 ```ts
-import { createBotBridge } from "shardwire";
-
 const bridge = createBotBridge({
   token: process.env.DISCORD_TOKEN!,
   intents: ["Guilds", "GuildMessages", "GuildMessageReactions", "MessageContent", "GuildMembers"],
-  server: {
-    port: 3001,
-    secrets: [process.env.SHARDWIRE_SECRET!],
-  },
+  server: { port: 3001, secrets: [process.env.SHARDWIRE_SECRET!] },
 });
-
 await bridge.ready();
 ```
 
-Use a scoped secret when one app should see only part of the bridge:
+App side:
 
 ```ts
-server: {
-  port: 3001,
-  secrets: [
-    {
-      id: "dashboard",
-      value: process.env.SHARDWIRE_SECRET!,
-      allow: {
-        events: ["ready", "messageCreate"],
-        actions: ["sendMessage"],
-      },
-    },
-  ],
-}
-```
-
-## Basic app setup
-
-```ts
-import { connectBotBridge } from "shardwire";
-
 const app = connectBotBridge({
-  url: "wss://bot.example.com/shardwire",
+  url: "ws://127.0.0.1:3001/shardwire",
   secret: process.env.SHARDWIRE_SECRET!,
-  secretId: "dashboard",
   appName: "dashboard",
 });
 
-app.on("ready", ({ user }) => {
-  console.log(user.username);
-});
-
-app.on("messageCreate", ({ message }) => {
-  console.log(message.channelId, message.content);
-});
-
+app.on("ready", ({ user }) => console.log(user.username));
 await app.ready();
 ```
 
-## Filtered subscriptions
+## Scoped secret pattern
 
-Subscribe narrowly when the app only needs one guild, channel, user, or slash command:
-
-```ts
-app.on(
-  "messageCreate",
-  ({ message }) => {
-    console.log(message.id);
-  },
-  { channelId: "123456789012345678" },
-);
-
-app.on(
-  "interactionCreate",
-  ({ interaction }) => {
-    console.log(interaction.commandName);
-  },
-  { commandName: "deploy" },
-);
-
-app.on(
-  "messageReactionAdd",
-  ({ reaction }) => {
-    console.log(reaction.messageId, reaction.emoji.name ?? reaction.emoji.id);
-  },
-  { channelId: "123456789012345678" },
-);
-```
-
-## Action calls
+Use scoped secrets when multiple clients need different permissions:
 
 ```ts
-const result = await app.actions.sendMessage({
-  channelId: "123456789012345678",
-  content: "hello",
-});
-
-if (!result.ok) {
-  console.error(result.error.code, result.error.message);
-  return;
-}
-
-console.log(result.data.id);
-
-await app.actions.addMessageReaction({
-  channelId: "123456789012345678",
-  messageId: result.data.id,
-  emoji: "🔥",
-});
+secrets: [
+  {
+    id: "dashboard",
+    value: process.env.SHARDWIRE_SECRET!,
+    allow: {
+      events: ["ready", "messageCreate"],
+      actions: ["sendMessage", "replyToInteraction"],
+    },
+  },
+];
 ```
 
-For interaction workflows, use the built-in methods:
+Debug by comparing expected permissions with `app.capabilities()`.
 
-- `replyToInteraction`
-- `deferInteraction`
-- `followUpInteraction`
+## Common failure patterns
 
-For moderation workflows, use:
+### App cannot connect
 
-- `banMember`
-- `kickMember`
-- `addMemberRole`
-- `removeMemberRole`
+- URL missing `/shardwire` suffix.
+- Using non-loopback `ws://` instead of `wss://`.
+- Wrong secret value or mismatched secret id/value pair.
 
-For reaction workflows, use:
+### Event handler never fires
 
-- `addMessageReaction`
-- `removeOwnMessageReaction`
+- Missing Discord intent on bot bridge.
+- Event not allowed by scoped secret.
+- Event name mismatch in `app.on(...)`.
+- Overly restrictive filter (wrong `guildId`/`channelId`/`userId`/`commandName`).
 
-## Troubleshooting rules
+### Action always fails
 
-- Connection opens but `ready()` rejects with `BridgeCapabilityError`:
-  - the app subscribed to an event that is unavailable because of bot intents or secret scope
-- Message events arrive without content:
-  - add `MessageContent` to bot intents
-- Action returns `FORBIDDEN`:
-  - the action is outside the secret's allowed action list
-- App cannot connect remotely over plain `ws://`:
-  - use `wss://` for non-loopback connections
-- App never receives an event:
-  - confirm the app subscribed with `app.on(...)`
-  - confirm the event is in `app.capabilities().events`
-  - confirm the filter matches the payload actually being emitted
+- Scoped secret blocks requested action.
+- Target ID invalid or not accessible by bot permissions.
+- Interaction action used with stale/invalid interaction context.
+
+## Agent behavior guidance
+
+When helping users:
+- Prefer concrete "bot snippet + app snippet + run steps".
+- Ask for only missing, high-impact context.
+- Validate intents/scopes before proposing deeper refactors.
+- Keep advice centered on built-in events/actions unless requirements clearly exceed current surface.
