@@ -139,7 +139,6 @@ export function serializeInteraction(interaction: Interaction): BridgeInteractio
   const base: BridgeInteraction = {
     id: interaction.id,
     applicationId: interaction.applicationId,
-    token: interaction.token,
     kind: "unknown",
     ...(interaction.guildId ? { guildId: interaction.guildId } : {}),
     ...(interaction.channelId ? { channelId: interaction.channelId } : {}),

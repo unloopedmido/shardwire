@@ -42,7 +42,7 @@ export interface AuthOkPayload {
 
 export interface AuthErrorPayload {
   code: "UNAUTHORIZED";
-  reason: "unknown_secret_id" | "invalid_secret";
+  reason: "unknown_secret_id" | "invalid_secret" | "ambiguous_secret";
   message: string;
 }
 

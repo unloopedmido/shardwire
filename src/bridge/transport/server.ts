@@ -35,7 +35,7 @@ interface AuthSuccess {
 
 interface AuthFailure {
   ok: false;
-  reason: "unknown_secret_id" | "invalid_secret";
+  reason: "unknown_secret_id" | "invalid_secret" | "ambiguous_secret";
 }
 
 interface BridgeConnectionState {
@@ -200,13 +200,17 @@ export class BridgeTransportServer {
       }
       const authResult = this.config.authenticate(envelope.payload as AuthHelloPayload);
       if (!authResult.ok) {
+        const message =
+          authResult.reason === "ambiguous_secret"
+            ? "Authentication failed: secret matches multiple configured scopes. Supply secretId or use unique secret values."
+            : "Authentication failed.";
         this.safeSend(
           state.socket,
           stringifyEnvelope(
             makeEnvelope("auth.error", {
               code: "UNAUTHORIZED",
               reason: authResult.reason,
-              message: "Authentication failed.",
+              message,
             }),
           ),
         );
@@ -352,10 +356,17 @@ export function authenticateSecret(
       return { ok: false, reason: "invalid_secret" };
     }
   } else {
-    matchedSecret = secrets.find((secret) => isSecretValid(payload.secret, secret.value));
-    if (!matchedSecret) {
+    const matches = secrets.filter((secret) => isSecretValid(payload.secret, secret.value));
+    if (matches.length === 0) {
       return { ok: false, reason: "invalid_secret" };
     }
+    if (matches.length > 1) {
+      return { ok: false, reason: "ambiguous_secret" };
+    }
+    matchedSecret = matches[0];
+  }
+  if (!matchedSecret) {
+    return { ok: false, reason: "invalid_secret" };
   }
 
   return {
