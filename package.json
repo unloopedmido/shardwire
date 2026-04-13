@@ -31,7 +31,8 @@
     "test:coverage": "vitest run --coverage",
     "example:bot": "tsx examples/bot-basic.ts",
     "example:app": "tsx examples/app-basic.ts",
-    "verify": "npm run lint && npm run test:coverage && npm run typecheck && npm run build",
+    "check:changelog": "node scripts/check-changelog-release.mjs",
+    "verify": "npm run check:changelog && npm run lint && npm run test:coverage && npm run typecheck && npm run build",
     "prepublishOnly": "npm run verify"
   },
   "keywords": [

@@ -68,9 +68,9 @@ jobs:
         if: steps.meta.outputs.publish == 'true'
         run: npm run verify
 
-      - name: Check changelog includes current version
+      - name: Check changelog release notes
         if: steps.meta.outputs.publish == 'true'
-        run: node -e "const fs=require('fs');const v=require('./package.json').version;const c=fs.readFileSync('CHANGELOG.md','utf8');if(!c.includes('## '+v)&&!c.includes('## '+v+' ')){process.exit(1)}"
+        run: node scripts/check-changelog-release.mjs
 
       - name: Push version tag
         if: steps.meta.outputs.publish == 'true'

@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented in this file.
 
-## 1.2.0 (unreleased)
+## 1.2.0
 
 - Added new built-in events: `guildCreate`, `guildDelete`, `guildMemberUpdate`, `threadCreate`, `threadUpdate`, and `threadDelete`.
 - Added new subscription filters for `interactionCreate`: `customId` and `interactionKind`.
