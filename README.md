@@ -118,6 +118,7 @@ Apps subscribe to events with `app.on(...)`. The bridge forwards only what each 
 - `messageCreate`
 - `messageUpdate`
 - `messageDelete`
+- `messageBulkDelete`
 - `messageReactionAdd`
 - `messageReactionRemove`
 - `guildCreate`
@@ -128,6 +129,9 @@ Apps subscribe to events with `app.on(...)`. The bridge forwards only what each 
 - `threadCreate`
 - `threadUpdate`
 - `threadDelete`
+- `channelCreate`
+- `channelUpdate`
+- `channelDelete`
 
 Supported filters:
 
@@ -137,13 +141,16 @@ Supported filters:
 - `commandName` (for `interactionCreate`)
 - `customId` (for `interactionCreate`)
 - `interactionKind` (for `interactionCreate`)
+- `channelType` (Discord `ChannelType` when present on the payload, for example `messageCreate` / `messageBulkDelete`)
+- `parentChannelId` (category parent, forum/text parent for threads, or thread parent when serialized)
+- `threadId` (guild thread channels only: matches thread channel ids)
 
 ### Intent Notes
 
 - `ready` and `interactionCreate`: no specific event intent requirement
-- `messageCreate`, `messageUpdate`, `messageDelete`: `GuildMessages`
+- `messageCreate`, `messageUpdate`, `messageDelete`, `messageBulkDelete`: `GuildMessages`
 - `messageReactionAdd`, `messageReactionRemove`: `GuildMessageReactions`
-- `guildCreate`, `guildDelete`, `threadCreate`, `threadUpdate`, `threadDelete`: `Guilds`
+- `guildCreate`, `guildDelete`, `threadCreate`, `threadUpdate`, `threadDelete`, `channelCreate`, `channelUpdate`, `channelDelete`: `Guilds`
 - `guildMemberAdd`, `guildMemberRemove`, `guildMemberUpdate`: `GuildMembers`
 
 ## Built-In Actions
@@ -169,6 +176,13 @@ Supported filters:
 - `removeMemberRole`
 - `addMessageReaction`
 - `removeOwnMessageReaction`
+- `timeoutMember`
+- `removeMemberTimeout`
+- `createChannel`
+- `editChannel`
+- `deleteChannel`
+- `createThread`
+- `archiveThread`
 
 All actions return:
 

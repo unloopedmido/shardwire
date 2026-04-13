@@ -7,6 +7,7 @@ export const BOT_EVENT_NAMES = [
 	'messageCreate',
 	'messageUpdate',
 	'messageDelete',
+	'messageBulkDelete',
 	'messageReactionAdd',
 	'messageReactionRemove',
 	'guildCreate',
@@ -17,6 +18,9 @@ export const BOT_EVENT_NAMES = [
 	'threadCreate',
 	'threadUpdate',
 	'threadDelete',
+	'channelCreate',
+	'channelUpdate',
+	'channelDelete',
 ] as const satisfies readonly BotEventName[];
 
 export const BOT_ACTION_NAMES = [
@@ -39,6 +43,13 @@ export const BOT_ACTION_NAMES = [
 	'removeMemberRole',
 	'addMessageReaction',
 	'removeOwnMessageReaction',
+	'timeoutMember',
+	'removeMemberTimeout',
+	'createChannel',
+	'editChannel',
+	'deleteChannel',
+	'createThread',
+	'archiveThread',
 ] as const satisfies readonly BotActionName[];
 
 const DISCORD_GATEWAY_INTENT_ENTRIES = Object.entries(GatewayIntentBits).filter(
@@ -55,6 +66,7 @@ const EVENT_REQUIRED_INTENTS: Record<BotEventName, readonly BotIntentName[]> = {
 	messageCreate: ['GuildMessages'],
 	messageUpdate: ['GuildMessages'],
 	messageDelete: ['GuildMessages'],
+	messageBulkDelete: ['GuildMessages'],
 	messageReactionAdd: ['GuildMessageReactions'],
 	messageReactionRemove: ['GuildMessageReactions'],
 	guildCreate: ['Guilds'],
@@ -65,6 +77,9 @@ const EVENT_REQUIRED_INTENTS: Record<BotEventName, readonly BotIntentName[]> = {
 	threadCreate: ['Guilds'],
 	threadUpdate: ['Guilds'],
 	threadDelete: ['Guilds'],
+	channelCreate: ['Guilds'],
+	channelUpdate: ['Guilds'],
+	channelDelete: ['Guilds'],
 };
 
 export function getAvailableEvents(intents: readonly BotIntentName[]): BotEventName[] {

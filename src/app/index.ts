@@ -475,6 +475,13 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
 		removeMemberRole: (payload, sendOptions) => invokeAction('removeMemberRole', payload, sendOptions),
 		addMessageReaction: (payload, sendOptions) => invokeAction('addMessageReaction', payload, sendOptions),
 		removeOwnMessageReaction: (payload, sendOptions) => invokeAction('removeOwnMessageReaction', payload, sendOptions),
+		timeoutMember: (payload, sendOptions) => invokeAction('timeoutMember', payload, sendOptions),
+		removeMemberTimeout: (payload, sendOptions) => invokeAction('removeMemberTimeout', payload, sendOptions),
+		createChannel: (payload, sendOptions) => invokeAction('createChannel', payload, sendOptions),
+		editChannel: (payload, sendOptions) => invokeAction('editChannel', payload, sendOptions),
+		deleteChannel: (payload, sendOptions) => invokeAction('deleteChannel', payload, sendOptions),
+		createThread: (payload, sendOptions) => invokeAction('createThread', payload, sendOptions),
+		archiveThread: (payload, sendOptions) => invokeAction('archiveThread', payload, sendOptions),
 	};
 
 	return {

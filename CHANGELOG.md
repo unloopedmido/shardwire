@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## 1.4.0
+
+- Added built-in events: `channelCreate`, `channelUpdate`, `channelDelete`, and `messageBulkDelete`.
+- Added built-in actions: `timeoutMember`, `removeMemberTimeout`, `createChannel`, `editChannel`, `deleteChannel`, `createThread`, and `archiveThread`.
+- Extended subscription filters with `channelType`, `parentChannelId`, and `threadId` (plus richer message/interaction metadata: `channelType` and `parentChannelId` on `BridgeMessage`, `BridgeDeletedMessage`, and `BridgeInteraction` when the runtime resolves the channel).
+
 ## 1.3.0
 
 - Added `check:changelog` script and wired it into `verify` and publish workflow so the current package version cannot remain marked `(unreleased)` in `CHANGELOG.md`.

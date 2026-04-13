@@ -75,6 +75,15 @@ export interface BridgeThread {
 	locked?: boolean;
 }
 
+/** Normalized non-thread channel snapshot for channel lifecycle events. */
+export interface BridgeChannel {
+	id: Snowflake;
+	type: number;
+	name?: string | null;
+	guildId?: Snowflake;
+	parentId?: Snowflake | null;
+}
+
 export interface BridgeMessage {
 	id: Snowflake;
 	channelId: Snowflake;
@@ -89,6 +98,10 @@ export interface BridgeMessage {
 	/** Message component rows (JSON-serializable API shape). */
 	components?: APIActionRowComponent<APIComponentInMessageActionRow>[];
 	reference?: BridgeMessageReference;
+	/** Discord `ChannelType` when the runtime could resolve `message.channel`. */
+	channelType?: number;
+	/** Parent category (guild text channels) or parent text/forum (threads), when known. */
+	parentChannelId?: Snowflake;
 }
 
 export interface BridgeDeletedMessage {
@@ -96,6 +109,8 @@ export interface BridgeDeletedMessage {
 	channelId: Snowflake;
 	guildId?: Snowflake;
 	deletedAt: string;
+	channelType?: number;
+	parentChannelId?: Snowflake;
 }
 
 export interface BridgeReactionEmoji {
@@ -130,6 +145,10 @@ export interface BridgeInteraction {
 	kind: BridgeInteractionKind;
 	guildId?: Snowflake;
 	channelId?: Snowflake;
+	/** Discord `ChannelType` for `channelId` when the runtime resolved the channel. */
+	channelType?: number;
+	/** Parent category or parent text/forum for thread channels, when known. */
+	parentChannelId?: Snowflake;
 	user: BridgeUser;
 	member?: BridgeGuildMember;
 	commandName?: string;
@@ -209,12 +228,36 @@ export interface MessageReactionRemoveEventPayload extends EventEnvelopeBase {
 	reaction: BridgeMessageReaction;
 }
 
+export interface ChannelCreateEventPayload extends EventEnvelopeBase {
+	channel: BridgeChannel;
+}
+
+export interface ChannelUpdateEventPayload extends EventEnvelopeBase {
+	oldChannel?: BridgeChannel;
+	channel: BridgeChannel;
+}
+
+export interface ChannelDeleteEventPayload extends EventEnvelopeBase {
+	channel: BridgeChannel;
+}
+
+export interface MessageBulkDeleteEventPayload extends EventEnvelopeBase {
+	channelId: Snowflake;
+	guildId: Snowflake;
+	messageIds: Snowflake[];
+	/** Discord `ChannelType` for `channelId` when known. */
+	channelType?: number;
+	/** Parent category or forum/text parent when the channel reports one. */
+	parentChannelId?: Snowflake;
+}
+
 export interface BotEventPayloadMap {
 	ready: ReadyEventPayload;
 	interactionCreate: InteractionCreateEventPayload;
 	messageCreate: MessageCreateEventPayload;
 	messageUpdate: MessageUpdateEventPayload;
 	messageDelete: MessageDeleteEventPayload;
+	messageBulkDelete: MessageBulkDeleteEventPayload;
 	messageReactionAdd: MessageReactionAddEventPayload;
 	messageReactionRemove: MessageReactionRemoveEventPayload;
 	guildCreate: GuildCreateEventPayload;
@@ -225,6 +268,9 @@ export interface BotEventPayloadMap {
 	threadCreate: ThreadCreateEventPayload;
 	threadUpdate: ThreadUpdateEventPayload;
 	threadDelete: ThreadDeleteEventPayload;
+	channelCreate: ChannelCreateEventPayload;
+	channelUpdate: ChannelUpdateEventPayload;
+	channelDelete: ChannelDeleteEventPayload;
 }
 
 export type BotEventName = keyof BotEventPayloadMap;
@@ -340,6 +386,60 @@ export interface RemoveOwnMessageReactionActionPayload {
 	emoji: string;
 }
 
+export interface TimeoutMemberActionPayload {
+	guildId: Snowflake;
+	userId: Snowflake;
+	/** Duration in milliseconds (Discord allows up to 28 days). */
+	durationMs: number;
+	reason?: string;
+}
+
+export interface RemoveMemberTimeoutActionPayload {
+	guildId: Snowflake;
+	userId: Snowflake;
+	reason?: string;
+}
+
+export interface CreateChannelActionPayload {
+	guildId: Snowflake;
+	name: string;
+	/** Discord `ChannelType` (default: `0` guild text). */
+	type?: number;
+	parentId?: Snowflake;
+	topic?: string;
+	reason?: string;
+}
+
+export interface EditChannelActionPayload {
+	channelId: Snowflake;
+	name?: string | null;
+	parentId?: Snowflake | null;
+	topic?: string | null;
+	reason?: string;
+}
+
+export interface DeleteChannelActionPayload {
+	channelId: Snowflake;
+	reason?: string;
+}
+
+/** `autoArchiveDuration` is in minutes (Discord-supported values). */
+export interface CreateThreadActionPayload {
+	parentChannelId: Snowflake;
+	name: string;
+	/** When set, starts a thread on this message (requires a text-based parent). */
+	messageId?: Snowflake;
+	type?: 'public' | 'private';
+	autoArchiveDuration?: 60 | 1440 | 4320 | 10080;
+	reason?: string;
+}
+
+export interface ArchiveThreadActionPayload {
+	threadId: Snowflake;
+	archived?: boolean;
+	reason?: string;
+}
+
 export interface BotActionPayloadMap {
 	sendMessage: SendMessageActionPayload;
 	editMessage: EditMessageActionPayload;
@@ -360,6 +460,13 @@ export interface BotActionPayloadMap {
 	removeMemberRole: RemoveMemberRoleActionPayload;
 	addMessageReaction: AddMessageReactionActionPayload;
 	removeOwnMessageReaction: RemoveOwnMessageReactionActionPayload;
+	timeoutMember: TimeoutMemberActionPayload;
+	removeMemberTimeout: RemoveMemberTimeoutActionPayload;
+	createChannel: CreateChannelActionPayload;
+	editChannel: EditChannelActionPayload;
+	deleteChannel: DeleteChannelActionPayload;
+	createThread: CreateThreadActionPayload;
+	archiveThread: ArchiveThreadActionPayload;
 }
 
 export interface DeleteMessageActionResult {
@@ -399,6 +506,11 @@ export interface MessageReactionActionResult {
 	emoji: string;
 }
 
+export interface DeleteChannelActionResult {
+	deleted: true;
+	channelId: Snowflake;
+}
+
 export interface BotActionResultDataMap {
 	sendMessage: BridgeMessage;
 	editMessage: BridgeMessage;
@@ -419,6 +531,13 @@ export interface BotActionResultDataMap {
 	removeMemberRole: BridgeGuildMember;
 	addMessageReaction: MessageReactionActionResult;
 	removeOwnMessageReaction: MessageReactionActionResult;
+	timeoutMember: MemberModerationActionResult;
+	removeMemberTimeout: BridgeGuildMember;
+	createChannel: BridgeChannel;
+	editChannel: BridgeChannel;
+	deleteChannel: DeleteChannelActionResult;
+	createThread: BridgeThread;
+	archiveThread: BridgeThread;
 }
 
 export type BotActionName = keyof BotActionPayloadMap;
@@ -437,6 +556,12 @@ export interface EventSubscriptionFilter {
 	customId?: string | readonly string[];
 	/** Matches `BridgeInteraction.kind`. */
 	interactionKind?: BridgeInteractionKind | readonly BridgeInteractionKind[];
+	/** Matches Discord `ChannelType` when present on the payload (messages, interactions, bulk delete). */
+	channelType?: number | readonly number[];
+	/** Matches `BridgeMessage.parentChannelId` / thread parent / channel parent when present. */
+	parentChannelId?: Snowflake | readonly Snowflake[];
+	/** Matches guild thread channels only: same as message `channelId` when `channelType` is a guild thread. */
+	threadId?: Snowflake | readonly Snowflake[];
 }
 
 export interface EventSubscription<K extends BotEventName = BotEventName> {

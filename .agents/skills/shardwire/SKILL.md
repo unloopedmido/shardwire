@@ -66,8 +66,8 @@ Follow this sequence unless the user asks for a narrower task.
 
 When wiring logic, stick to built-in names:
 
-- Events: `ready`, `interactionCreate`, `messageCreate`, `messageUpdate`, `messageDelete`, `messageReactionAdd`, `messageReactionRemove`, `guildMemberAdd`, `guildMemberRemove`
-- Actions: `sendMessage`, `editMessage`, `deleteMessage`, `replyToInteraction`, `deferInteraction`, `followUpInteraction`, `banMember`, `kickMember`, `addMemberRole`, `removeMemberRole`, `addMessageReaction`, `removeOwnMessageReaction`
+- Events: `ready`, `interactionCreate`, `messageCreate`, `messageUpdate`, `messageDelete`, `messageBulkDelete`, `messageReactionAdd`, `messageReactionRemove`, `guildCreate`, `guildDelete`, `guildMemberAdd`, `guildMemberRemove`, `guildMemberUpdate`, `threadCreate`, `threadUpdate`, `threadDelete`, `channelCreate`, `channelUpdate`, `channelDelete`
+- Actions: `sendMessage`, `editMessage`, `deleteMessage`, `replyToInteraction`, `deferInteraction`, `followUpInteraction`, `banMember`, `kickMember`, `addMemberRole`, `removeMemberRole`, `addMessageReaction`, `removeOwnMessageReaction`, `timeoutMember`, `removeMemberTimeout`, `createChannel`, `editChannel`, `deleteChannel`, `createThread`, `archiveThread`
 
 If user asks for behavior outside this surface:
 

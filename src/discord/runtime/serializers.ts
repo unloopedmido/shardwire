@@ -1,6 +1,7 @@
 import type { APIEmbed } from 'discord-api-types/v10';
 import type {
 	AnySelectMenuInteraction,
+	Channel,
 	ChatInputCommandInteraction,
 	Guild,
 	GuildMember,
@@ -16,6 +17,7 @@ import type {
 	User,
 } from 'discord.js';
 import type {
+	BridgeChannel,
 	BridgeDeletedMessage,
 	BridgeGuild,
 	BridgeGuildMember,
@@ -74,6 +76,21 @@ export function serializeMessage(message: Message | PartialMessage): BridgeMessa
 			? message.components.map((row) => row.toJSON())
 			: undefined;
 
+	const channelMeta = (() => {
+		if (!('channel' in message) || !message.channel) {
+			return {};
+		}
+		const ch = message.channel;
+		const meta: Partial<Pick<BridgeMessage, 'channelType' | 'parentChannelId'>> = {};
+		if (typeof ch.type === 'number') {
+			meta.channelType = ch.type;
+		}
+		if ('parentId' in ch && typeof ch.parentId === 'string') {
+			meta.parentChannelId = ch.parentId;
+		}
+		return meta;
+	})();
+
 	return {
 		id: message.id,
 		channelId: message.channelId,
@@ -96,6 +113,7 @@ export function serializeMessage(message: Message | PartialMessage): BridgeMessa
 		embeds: serializeEmbeds(message),
 		...(components ? { components } : {}),
 		...(reference ? { reference } : {}),
+		...channelMeta,
 	} as BridgeMessage;
 }
 
@@ -120,12 +138,45 @@ export function serializeThread(thread: ThreadChannel): BridgeThread {
 	};
 }
 
+export function serializeChannel(channel: Channel): BridgeChannel {
+	const base: BridgeChannel = {
+		id: channel.id,
+		type: channel.type,
+	};
+	if ('name' in channel) {
+		base.name = channel.name ?? null;
+	}
+	if ('guildId' in channel && typeof channel.guildId === 'string') {
+		base.guildId = channel.guildId;
+	}
+	if ('parentId' in channel) {
+		base.parentId = channel.parentId;
+	}
+	return base;
+}
+
 export function serializeDeletedMessage(message: Message | PartialMessage): BridgeDeletedMessage {
+	const channelMeta = (() => {
+		if (!('channel' in message) || !message.channel) {
+			return {};
+		}
+		const ch = message.channel;
+		const meta: Partial<Pick<BridgeDeletedMessage, 'channelType' | 'parentChannelId'>> = {};
+		if (typeof ch.type === 'number') {
+			meta.channelType = ch.type;
+		}
+		if ('parentId' in ch && typeof ch.parentId === 'string') {
+			meta.parentChannelId = ch.parentId;
+		}
+		return meta;
+	})();
+
 	return {
 		id: message.id,
 		channelId: message.channelId,
 		...(message.guildId ? { guildId: message.guildId } : {}),
 		deletedAt: new Date().toISOString(),
+		...channelMeta,
 	};
 }
 
@@ -204,81 +255,123 @@ export function serializeInteraction(interaction: Interaction): BridgeInteractio
 	};
 
 	if (interaction.isChatInputCommand()) {
-		return {
-			...base,
-			kind: 'chatInput',
-			commandName: interaction.commandName,
-			options: serializeChatInputOptions(interaction),
-		};
+		return enrichInteractionChannel(
+			{
+				...base,
+				kind: 'chatInput',
+				commandName: interaction.commandName,
+				options: serializeChatInputOptions(interaction),
+			},
+			interaction,
+		);
 	}
 	if (interaction.isContextMenuCommand()) {
-		return {
-			...base,
-			kind: 'contextMenu',
-			commandName: interaction.commandName,
-		};
+		return enrichInteractionChannel(
+			{
+				...base,
+				kind: 'contextMenu',
+				commandName: interaction.commandName,
+			},
+			interaction,
+		);
 	}
 	if (interaction.isButton()) {
 		const message = serializeInteractionMessage(interaction);
-		return {
-			...base,
-			kind: 'button',
-			customId: interaction.customId,
-			...(message ? { message } : {}),
-		};
+		return enrichInteractionChannel(
+			{
+				...base,
+				kind: 'button',
+				customId: interaction.customId,
+				...(message ? { message } : {}),
+			},
+			interaction,
+		);
 	}
 	if (interaction.isStringSelectMenu()) {
 		const message = serializeInteractionMessage(interaction);
-		return {
-			...base,
-			kind: 'stringSelect',
-			...serializeSelectMenu(interaction),
-			...(message ? { message } : {}),
-		};
+		return enrichInteractionChannel(
+			{
+				...base,
+				kind: 'stringSelect',
+				...serializeSelectMenu(interaction),
+				...(message ? { message } : {}),
+			},
+			interaction,
+		);
 	}
 	if (interaction.isUserSelectMenu()) {
 		const message = serializeInteractionMessage(interaction);
-		return {
-			...base,
-			kind: 'userSelect',
-			...serializeSelectMenu(interaction),
-			...(message ? { message } : {}),
-		};
+		return enrichInteractionChannel(
+			{
+				...base,
+				kind: 'userSelect',
+				...serializeSelectMenu(interaction),
+				...(message ? { message } : {}),
+			},
+			interaction,
+		);
 	}
 	if (interaction.isRoleSelectMenu()) {
 		const message = serializeInteractionMessage(interaction);
-		return {
-			...base,
-			kind: 'roleSelect',
-			...serializeSelectMenu(interaction),
-			...(message ? { message } : {}),
-		};
+		return enrichInteractionChannel(
+			{
+				...base,
+				kind: 'roleSelect',
+				...serializeSelectMenu(interaction),
+				...(message ? { message } : {}),
+			},
+			interaction,
+		);
 	}
 	if (interaction.isMentionableSelectMenu()) {
 		const message = serializeInteractionMessage(interaction);
-		return {
-			...base,
-			kind: 'mentionableSelect',
-			...serializeSelectMenu(interaction),
-			...(message ? { message } : {}),
-		};
+		return enrichInteractionChannel(
+			{
+				...base,
+				kind: 'mentionableSelect',
+				...serializeSelectMenu(interaction),
+				...(message ? { message } : {}),
+			},
+			interaction,
+		);
 	}
 	if (interaction.isChannelSelectMenu()) {
 		const message = serializeInteractionMessage(interaction);
-		return {
-			...base,
-			kind: 'channelSelect',
-			...serializeSelectMenu(interaction),
-			...(message ? { message } : {}),
-		};
+		return enrichInteractionChannel(
+			{
+				...base,
+				kind: 'channelSelect',
+				...serializeSelectMenu(interaction),
+				...(message ? { message } : {}),
+			},
+			interaction,
+		);
 	}
 	if (interaction.isModalSubmit()) {
-		return {
-			...base,
-			kind: 'modalSubmit',
-			customId: interaction.customId,
-			fields: serializeModalFields(interaction),
-		};
+		return enrichInteractionChannel(
+			{
+				...base,
+				kind: 'modalSubmit',
+				customId: interaction.customId,
+				fields: serializeModalFields(interaction),
+			},
+			interaction,
+		);
 	}
-	return base;
+	return enrichInteractionChannel(base, interaction);
+}
+
+function enrichInteractionChannel(base: BridgeInteraction, interaction: Interaction): BridgeInteraction {
+	if (!('channel' in interaction) || !interaction.channel || interaction.channel.isDMBased()) {
+		return base;
+	}
+	const ch = interaction.channel;
+	const out: BridgeInteraction = { ...base };
+	if (typeof ch.type === 'number') {
+		out.channelType = ch.type;
+	}
+	if ('parentId' in ch && typeof ch.parentId === 'string') {
+		out.parentChannelId = ch.parentId;
+	}
+	return out;
 }
