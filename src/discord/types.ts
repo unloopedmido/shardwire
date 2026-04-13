@@ -88,7 +88,6 @@ export type BridgeInteractionKind =
 export interface BridgeInteraction {
   id: Snowflake;
   applicationId: Snowflake;
-  token: string;
   kind: BridgeInteractionKind;
   guildId?: Snowflake;
   channelId?: Snowflake;

@@ -112,12 +112,17 @@ export function assertBotBridgeOptions(options: BotBridgeOptions): void {
     throw new Error("server.secrets must contain at least one secret.");
   }
   const ids = new Set<string>();
+  const values = new Set<string>();
   options.server.secrets.forEach((secret: BotBridgeSecret, index) => {
     const normalized = normalizeSecretEntry(secret, index);
     if (ids.has(normalized.id)) {
       throw new Error(`server.secrets contains duplicate secret id "${normalized.id}".`);
     }
+    if (values.has(normalized.value)) {
+      throw new Error(`server.secrets contains duplicate secret value at index ${index}.`);
+    }
     ids.add(normalized.id);
+    values.add(normalized.value);
   });
 }
 

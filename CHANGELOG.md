@@ -11,6 +11,8 @@ All notable changes to this project are documented in this file.
 - Added negotiated bridge capabilities based on bot intents and optional scoped secrets.
 - Added app-driven event subscriptions with optional `guildId`, `channelId`, `userId`, and `commandName` filters.
 - Added a token-first Discord runtime with normalized JSON payload types backed by internal `discord.js` integration.
+- Removed Discord interaction callback tokens from serialized `BridgeInteraction` payloads sent to apps.
+- Tightened secret handling to reject duplicate configured secret values and ambiguous value-only authentication matches.
 - Replaced the package examples, tests, and skill metadata to match the Discord-first product direction.
 
 ## 0.2.0

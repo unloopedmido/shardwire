@@ -2,6 +2,8 @@ import { createServer } from "node:net";
 import { describe, expect, it } from "vitest";
 import { BridgeCapabilityError, connectBotBridge, createBotBridge } from "../src";
 import { createBotBridgeWithRuntime } from "../src/bot";
+import { authenticateSecret } from "../src/bridge/transport/server";
+import { serializeInteraction } from "../src/discord/runtime/serializers";
 import { FakeDiscordRuntime } from "./helpers/fake-runtime";
 
 async function getFreePort(): Promise<number> {
@@ -38,6 +40,31 @@ describe("discord-first bridge validation", () => {
         },
       }),
     ).toThrow(/token|intent|port|secret/i);
+  });
+
+  it("rejects duplicate secret values even when ids differ", () => {
+    expect(() =>
+      createBotBridge({
+        token: "fake-token",
+        intents: ["Guilds"],
+        server: {
+          port: 3001,
+          secrets: [
+            {
+              id: "full-access",
+              value: "shared-secret",
+            },
+            {
+              id: "limited-access",
+              value: "shared-secret",
+              allow: {
+                events: ["ready"],
+              },
+            },
+          ],
+        },
+      }),
+    ).toThrow(/duplicate secret value/i);
   });
 
   it("throws for invalid app bridge config", () => {
@@ -178,5 +205,82 @@ describe("discord-first bridge validation", () => {
 
     await app.close();
     await bot.close();
+  });
+
+  it("rejects ambiguous value-only auth matches as a runtime backstop", () => {
+    const authResult = authenticateSecret(
+      {
+        secret: "shared-secret",
+      },
+      [
+        {
+          id: "full",
+          value: "shared-secret",
+          scope: {
+            events: "*",
+            actions: "*",
+          },
+        },
+        {
+          id: "limited",
+          value: "shared-secret",
+          scope: {
+            events: new Set(["ready"]),
+            actions: new Set(["sendMessage"]),
+          },
+        },
+      ],
+      () => ({
+        events: ["ready"],
+        actions: ["sendMessage"],
+      }),
+    );
+
+    expect(authResult).toEqual({
+      ok: false,
+      reason: "ambiguous_secret",
+    });
+  });
+
+  it("does not expose the Discord interaction token in serialized payloads", () => {
+    const serialized = serializeInteraction({
+      id: "interaction-1",
+      applicationId: "app-1",
+      token: "discord-interaction-token",
+      guildId: "guild-1",
+      channelId: "channel-1",
+      user: {
+        id: "user-1",
+        username: "tester",
+        discriminator: "0",
+        globalName: null,
+        displayAvatarURL: () => "https://example.com/avatar.png",
+        bot: false,
+        system: false,
+      },
+      member: null,
+      isChatInputCommand: () => false,
+      isContextMenuCommand: () => false,
+      isButton: () => false,
+      isStringSelectMenu: () => false,
+      isUserSelectMenu: () => false,
+      isRoleSelectMenu: () => false,
+      isMentionableSelectMenu: () => false,
+      isChannelSelectMenu: () => false,
+      isModalSubmit: () => false,
+    } as never);
+
+    expect(serialized).not.toHaveProperty("token");
+    expect(serialized).toMatchObject({
+      id: "interaction-1",
+      applicationId: "app-1",
+      guildId: "guild-1",
+      channelId: "channel-1",
+      kind: "unknown",
+      user: {
+        id: "user-1",
+        username: "tester",
+      },
+    });
   });
 });

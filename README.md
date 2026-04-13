@@ -196,5 +196,5 @@ Main exports:
 
 ## Examples
 
-- Bot: [examples/bot-basic.ts](/home/looped/dev/packages/shardwire/examples/bot-basic.ts)
-- App: [examples/app-basic.ts](/home/looped/dev/packages/shardwire/examples/app-basic.ts)
+- Bot: [examples/bot-basic.ts](./examples/bot-basic.ts)
+- App: [examples/app-basic.ts](./examples/app-basic.ts)
