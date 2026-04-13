@@ -108,8 +108,14 @@ Apps subscribe to events with `app.on(...)`. The bridge forwards only what each 
 - `messageDelete`
 - `messageReactionAdd`
 - `messageReactionRemove`
+- `guildCreate`
+- `guildDelete`
 - `guildMemberAdd`
 - `guildMemberRemove`
+- `guildMemberUpdate`
+- `threadCreate`
+- `threadUpdate`
+- `threadDelete`
 
 Supported filters:
 
@@ -117,13 +123,16 @@ Supported filters:
 - `channelId`
 - `userId`
 - `commandName` (for `interactionCreate`)
+- `customId` (for `interactionCreate`)
+- `interactionKind` (for `interactionCreate`)
 
 ### Intent Notes
 
 - `ready` and `interactionCreate`: no specific event intent requirement
 - `messageCreate`, `messageUpdate`, `messageDelete`: `GuildMessages`
 - `messageReactionAdd`, `messageReactionRemove`: `GuildMessageReactions`
-- `guildMemberAdd`, `guildMemberRemove`: `GuildMembers`
+- `guildCreate`, `guildDelete`, `threadCreate`, `threadUpdate`, `threadDelete`: `Guilds`
+- `guildMemberAdd`, `guildMemberRemove`, `guildMemberUpdate`: `GuildMembers`
 
 ## Built-In Actions
 
@@ -134,7 +143,14 @@ Supported filters:
 - `deleteMessage`
 - `replyToInteraction`
 - `deferInteraction`
+- `deferUpdateInteraction`
 - `followUpInteraction`
+- `editInteractionReply`
+- `deleteInteractionReply`
+- `updateInteraction`
+- `showModal`
+- `fetchMessage`
+- `fetchMember`
 - `banMember`
 - `kickMember`
 - `addMemberRole`
@@ -148,6 +164,31 @@ All actions return:
 type ActionResult<T> =
   | { ok: true; requestId: string; ts: number; data: T }
   | { ok: false; requestId: string; ts: number; error: { code: string; message: string; details?: unknown } };
+```
+
+### Idempotency for safe retries
+
+You can provide an `idempotencyKey` in action options to dedupe repeated requests on the same connection:
+
+```ts
+await app.actions.sendMessage(
+  { channelId: "123456789012345678", content: "Hello once" },
+  { idempotencyKey: "notify:order:123" },
+);
+```
+
+### App-side action metrics
+
+```ts
+const app = connectBotBridge({
+  url: "ws://127.0.0.1:3001/shardwire",
+  secret: process.env.SHARDWIRE_SECRET!,
+  metrics: {
+    onActionComplete(meta) {
+      console.log(meta.name, meta.durationMs, meta.ok, meta.errorCode);
+    },
+  },
+});
 ```
 
 ## Secret Scopes
@@ -225,6 +266,7 @@ Main exports include:
 - Use `wss://` for non-loopback deployments.
 - `ws://` is only accepted for loopback hosts (`127.0.0.1`, `localhost`, `::1`).
 - Event availability depends on enabled intents and secret scope.
+- For vulnerability reporting and security policy, see [`SECURITY.md`](./SECURITY.md).
 
 ## Contributing
 

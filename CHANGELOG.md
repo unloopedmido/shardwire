@@ -2,7 +2,21 @@
 
 All notable changes to this project are documented in this file.
 
-## 1.1.0 (unreleased)
+## 1.2.0 (unreleased)
+
+- Added new built-in events: `guildCreate`, `guildDelete`, `guildMemberUpdate`, `threadCreate`, `threadUpdate`, and `threadDelete`.
+- Added new subscription filters for `interactionCreate`: `customId` and `interactionKind`.
+- Added interaction lifecycle actions: `deferUpdateInteraction`, `editInteractionReply`, `deleteInteractionReply`, `updateInteraction`, and `showModal`.
+- Added query/read actions: `fetchMessage` and `fetchMember`.
+- Expanded message input/payload normalization with component support and richer send/edit parity fields.
+- Added best-effort action idempotency via `idempotencyKey` on app action calls.
+- Added bridge-side action backpressure controls: `server.maxConcurrentActions` and `server.actionQueueTimeoutMs`.
+- Added bridge-side connection and auth-abuse controls: `server.maxConnections` and auth rate limiting safeguards.
+- Added optional app metrics hook (`metrics.onActionComplete`) and richer structured action/error details.
+- Added shard-aware event envelopes by populating `shardId` when available.
+- Strengthened release/CI quality gates with lint + coverage in `verify`, Node version alignment, changelog/version check, and npm provenance publishing.
+
+## 1.1.0
 
 - Added `messageReactionAdd` and `messageReactionRemove` built-in events, including normalized reaction payload types and subscription filtering support.
 - Added `addMessageReaction` and `removeOwnMessageReaction` built-in app actions with runtime support in the default `discord.js` adapter.
