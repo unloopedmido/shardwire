@@ -2,11 +2,11 @@
 
 ## Connection / auth
 
-| Symptom | Checks |
-|---------|--------|
-| `Non-loopback app bridge URLs must use wss://` | Use `wss://` when not on localhost. |
-| `Authentication failed` / socket closes early | Same `secret` (and `secretId` if using scoped entries) as `server.secrets`. Path must match (default `/shardwire`). |
-| `ambiguous_secret` | Multiple scoped entries share the same value; set `secretId` on the app or use unique secret strings. |
+| Symptom                                        | Checks                                                                                                              |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `Non-loopback app bridge URLs must use wss://` | Use `wss://` when not on localhost.                                                                                 |
+| `Authentication failed` / socket closes early  | Same `secret` (and `secretId` if using scoped entries) as `server.secrets`. Path must match (default `/shardwire`). |
+| `ambiguous_secret`                             | Multiple scoped entries share the same value; set `secretId` on the app or use unique secret strings.               |
 
 ## Missing events
 
@@ -21,19 +21,19 @@ Print `app.capabilities()` after `ready()` to see negotiated `events` / `actions
 Always branch on `ActionResult`:
 
 ```ts
-const result = await app.actions.sendMessage({ channelId, content: "hi" });
+const result = await app.actions.sendMessage({ channelId, content: 'hi' });
 if (!result.ok) {
-  console.error(result.error.code, result.error.message, result.error.details);
+	console.error(result.error.code, result.error.message, result.error.details);
 }
 ```
 
-| `error.code` | Typical meaning |
-|--------------|-----------------|
-| `FORBIDDEN` | Missing Discord permission or action blocked by secret scope. |
-| `NOT_FOUND` | Channel/message/user not found. |
-| `INVALID_REQUEST` | Malformed payload vs Discord API. |
-| `SERVICE_UNAVAILABLE` | Rate limit (`details.retryAfterMs`) or bridge action queue timeout (`details.reason === "action_queue"`). |
-| `TIMEOUT` / `DISCONNECTED` | App transport: slow bot or closed socket mid-flight. |
+| `error.code`               | Typical meaning                                                                                           |
+| -------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `FORBIDDEN`                | Missing Discord permission or action blocked by secret scope.                                             |
+| `NOT_FOUND`                | Channel/message/user not found.                                                                           |
+| `INVALID_REQUEST`          | Malformed payload vs Discord API.                                                                         |
+| `SERVICE_UNAVAILABLE`      | Rate limit (`details.retryAfterMs`) or bridge action queue timeout (`details.reason === "action_queue"`). |
+| `TIMEOUT` / `DISCONNECTED` | App transport: slow bot or closed socket mid-flight.                                                      |
 
 ## Capability errors
 

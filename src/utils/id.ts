@@ -1,9 +1,9 @@
-import { randomUUID } from "node:crypto";
+import { randomUUID } from 'node:crypto';
 
 export function createRequestId(): string {
-  return randomUUID();
+	return randomUUID();
 }
 
 export function createConnectionId(): string {
-  return randomUUID();
+	return randomUUID();
 }
