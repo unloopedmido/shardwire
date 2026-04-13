@@ -3,6 +3,7 @@ import type {
   ActionResult,
   AppBridge,
   AppBridgeActions,
+  AppBridgeActionInvokeOptions,
   AppBridgeOptions,
   BotActionName,
   BotActionPayloadMap,
@@ -57,6 +58,7 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
   assertAppBridgeOptions(options);
 
   const logger = withLogger(options.logger);
+  const metrics = options.metrics;
   const reconnectEnabled = options.reconnect?.enabled ?? true;
   const initialDelayMs = options.reconnect?.initialDelayMs ?? 500;
   const maxDelayMs = options.reconnect?.maxDelayMs ?? 10000;
@@ -330,7 +332,7 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
   async function invokeAction<K extends BotActionName>(
     name: K,
     payload: BotActionPayloadMap[K],
-    sendOptions?: { timeoutMs?: number; requestId?: string },
+    sendOptions?: AppBridgeActionInvokeOptions,
   ): Promise<ActionResult<BotActionResultDataMap[K]>> {
     try {
       await connect();
@@ -372,6 +374,7 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
 
     const requestId = sendOptions?.requestId ?? createRequestId();
     const timeoutMs = sendOptions?.timeoutMs ?? requestTimeoutMs;
+    const started = Date.now();
     const promise = new Promise<ActionResult<unknown>>((resolve, reject) => {
       const timer = setTimeout(() => {
         pendingRequests.delete(requestId);
@@ -392,6 +395,7 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
           {
             name,
             data: payload,
+            ...(sendOptions?.idempotencyKey ? { idempotencyKey: sendOptions.idempotencyKey } : {}),
           },
           { requestId },
         ),
@@ -399,7 +403,15 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
     );
 
     try {
-      return (await promise) as ActionResult<BotActionResultDataMap[K]>;
+      const result = (await promise) as ActionResult<BotActionResultDataMap[K]>;
+      metrics?.onActionComplete?.({
+        name,
+        requestId,
+        durationMs: Date.now() - started,
+        ok: result.ok,
+        ...(!result.ok ? { errorCode: result.error.code } : {}),
+      });
+      return result;
     } catch (error) {
       const code =
         error instanceof AppRequestError
@@ -407,6 +419,13 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
           : !socket || socket.readyState !== 1
             ? "DISCONNECTED"
             : "TIMEOUT";
+      metrics?.onActionComplete?.({
+        name,
+        requestId,
+        durationMs: Date.now() - started,
+        ok: false,
+        errorCode: code,
+      });
       return {
         ok: false,
         requestId,
@@ -425,7 +444,14 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
     deleteMessage: (payload, sendOptions) => invokeAction("deleteMessage", payload, sendOptions),
     replyToInteraction: (payload, sendOptions) => invokeAction("replyToInteraction", payload, sendOptions),
     deferInteraction: (payload, sendOptions) => invokeAction("deferInteraction", payload, sendOptions),
+    deferUpdateInteraction: (payload, sendOptions) => invokeAction("deferUpdateInteraction", payload, sendOptions),
     followUpInteraction: (payload, sendOptions) => invokeAction("followUpInteraction", payload, sendOptions),
+    editInteractionReply: (payload, sendOptions) => invokeAction("editInteractionReply", payload, sendOptions),
+    deleteInteractionReply: (payload, sendOptions) => invokeAction("deleteInteractionReply", payload, sendOptions),
+    updateInteraction: (payload, sendOptions) => invokeAction("updateInteraction", payload, sendOptions),
+    showModal: (payload, sendOptions) => invokeAction("showModal", payload, sendOptions),
+    fetchMessage: (payload, sendOptions) => invokeAction("fetchMessage", payload, sendOptions),
+    fetchMember: (payload, sendOptions) => invokeAction("fetchMember", payload, sendOptions),
     banMember: (payload, sendOptions) => invokeAction("banMember", payload, sendOptions),
     kickMember: (payload, sendOptions) => invokeAction("kickMember", payload, sendOptions),
     addMemberRole: (payload, sendOptions) => invokeAction("addMemberRole", payload, sendOptions),

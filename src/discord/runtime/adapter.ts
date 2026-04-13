@@ -28,7 +28,12 @@ export interface DiscordRuntimeAdapter {
 
 export class ActionExecutionError extends Error {
   constructor(
-    public readonly code: "FORBIDDEN" | "NOT_FOUND" | "INVALID_REQUEST" | "INTERNAL_ERROR",
+    public readonly code:
+      | "FORBIDDEN"
+      | "NOT_FOUND"
+      | "INVALID_REQUEST"
+      | "INTERNAL_ERROR"
+      | "SERVICE_UNAVAILABLE",
     message: string,
     public readonly details?: unknown,
   ) {
