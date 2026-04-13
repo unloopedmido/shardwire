@@ -1,68 +1,60 @@
 ---
 name: shardwire
-description: "Use when developers ask how to integrate the Shardwire npm package in real apps: setting up bot-hosted websocket servers, connecting dashboard/backend consumers, defining typed command/event maps, configuring auth/reconnect, handling CommandResult errors, or troubleshooting host-consumer connectivity."
+description: "Discord-first integration guide for the Shardwire npm package. Use when Codex needs to wire a Discord bot and a web/backend app with `createBotBridge(...)` and `connectBotBridge(...)`, choose intents, configure shared or scoped secrets, subscribe to built-in Discord events, call built-in bot actions, add event filters, or troubleshoot capability/auth/reconnect issues."
 ---
 
-# Shardwire Skill
+# Shardwire
 
-Shardwire usage questions are often answered with partial snippets that miss typing, auth, or reconnect details. Use this skill to provide complete host+consumer integration guidance grounded in Shardwire v1 behavior.
+Use this skill for the current Shardwire package only. Ground answers in the Discord-first API, not the pre-rewrite generic websocket bridge.
 
-## When to Use
+## Workflow
 
-Use this skill when the user asks about:
+1. Classify the request:
+   - bot host
+   - app consumer
+   - both sides
+   - troubleshooting
+2. Gather only the missing inputs:
+   - bot token
+   - required intents
+   - bridge server port, host, or path
+   - app URL and secret
+   - events the app needs
+   - built-in actions the app needs
+   - whether secret scoping is required
+3. Prefer the current root API:
+   - bot: `createBotBridge({ token, intents, server })`
+   - app: `connectBotBridge({ url, secret, secretId?, appName? })`
+   - event subscription: `app.on(name, handler, filter?)`
+   - action calls: `app.actions.<builtInAction>(payload)`
+4. Keep examples Discord-first:
+   - never propose `createShardwire(...)`
+   - never ask the user to design `CommandMap` or `EventMap`
+   - use built-in event names and built-in actions first
+   - use Shardwire JSON payload types, not raw `discord.js` objects
+5. Cover the likely failure surfaces:
+   - event availability depends on intents
+   - capabilities can be narrowed by secret scopes
+   - remote actions return `ActionResult`, so show the failure branch when relevant
+   - non-loopback app connections should use `wss://`
 
-- Setting up `createShardwire(...)` on bot host or consumer apps
-- Designing command/event payload schemas
-- Runtime schema validation with `validation.commands/events`
-- Using `fromZodSchema(...)` or custom safe-parse adapters
-- Shared secret setup, path/URL wiring, or connection lifecycle
-- Reconnect behavior and timeout tuning
-- Error handling for `CommandResult` (`UNAUTHORIZED`, `TIMEOUT`, etc.)
-- Practical examples for Discord bot + web/backend integration
+## Current Source Anchors
 
-Do not use this skill for:
+- Public exports: [src/index.ts](../../../src/index.ts)
+- Public types: [src/discord/types.ts](../../../src/discord/types.ts)
+- Event catalog and intent gating: [src/discord/catalog.ts](../../../src/discord/catalog.ts)
+- Bot example: [examples/bot-basic.ts](../../../examples/bot-basic.ts)
+- App example: [examples/app-basic.ts](../../../examples/app-basic.ts)
 
-- Internal maintenance/refactoring of the Shardwire library implementation
-- Multi-host sharding architecture design (out of v1 scope)
-- Generic websocket theory unrelated to Shardwire APIs
+## References
 
-## Quick Start Workflow
+- Read [references/api-surface.md](references/api-surface.md) for the current public API, built-in events, built-in actions, secret scopes, and filter keys.
+- Read [references/integration-patterns.md](references/integration-patterns.md) for copy-paste bot/app setup, filtered subscriptions, action calls, and troubleshooting patterns.
 
-1. Classify request: host side, consumer side, or both.
-2. Ask for missing integration inputs:
-   - shared secret env var
-   - host URL/port/path
-   - command names and payloads
-   - event names and payloads
-3. Define typed maps first (`Commands`, `Events`).
-4. Provide complete host+consumer snippets (not partial fragments).
-5. Include error handling and reconnect guidance.
+## Response Rules
 
-## Activity-Based Routing
-
-| Activity | Reference |
-| --- | --- |
-| First-time integration setup | [references.md](references.md) |
-| Add command + emitted event flow | [examples/command-event-change.md](examples/command-event-change.md) |
-| Tune reconnect behavior | [examples/reconnect-hardening.md](examples/reconnect-hardening.md) |
-| Token-only host startup | [examples/token-only-host.md](examples/token-only-host.md) |
-| Troubleshoot auth/timeouts/handlers | [examples/troubleshooting-flow.md](examples/troubleshooting-flow.md) |
-
-## Core Rules
-
-- Keep guidance aligned to Shardwire v1 constraints (single-host, no external infra).
-- Use correct API forms:
-  - host: `createShardwire({ server, client|token })`
-  - consumer: `createShardwire({ url, secret })`
-- Recommend `wss://` for non-localhost consumers; only suggest `allowInsecureWs: true` when a trusted non-TLS path is explicitly intended.
-- Prefer typed examples with `createShardwire<Commands, Events>()`.
-- When validating payloads, show `validation` config and include `VALIDATION_ERROR.details` handling.
-- Keep payloads JSON-serializable and command/event names stable.
-- Always include `CommandResult` error-branch handling in consumer examples.
-
-## Answer Shape
-
-1. Direct integration recommendation
-2. Copy-paste host and/or consumer snippet
-3. Config checklist (secret/url/path/timeouts)
-4. Troubleshooting hints for likely failure modes
+- Start with the shortest correct architecture recommendation.
+- Prefer one complete bot snippet and one complete app snippet over fragmented fragments.
+- Use event filters when the app only needs a subset of traffic.
+- When the user asks about permissions, show scoped secrets rather than custom action registries.
+- If the user asks for unsupported Discord surface, say it is not built in yet and do not invent APIs.

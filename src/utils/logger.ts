@@ -1,4 +1,4 @@
-import type { ShardwireLogger } from "../core/types";
+import type { ShardwireLogger } from "../discord/types";
 
 export function withLogger(logger?: ShardwireLogger): Required<ShardwireLogger> {
   return {

@@ -1,7 +1,7 @@
 {
   "name": "shardwire",
-  "version": "0.2.0",
-  "description": "Lightweight Discord-hosted WebSocket bridge for commands and events.",
+  "version": "1.0.0",
+  "description": "Discord-first bridge between a bot process and external apps over WebSocket.",
   "homepage": "https://www.npmjs.com/package/shardwire",
   "repository": {
     "type": "git",
@@ -28,10 +28,8 @@
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --fix",
     "test": "vitest run",
-    "example:host": "tsx examples/host-basic.ts",
-    "example:consumer": "tsx examples/consumer-basic.ts",
-    "example:host:schema": "tsx examples/host-schema-zod.ts",
-    "example:consumer:schema": "tsx examples/consumer-schema-zod.ts",
+    "example:bot": "tsx examples/bot-basic.ts",
+    "example:app": "tsx examples/app-basic.ts",
     "verify": "npm run test && npm run typecheck && npm run build",
     "prepublishOnly": "npm run verify"
   },
@@ -39,13 +37,11 @@
     "discord",
     "discord-bot",
     "websocket",
-    "websocket-bridge",
+    "bot-bridge",
     "realtime",
     "typescript",
-    "rpc",
-    "command-bus",
-    "event-stream",
-    "typed-events",
+    "discord-events",
+    "discord-apps",
     "discord-api"
   ],
   "author": "Mohammed Haism <cored.developments@gmail.com>",
@@ -56,23 +52,15 @@
   "engines": {
     "node": ">=18.18"
   },
-  "peerDependencies": {
-    "discord.js": "^14.0.0"
-  },
-  "peerDependenciesMeta": {
-    "discord.js": {
-      "optional": true
-    }
-  },
   "dependencies": {
-    "ws": "^8.20.0",
-    "zod": "^4.3.6"
+    "discord-api-types": "^0.38.34",
+    "discord.js": "^14.26.2",
+    "ws": "^8.20.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
     "@types/node": "^25.6.0",
     "@types/ws": "^8.18.1",
-    "discord.js": "^14.26.2",
     "eslint": "^10.2.0",
     "globals": "^17.5.0",
     "tsup": "^8.5.1",

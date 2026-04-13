@@ -1,339 +1,200 @@
-# shardwire
+# Shardwire
 
-> Lightweight TypeScript library for building a Discord-hosted WebSocket command and event bridge.
+Discord events and bot actions, streamed to your app over a single WebSocket bridge.
 
-[![npm version](https://img.shields.io/npm/v/shardwire?style=flat-square)](https://www.npmjs.com/package/shardwire)
-[![npm downloads](https://img.shields.io/npm/dm/shardwire?style=flat-square)](https://www.npmjs.com/package/shardwire)
-[![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18.18-3c873a?style=flat-square)](https://nodejs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178c6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](./LICENSE)
+Shardwire runs your bot connection, listens to Discord, and exposes a clean app-facing API for:
 
-`shardwire` helps you expose strongly-typed bot capabilities over WebSocket so dashboards, admin tools, and backend services can send commands to your Discord bot host and subscribe to events in real time.
+- subscribing to Discord events
+- replying to interactions
+- sending and editing messages
+- moderation actions like ban, kick, and role changes
 
-[Quick Start](#quick-start) • [Why shardwire](#why-shardwire) • [Host Setup](#host-setup) • [Consumer Setup](#consumer-setup) • [API Overview](#api-overview) • [Configuration](#configuration) • [Security Notes](#security-notes)
+It is designed for one common setup:
 
-## Table of Contents
+> your Discord bot lives in one process, while your web app, backend, or worker lives somewhere else
 
-- [Why shardwire](#why-shardwire)
-- [Features](#features)
-- [Quick Start](#quick-start)
-- [Host Setup](#host-setup)
-- [Consumer Setup](#consumer-setup)
-- [Token-Only Host (No Existing discord.js Client)](#token-only-host-no-existing-discordjs-client)
-- [Reconnect and Timeout Hardening](#reconnect-and-timeout-hardening)
-- [API Overview](#api-overview)
-- [Configuration](#configuration)
-- [Error Model](#error-model)
-- [Recipes and Troubleshooting](#recipes-and-troubleshooting)
-- [Compatibility](#compatibility)
-- [Security Notes](#security-notes)
-- [Roadmap Constraints (v1)](#roadmap-constraints-v1)
+## Why Shardwire
 
-## Why shardwire
+- **Discord-first**: no generic command bus or event map setup
+- **Token-first**: start the bot bridge with `token`, `intents`, and `server`
+- **App-friendly payloads**: normalized JSON, not live `discord.js` objects
+- **Built-in actions**: call `app.actions.sendMessage(...)`, `app.actions.replyToInteraction(...)`, and more
+- **Scoped secrets**: optionally limit which apps can subscribe to which events or invoke which actions
 
-Running bot logic inside your Discord host process while orchestrating it from external services is a common pattern, but wiring this safely and ergonomically takes time. `shardwire` gives you a focused transport layer with a typed contract so you can:
+## Install
 
-- call bot-hosted commands from apps and services,
-- stream real-time events back to consumers,
-- keep payloads typed end-to-end with TypeScript,
-- start quickly without deploying extra infrastructure.
-
-## Features
-
-- **Typed command RPC** from consumers to host (`send` -> `CommandResult`).
-- **Real-time pub/sub events** from host to all authenticated consumers.
-- **Single factory API** (`createShardwire`) with host and consumer overloads.
-- **Built-in reliability controls** with reconnect backoff, jitter, and timeouts.
-- **Runtime input validation** for config, names, and JSON-serializable payloads.
-- **Optional schema validation** for command and event payloads.
-- **Optional token-only Discord mode** where shardwire can own client lifecycle.
-- **Dual package output** for ESM and CJS consumers.
+```bash
+npm install shardwire
+```
 
 ## Quick Start
 
-Install:
-
-```bash
-pnpm add shardwire
-```
-
-Define shared message contracts:
+### 1. Start the bot bridge
 
 ```ts
-type Commands = {
-  "ban-user": {
-    request: { userId: string };
-    response: { banned: true; userId: string };
-  };
-};
+import { createBotBridge } from "shardwire";
 
-type Events = {
-  "member-joined": { userId: string; guildId: string };
-};
-```
-
-## Host Setup
-
-```ts
-import { createShardwire } from "shardwire";
-
-type Commands = {
-  "ban-user": {
-    request: { userId: string };
-    response: { banned: true; userId: string };
-  };
-};
-
-type Events = {
-  "member-joined": { userId: string; guildId: string };
-};
-
-const wire = createShardwire<Commands, Events>({
-  client: discordClient,
+const bridge = createBotBridge({
+  token: process.env.DISCORD_TOKEN!,
+  intents: ["Guilds", "GuildMessages", "MessageContent", "GuildMembers"],
   server: {
     port: 3001,
     secrets: [process.env.SHARDWIRE_SECRET!],
-    primarySecretId: "s0",
   },
-  name: "bot-host",
 });
 
-wire.onCommand("ban-user", async ({ userId }) => {
-  await guild.members.ban(userId);
-  return { banned: true, userId };
-});
-
-wire.emitEvent("member-joined", { userId: "123", guildId: "456" });
+await bridge.ready();
 ```
 
-## Consumer Setup
+### 2. Connect from your app
 
 ```ts
-import { createShardwire } from "shardwire";
+import { connectBotBridge } from "shardwire";
 
-type Commands = {
-  "ban-user": {
-    request: { userId: string };
-    response: { banned: true; userId: string };
-  };
-};
-
-type Events = {
-  "member-joined": { userId: string; guildId: string };
-};
-
-const wire = createShardwire<Commands, Events>({
-  url: "ws://localhost:3001/shardwire",
+const app = connectBotBridge({
+  url: "ws://127.0.0.1:3001/shardwire",
   secret: process.env.SHARDWIRE_SECRET!,
-  secretId: "s0",
-  clientName: "dashboard-api",
+  appName: "dashboard",
 });
 
-const result = await wire.send("ban-user", { userId: "123" });
+app.on("ready", ({ user }) => {
+  console.log("Bot ready as", user.username);
+});
 
-if (result.ok) {
-  console.log("Command succeeded:", result.data);
-} else {
-  console.error("Command failed:", result.error.code, result.error.message);
+app.on("messageCreate", ({ message }) => {
+  console.log(message.channelId, message.content);
+});
+
+await app.ready();
+```
+
+### 2.5 Filter subscriptions when you need less noise
+
+```ts
+app.on(
+  "messageCreate",
+  ({ message }) => {
+    console.log("Only channel 123:", message.content);
+  },
+  { channelId: "123456789012345678" },
+);
+```
+
+### 3. Call built-in bot actions
+
+```ts
+const result = await app.actions.sendMessage({
+  channelId: "123456789012345678",
+  content: "Hello from the app side",
+});
+
+if (!result.ok) {
+  console.error(result.error.code, result.error.message);
 }
-
-wire.on("member-joined", (payload, meta) => {
-  console.log("event", payload, meta.ts);
-});
-
-wire.onReconnecting(({ attempt, delayMs }) => {
-  console.warn(`reconnecting attempt ${attempt} in ${delayMs}ms`);
-});
-
-await wire.ready();
 ```
 
-## Token-Only Host (No Existing discord.js Client)
+## Built-In Events
 
-If you do not already manage a `discord.js` client, provide a bot token and shardwire can initialize and own the client lifecycle.
+Shardwire currently exposes these bot-side events:
+
+- `ready`
+- `interactionCreate`
+- `messageCreate`
+- `messageUpdate`
+- `messageDelete`
+- `guildMemberAdd`
+- `guildMemberRemove`
+
+Subscriptions are app-driven. The bot bridge does not need per-event setup. Your app subscribes by calling `app.on(...)`, and the host only forwards the events that app is listening to.
+
+Optional filters can narrow delivery by:
+
+- `guildId`
+- `channelId`
+- `userId`
+- `commandName` for `interactionCreate`
+
+## Built-In Actions
+
+`app.actions.*` currently includes:
+
+- `sendMessage`
+- `editMessage`
+- `deleteMessage`
+- `replyToInteraction`
+- `deferInteraction`
+- `followUpInteraction`
+- `banMember`
+- `kickMember`
+- `addMemberRole`
+- `removeMemberRole`
+
+Every action returns an `ActionResult<T>`:
 
 ```ts
-const wire = createShardwire<Commands, Events>({
-  token: process.env.DISCORD_BOT_TOKEN!,
-  server: {
-    port: 3001,
-    secrets: [process.env.SHARDWIRE_SECRET!],
-    primarySecretId: "s0",
-  },
-});
+type ActionResult<T> =
+  | { ok: true; requestId: string; ts: number; data: T }
+  | { ok: false; requestId: string; ts: number; error: { code: string; message: string; details?: unknown } };
 ```
 
-> [!IMPORTANT]
-> Keep `DISCORD_BOT_TOKEN` and `SHARDWIRE_SECRET` in environment variables. Never commit them.
+## Secret Scopes
 
-## Reconnect and Timeout Hardening
-
-For unstable networks, tune reconnect behavior and request timeout explicitly:
+Use a plain string secret for full access:
 
 ```ts
-const wire = createShardwire({
-  url: "ws://bot-host:3001/shardwire",
-  secret: process.env.SHARDWIRE_SECRET!,
-  secretId: "s0",
-  requestTimeoutMs: 10_000,
-  reconnect: {
-    enabled: true,
-    initialDelayMs: 500,
-    maxDelayMs: 10_000,
-    jitter: true,
-  },
-});
+server: {
+  port: 3001,
+  secrets: ["full-access-secret"],
+}
 ```
 
-## Schema Validation (Zod)
-
-Use runtime schemas to validate command request/response payloads and emitted event payloads.
+Or scope a secret to specific events and actions:
 
 ```ts
-import { z } from "zod";
-import { createShardwire, fromZodSchema } from "shardwire";
-
-type Commands = {
-  "ban-user": {
-    request: { userId: string };
-    response: { banned: true; userId: string };
-  };
-};
-
-const wire = createShardwire<Commands, {}>({
-  server: {
-    port: 3001,
-    secrets: [process.env.SHARDWIRE_SECRET!],
-    primarySecretId: "s0",
-  },
-  validation: {
-    commands: {
-      "ban-user": {
-        request: fromZodSchema(z.object({ userId: z.string().min(3) })),
-        response: fromZodSchema(z.object({ banned: z.literal(true), userId: z.string() })),
+server: {
+  port: 3001,
+  secrets: [
+    {
+      id: "dashboard",
+      value: process.env.SHARDWIRE_SECRET!,
+      allow: {
+        events: ["ready", "messageCreate"],
+        actions: ["sendMessage", "replyToInteraction"],
       },
     },
-  },
-});
+  ],
+}
 ```
 
-## API Overview
+On the app side, you can inspect what the connection is allowed to do:
 
-### Host API
-
-- `wire.onCommand(name, handler)` register a command handler.
-- `wire.emitEvent(name, payload)` emit an event to all connected consumers.
-- `wire.broadcast(name, payload)` alias of `emitEvent`.
-- `wire.close()` close the server and active sockets.
-
-### Consumer API
-
-- `wire.send(name, payload, options?)` send command and await typed result.
-- `wire.on(name, handler)` subscribe to events.
-- `wire.off(name, handler)` unsubscribe a specific handler.
-- `wire.ready()` wait for authenticated connection.
-- `wire.onConnected(handler)` subscribe to authenticated connection events.
-- `wire.onDisconnected(handler)` subscribe to disconnect events.
-- `wire.onReconnecting(handler)` subscribe to reconnect scheduling events.
-- `wire.connected()` check authenticated connection state.
-- `wire.connectionId()` get current authenticated connection id (or `null`).
-- `wire.close()` close socket and stop reconnect attempts.
-
-## Configuration
-
-### Host options
-
-- `server.port` required port.
-- `server.secrets` required shared secret list for authentication.
-- `server.primarySecretId` optional preferred secret id (for example `"s0"`).
-- `server.path` optional WebSocket path (default `/shardwire`).
-- `server.host` optional bind host.
-- `server.heartbeatMs` heartbeat interval.
-- `server.commandTimeoutMs` command execution timeout.
-- `server.maxPayloadBytes` WebSocket payload size limit.
-- `server.corsOrigins` CORS allowlist for browser clients.
-- `client` existing `discord.js` client (optional).
-- `token` Discord bot token (optional, enables token-only mode).
-
-### Consumer options
-
-- `url` host endpoint (for example `ws://localhost:3001/shardwire`).
-- `secret` shared secret matching host.
-- `secretId` optional secret id (for example `"s0"`) used during handshake.
-- `clientName` optional identity sent during auth handshake for host-side telemetry.
-- `allowInsecureWs` optional escape hatch to allow `ws://` for non-loopback hosts (defaults to `false`).
-- `requestTimeoutMs` default timeout for `send`.
-- `reconnect` reconnect policy (`enabled`, delays, jitter).
-- `webSocketFactory` optional custom client implementation.
-
-> [!NOTE]
-> Invalid configuration, empty command/event names, or non-serializable payloads throw synchronously with clear errors.
-
-## Error Model
-
-`send()` resolves to:
-
-- success: `{ ok: true, requestId, ts, data }`
-- failure: `{ ok: false, requestId, ts, error }`
-
-When `error.code === "VALIDATION_ERROR"`, `error.details` includes:
-
-- `name`: command/event name
-- `stage`: `"command.request" | "command.response" | "event.emit"`
-- `issues`: optional normalized issue list (`path`, `message`)
-
-Failure codes:
-
-- `UNAUTHORIZED`
-- `TIMEOUT`
-- `DISCONNECTED`
-- `COMMAND_NOT_FOUND`
-- `VALIDATION_ERROR`
-- `INTERNAL_ERROR`
-
-## Recipes and Troubleshooting
-
-Run local examples:
-
-```bash
-pnpm run example:host
-pnpm run example:consumer
-pnpm run example:host:schema
-pnpm run example:consumer:schema
+```ts
+const capabilities = app.capabilities();
+console.log(capabilities.events, capabilities.actions);
 ```
 
-Practical guides:
+## Public API
 
-- [Integration reference](./.agents/skills/shardwire/references.md)
-- [Add command + event flow](./.agents/skills/shardwire/examples/command-event-change.md)
-- [Reconnect hardening](./.agents/skills/shardwire/examples/reconnect-hardening.md)
-- [Token-only host setup](./.agents/skills/shardwire/examples/token-only-host.md)
-- [Troubleshooting flow](./.agents/skills/shardwire/examples/troubleshooting-flow.md)
+```ts
+import { createBotBridge, connectBotBridge } from "shardwire";
+```
 
-Common symptoms:
+Main exports:
 
-- `UNAUTHORIZED`: verify `secret`, `secretId`, and host `server.secrets` ordering.
-- `DISCONNECTED`: host unavailable or connection dropped before response completed.
-- Frequent `TIMEOUT`: increase `requestTimeoutMs` and inspect host command handler duration.
+- `createBotBridge(options)`
+- `connectBotBridge(options)`
+- `BridgeCapabilityError`
+- bot/app option types
+- normalized event payload types like `BridgeMessage`, `BridgeInteraction`, and `BridgeGuildMember`
+- action payload/result types
 
-## Compatibility
+## Notes
 
-- Node.js `>=18.18`
-- TypeScript-first API
-- `discord.js` `^14` as optional peer dependency
-- ESM + CJS package exports
+- Non-loopback app connections should use `wss://`
+- `discord.js` is used internally by the default runtime, but apps interact with Shardwire through Shardwire's own JSON payloads
+- Event availability depends on the intents you enable for the bot bridge
 
-## Security Notes
+## Examples
 
-- Use strong, rotated secrets via environment variables.
-- Rotate with overlapping `server.secrets` entries and explicit `secretId` cutovers.
-- Use `wss://` for non-localhost deployments. By default, consumer `ws://` is only accepted for loopback hosts.
-- Set payload and timeout limits appropriate for your workload.
-- Configure `server.corsOrigins` when exposing browser consumers.
-
-## Roadmap Constraints (v1)
-
-- Single npm package, no external infrastructure requirement.
-- Host process embeds WebSocket server.
-- Single-host process model (no cross-host sharding in v1).
-- Shared-secret handshake with in-memory dedupe and pending-request tracking.
+- Bot: [examples/bot-basic.ts](./examples/bot-basic.ts)
+- App: [examples/app-basic.ts](./examples/app-basic.ts)
