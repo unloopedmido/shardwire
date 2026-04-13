@@ -414,6 +414,80 @@ describe('discord-first bridge integration', () => {
 		await bot.close();
 	});
 
+	it('filters messageCreate by channelType and threadId', async () => {
+		const port = await getFreePort();
+		const runtime = new FakeDiscordRuntime();
+		const bot = createBotBridgeWithRuntime(
+			{
+				token: 'fake-token',
+				intents: ['Guilds', 'GuildMessages'],
+				server: {
+					port,
+					secrets: ['shared-secret'],
+				},
+			},
+			runtime,
+		);
+
+		const app = connectBotBridge({
+			url: `ws://127.0.0.1:${port}/shardwire`,
+			secret: 'shared-secret',
+		});
+
+		const threadTypeHits: string[] = [];
+		const threadIdHits: string[] = [];
+
+		app.on(
+			'messageCreate',
+			({ message }) => {
+				threadTypeHits.push(message.id);
+			},
+			{ channelType: 11 },
+		);
+		app.on(
+			'messageCreate',
+			({ message }) => {
+				threadIdHits.push(message.id);
+			},
+			{ threadId: 'thread-a' },
+		);
+
+		await Promise.all([bot.ready(), app.ready()]);
+		await new Promise((resolve) => setTimeout(resolve, 50));
+
+		runtime.emit('messageCreate', {
+			receivedAt: Date.now(),
+			message: {
+				id: 'm-guild-text',
+				channelId: 'ch-text',
+				guildId: 'guild-1',
+				channelType: 0,
+				attachments: [],
+				embeds: [],
+			},
+		});
+		runtime.emit('messageCreate', {
+			receivedAt: Date.now(),
+			message: {
+				id: 'm-thread',
+				channelId: 'thread-a',
+				guildId: 'guild-1',
+				channelType: 11,
+				parentChannelId: 'forum-1',
+				attachments: [],
+				embeds: [],
+			},
+		});
+
+		await waitFor(() => {
+			expect(threadTypeHits).toEqual(['m-thread']);
+			expect(threadIdHits).toEqual(['m-thread']);
+		});
+
+		await app.close();
+		await bot.close();
+	});
+
 	it('supports interactionCreate filtering by customId and interactionKind', async () => {
 		const port = await getFreePort();
 		const runtime = new FakeDiscordRuntime();
@@ -726,6 +800,98 @@ describe('discord-first bridge integration', () => {
 		}
 		if (memberResult.ok) {
 			expect(memberResult.data.roles).toEqual(['role-1']);
+		}
+
+		await app.close();
+		await bot.close();
+	});
+
+	it('round-trips channel, thread, and timeout actions', async () => {
+		const port = await getFreePort();
+		const runtime = new FakeDiscordRuntime();
+		const bot = createBotBridgeWithRuntime(
+			{
+				token: 'fake-token',
+				intents: ['Guilds', 'GuildMessages', 'GuildMembers'],
+				server: {
+					port,
+					secrets: ['shared-secret'],
+				},
+			},
+			runtime,
+		);
+
+		runtime.setActionHandler('timeoutMember', async ({ guildId, userId }) => ({
+			guildId,
+			userId,
+		}));
+		runtime.setActionHandler('removeMemberTimeout', async ({ guildId, userId }) => ({
+			id: userId,
+			guildId,
+			roles: [],
+		}));
+		runtime.setActionHandler('createChannel', async ({ guildId, name }) => ({
+			id: 'ch-new',
+			type: 0,
+			guildId,
+			name,
+		}));
+		runtime.setActionHandler('editChannel', async ({ channelId }) => ({
+			id: channelId,
+			type: 0,
+			name: 'edited',
+		}));
+		runtime.setActionHandler('deleteChannel', async ({ channelId }) => ({
+			deleted: true as const,
+			channelId,
+		}));
+		runtime.setActionHandler('createThread', async ({ parentChannelId, name }) => ({
+			id: 'th-1',
+			guildId: 'guild-1',
+			parentId: parentChannelId,
+			name,
+			type: 11,
+		}));
+		runtime.setActionHandler('archiveThread', async ({ threadId }) => ({
+			id: threadId,
+			guildId: 'guild-1',
+			parentId: 'parent-1',
+			name: 't',
+			type: 11,
+			archived: true,
+		}));
+
+		const app = connectBotBridge({
+			url: `ws://127.0.0.1:${port}/shardwire`,
+			secret: 'shared-secret',
+		});
+
+		await Promise.all([bot.ready(), app.ready()]);
+
+		const timeoutRes = await app.actions.timeoutMember({
+			guildId: 'guild-1',
+			userId: 'user-1',
+			durationMs: 60_000,
+		});
+		const clearTimeoutRes = await app.actions.removeMemberTimeout({ guildId: 'guild-1', userId: 'user-1' });
+		const createCh = await app.actions.createChannel({ guildId: 'guild-1', name: 'tickets' });
+		const editCh = await app.actions.editChannel({ channelId: 'ch-1', name: 'edited' });
+		const delCh = await app.actions.deleteChannel({ channelId: 'ch-1' });
+		const createTh = await app.actions.createThread({ parentChannelId: 'ch-parent', name: 'case-1' });
+		const archTh = await app.actions.archiveThread({ threadId: 'th-1' });
+
+		expect(timeoutRes.ok).toBe(true);
+		expect(clearTimeoutRes.ok).toBe(true);
+		expect(createCh.ok).toBe(true);
+		expect(editCh.ok).toBe(true);
+		expect(delCh.ok).toBe(true);
+		expect(createTh.ok).toBe(true);
+		expect(archTh.ok).toBe(true);
+		if (delCh.ok) {
+			expect(delCh.data).toEqual({ deleted: true, channelId: 'ch-1' });
+		}
+		if (createTh.ok) {
+			expect(createTh.data.id).toBe('th-1');
 		}
 
 		await app.close();

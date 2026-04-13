@@ -1,10 +1,13 @@
 import type { Snowflake } from 'discord-api-types/v10';
 import {
+	ChannelType,
 	Client,
 	DiscordAPIError,
 	Events,
+	type Channel,
 	type Guild,
 	type GuildMember,
+	type GuildTextBasedChannel,
 	type Interaction,
 	type Message,
 	type MessageReaction,
@@ -14,6 +17,7 @@ import {
 	type PartialMessage,
 	type PartialGuildMember,
 	type MessageComponentInteraction,
+	type ReadonlyCollection,
 	type ThreadChannel,
 	type User,
 } from 'discord.js';
@@ -32,6 +36,7 @@ import { withLogger } from '../../utils/logger';
 import { DedupeCache } from '../../utils/cache';
 import { ActionExecutionError, type DiscordRuntimeAdapter, type DiscordRuntimeOptions } from './adapter';
 import {
+	serializeChannel,
 	serializeDeletedMessage,
 	serializeGuild,
 	serializeGuildMember,
@@ -185,6 +190,13 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
 			removeMemberRole: (payload) => this.removeMemberRole(payload),
 			addMessageReaction: (payload) => this.addMessageReaction(payload),
 			removeOwnMessageReaction: (payload) => this.removeOwnMessageReaction(payload),
+			timeoutMember: (payload) => this.timeoutMember(payload),
+			removeMemberTimeout: (payload) => this.removeMemberTimeout(payload),
+			createChannel: (payload) => this.createChannel(payload),
+			editChannel: (payload) => this.editChannel(payload),
+			deleteChannel: (payload) => this.deleteChannel(payload),
+			createThread: (payload) => this.createThread(payload),
+			archiveThread: (payload) => this.archiveThread(payload),
 		};
 	}
 
@@ -309,6 +321,28 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
 				this.client.on(Events.MessageDelete, listener);
 				return () => {
 					this.client.off(Events.MessageDelete, listener);
+				};
+			}
+			case 'messageBulkDelete': {
+				const listener = (
+					messages: ReadonlyCollection<string, Message | PartialMessage>,
+					channel: GuildTextBasedChannel,
+				) => {
+					handler({
+						receivedAt: Date.now(),
+						...this.shardEnvelope(),
+						channelId: channel.id,
+						guildId: channel.guildId,
+						messageIds: [...messages.keys()],
+						channelType: channel.type,
+						...('parentId' in channel && typeof channel.parentId === 'string'
+							? { parentChannelId: channel.parentId }
+							: {}),
+					} as BotEventPayloadMap[K]);
+				};
+				this.client.on(Events.MessageBulkDelete, listener);
+				return () => {
+					this.client.off(Events.MessageBulkDelete, listener);
 				};
 			}
 			case 'messageReactionAdd': {
@@ -446,6 +480,46 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
 				this.client.on(Events.ThreadDelete, listener);
 				return () => {
 					this.client.off(Events.ThreadDelete, listener);
+				};
+			}
+			case 'channelCreate': {
+				const listener = (channel: Channel) => {
+					handler({
+						receivedAt: Date.now(),
+						...this.shardEnvelope(),
+						channel: serializeChannel(channel),
+					} as BotEventPayloadMap[K]);
+				};
+				this.client.on(Events.ChannelCreate, listener);
+				return () => {
+					this.client.off(Events.ChannelCreate, listener);
+				};
+			}
+			case 'channelUpdate': {
+				const listener = (oldChannel: Channel, newChannel: Channel) => {
+					handler({
+						receivedAt: Date.now(),
+						...this.shardEnvelope(),
+						oldChannel: serializeChannel(oldChannel),
+						channel: serializeChannel(newChannel),
+					} as BotEventPayloadMap[K]);
+				};
+				this.client.on(Events.ChannelUpdate, listener);
+				return () => {
+					this.client.off(Events.ChannelUpdate, listener);
+				};
+			}
+			case 'channelDelete': {
+				const listener = (channel: Channel) => {
+					handler({
+						receivedAt: Date.now(),
+						...this.shardEnvelope(),
+						channel: serializeChannel(channel),
+					} as BotEventPayloadMap[K]);
+				};
+				this.client.on(Events.ChannelDelete, listener);
+				return () => {
+					this.client.off(Events.ChannelDelete, listener);
 				};
 			}
 			default:
@@ -735,6 +809,125 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
 			channelId: payload.channelId,
 			emoji: payload.emoji,
 		} as const;
+	}
+
+	private static readonly maxTimeoutMs = 28 * 24 * 60 * 60 * 1000;
+
+	private async timeoutMember(payload: BotActionPayloadMap['timeoutMember']) {
+		if (
+			typeof payload.durationMs !== 'number' ||
+			!Number.isFinite(payload.durationMs) ||
+			payload.durationMs < 1 ||
+			payload.durationMs > DiscordJsRuntimeAdapter.maxTimeoutMs
+		) {
+			throw new ActionExecutionError(
+				'INVALID_REQUEST',
+				`durationMs must be between 1 and ${DiscordJsRuntimeAdapter.maxTimeoutMs} (28 days).`,
+			);
+		}
+		const guild = await this.client.guilds.fetch(payload.guildId);
+		const member = await guild.members.fetch(payload.userId);
+		await member.timeout(payload.durationMs, payload.reason);
+		return {
+			guildId: payload.guildId,
+			userId: payload.userId,
+		} as const;
+	}
+
+	private async removeMemberTimeout(payload: BotActionPayloadMap['removeMemberTimeout']) {
+		const guild = await this.client.guilds.fetch(payload.guildId);
+		const member = await guild.members.fetch(payload.userId);
+		await member.timeout(null, payload.reason);
+		return serializeGuildMember(await member.fetch());
+	}
+
+	private async createChannel(payload: BotActionPayloadMap['createChannel']) {
+		const guild = await this.client.guilds.fetch(payload.guildId);
+		const created = await guild.channels.create({
+			name: payload.name,
+			type: (payload.type ?? ChannelType.GuildText) as never,
+			...(payload.parentId ? { parent: payload.parentId } : {}),
+			...(payload.topic !== undefined ? { topic: payload.topic } : {}),
+			...(payload.reason ? { reason: payload.reason } : {}),
+		});
+		return serializeChannel(created);
+	}
+
+	private async editChannel(payload: BotActionPayloadMap['editChannel']) {
+		const raw = await this.client.channels.fetch(payload.channelId);
+		if (!raw) {
+			throw new ActionExecutionError('NOT_FOUND', `Channel "${payload.channelId}" was not found.`);
+		}
+		if (!('edit' in raw) || typeof raw.edit !== 'function') {
+			throw new ActionExecutionError('INVALID_REQUEST', `Channel "${payload.channelId}" cannot be edited.`);
+		}
+		const edited = await raw.edit({
+			...(payload.name !== undefined ? { name: payload.name ?? undefined } : {}),
+			...(payload.parentId !== undefined ? { parent: payload.parentId } : {}),
+			...(payload.topic !== undefined ? { topic: payload.topic } : {}),
+			...(payload.reason ? { reason: payload.reason } : {}),
+		} as never);
+		return serializeChannel(edited as Channel);
+	}
+
+	private async deleteChannel(payload: BotActionPayloadMap['deleteChannel']) {
+		const raw = await this.client.channels.fetch(payload.channelId);
+		if (!raw) {
+			throw new ActionExecutionError('NOT_FOUND', `Channel "${payload.channelId}" was not found.`);
+		}
+		if (!('delete' in raw) || typeof raw.delete !== 'function') {
+			throw new ActionExecutionError('INVALID_REQUEST', `Channel "${payload.channelId}" cannot be deleted.`);
+		}
+		await raw.delete(payload.reason);
+		return {
+			deleted: true,
+			channelId: payload.channelId,
+		} as const;
+	}
+
+	private async createThread(payload: BotActionPayloadMap['createThread']) {
+		const parent = await this.client.channels.fetch(payload.parentChannelId);
+		if (!parent || !parent.isTextBased()) {
+			throw new ActionExecutionError(
+				'NOT_FOUND',
+				`Parent channel "${payload.parentChannelId}" was not found or is not text-based.`,
+			);
+		}
+		if (payload.messageId) {
+			if (!('messages' in parent) || !parent.messages) {
+				throw new ActionExecutionError(
+					'INVALID_REQUEST',
+					`Channel "${payload.parentChannelId}" does not support fetching messages.`,
+				);
+			}
+			const msg = await parent.messages.fetch(payload.messageId);
+			const thread = await msg.startThread({
+				name: payload.name,
+				...(payload.reason ? { reason: payload.reason } : {}),
+				...(payload.autoArchiveDuration ? { autoArchiveDuration: payload.autoArchiveDuration } : {}),
+			});
+			return serializeThread(thread);
+		}
+		if (!('threads' in parent) || !parent.threads || typeof parent.threads.create !== 'function') {
+			throw new ActionExecutionError('INVALID_REQUEST', `Channel "${payload.parentChannelId}" cannot create threads.`);
+		}
+		const threadOptions = Object.assign(
+			{ name: payload.name },
+			payload.type === 'private' ? { type: ChannelType.PrivateThread } : {},
+			payload.reason ? { reason: payload.reason } : {},
+			payload.autoArchiveDuration ? { autoArchiveDuration: payload.autoArchiveDuration } : {},
+		);
+		const thread = await parent.threads.create(threadOptions as never);
+		return serializeThread(thread);
+	}
+
+	private async archiveThread(payload: BotActionPayloadMap['archiveThread']) {
+		const raw = await this.client.channels.fetch(payload.threadId);
+		if (!raw || !raw.isThread()) {
+			throw new ActionExecutionError('NOT_FOUND', `Thread "${payload.threadId}" was not found.`);
+		}
+		await raw.setArchived(payload.archived ?? true, payload.reason);
+		return serializeThread(raw);
 	}
 }
 

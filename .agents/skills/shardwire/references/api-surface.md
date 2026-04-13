@@ -19,6 +19,7 @@ import { createBotBridge, connectBotBridge } from 'shardwire';
 - `messageCreate`
 - `messageUpdate`
 - `messageDelete`
+- `messageBulkDelete`
 - `messageReactionAdd`
 - `messageReactionRemove`
 - `guildCreate`
@@ -29,6 +30,9 @@ import { createBotBridge, connectBotBridge } from 'shardwire';
 - `threadCreate`
 - `threadUpdate`
 - `threadDelete`
+- `channelCreate`
+- `channelUpdate`
+- `channelDelete`
 
 ## Subscription filters
 
@@ -38,6 +42,9 @@ import { createBotBridge, connectBotBridge } from 'shardwire';
 - `commandName` (for `interactionCreate`)
 - `customId` (for `interactionCreate`)
 - `interactionKind` (for `interactionCreate`)
+- `channelType`
+- `parentChannelId`
+- `threadId`
 
 ## Built-in actions (`app.actions.*`)
 
@@ -60,6 +67,13 @@ import { createBotBridge, connectBotBridge } from 'shardwire';
 - `removeMemberRole`
 - `addMessageReaction`
 - `removeOwnMessageReaction`
+- `timeoutMember`
+- `removeMemberTimeout`
+- `createChannel`
+- `editChannel`
+- `deleteChannel`
+- `createThread`
+- `archiveThread`
 
 ## Action result shape
 
@@ -74,9 +88,10 @@ Always branch on `result.ok` before using `data`.
 ## Intent alignment notes
 
 - `ready` and `interactionCreate`: no specific event intent requirement.
-- `messageCreate`, `messageUpdate`, `messageDelete`: `GuildMessages`
+- `messageCreate`, `messageUpdate`, `messageDelete`, `messageBulkDelete`: `GuildMessages`
 - `messageReactionAdd`, `messageReactionRemove`: `GuildMessageReactions`
-- `guildMemberAdd`, `guildMemberRemove`: `GuildMembers`
+- `guildMemberAdd`, `guildMemberRemove`, `guildMemberUpdate`: `GuildMembers`
+- `guildCreate`, `guildDelete`, `threadCreate`, `threadUpdate`, `threadDelete`, `channelCreate`, `channelUpdate`, `channelDelete`: `Guilds`
 
 ## Secret permissions model
 
