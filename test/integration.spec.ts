@@ -1,7 +1,7 @@
 import { createServer } from 'node:net';
 import { describe, expect, it } from 'vitest';
 import WebSocket from 'ws';
-import { connectBotBridge } from '../src';
+import { connectBotBridge, createThreadThenSendMessage, deferThenEditInteractionReply } from '../src';
 import { createBotBridgeWithRuntime } from '../src/bot';
 import { FakeDiscordRuntime } from './helpers/fake-runtime';
 
@@ -943,6 +943,73 @@ describe('discord-first bridge integration', () => {
 			});
 		});
 
+		await bot.close();
+	});
+
+	it('workflow helpers chain defer + editInteractionReply and createThread + sendMessage', async () => {
+		const port = await getFreePort();
+		const runtime = new FakeDiscordRuntime();
+		const bot = createBotBridgeWithRuntime(
+			{
+				token: 'fake-token',
+				intents: ['Guilds', 'GuildMessages'],
+				server: { port, secrets: ['shared-secret'] },
+			},
+			runtime,
+		);
+		runtime.setActionHandler('deferInteraction', async ({ interactionId }) => ({
+			deferred: true as const,
+			interactionId,
+		}));
+		runtime.setActionHandler('editInteractionReply', async ({ content }) => ({
+			id: 'reply-1',
+			channelId: 'c1',
+			content: content ?? 'ok',
+			attachments: [],
+			embeds: [],
+		}));
+		runtime.setActionHandler('createThread', async ({ parentChannelId, name }) => ({
+			id: 'thread-new',
+			guildId: 'g1',
+			parentId: parentChannelId,
+			name,
+			type: 11,
+		}));
+		runtime.setActionHandler('sendMessage', async ({ channelId, content }) => ({
+			id: 'msg-in-thread',
+			channelId,
+			content: content ?? '',
+			attachments: [],
+			embeds: [],
+		}));
+
+		const app = connectBotBridge({
+			url: `ws://127.0.0.1:${port}/shardwire`,
+			secret: 'shared-secret',
+		});
+		await Promise.all([bot.ready(), app.ready()]);
+
+		const deferEdit = await deferThenEditInteractionReply(app, {
+			interactionId: 'ix-1',
+			defer: { ephemeral: true },
+			edit: { interactionId: 'ix-1', content: 'done' },
+		});
+		expect(deferEdit.ok).toBe(true);
+		if (deferEdit.ok) {
+			expect(deferEdit.data.content).toBe('done');
+		}
+
+		const ct = await createThreadThenSendMessage(app, {
+			thread: { parentChannelId: 'parent-1', name: 't' },
+			message: { content: 'first' },
+		});
+		expect(ct.threadResult.ok).toBe(true);
+		expect(ct.messageResult.ok).toBe(true);
+		if (ct.messageResult.ok) {
+			expect(ct.messageResult.data.channelId).toBe('thread-new');
+		}
+
+		await app.close();
 		await bot.close();
 	});
 });

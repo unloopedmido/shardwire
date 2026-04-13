@@ -10,6 +10,13 @@ async function main(): Promise<void> {
 		appName: 'example-app',
 	});
 
+	console.log('Shardwire catalog:', app.catalog().events.length, 'events,', app.catalog().actions.length, 'actions');
+
+	const preflight = await app.preflight({
+		events: ['ready', 'messageCreate', 'messageReactionAdd'],
+	});
+	console.log('Preflight ok:', preflight.ok, preflight.issues);
+
 	app.on('ready', ({ user }) => {
 		console.log('Bot ready as:', user.username);
 	});

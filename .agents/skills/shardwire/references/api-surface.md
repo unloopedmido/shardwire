@@ -3,14 +3,22 @@
 ## Public entry points
 
 ```ts
-import { createBotBridge, connectBotBridge } from 'shardwire';
+import {
+	connectBotBridge,
+	createBotBridge,
+	createThreadThenSendMessage,
+	deferThenEditInteractionReply,
+	getShardwireCatalog,
+} from 'shardwire';
 ```
 
 ## Primary APIs
 
 - `createBotBridge(options)` - starts bot-side bridge runtime/server.
 - `connectBotBridge(options)` - app-side client connection to bridge.
-- `BridgeCapabilityError` - capability/permission related error type.
+- `getShardwireCatalog()` - static catalog of events, actions, and subscription filter keys.
+- `deferThenEditInteractionReply`, `deferUpdateThenEditInteractionReply`, `createThreadThenSendMessage` - workflow helpers.
+- `BridgeCapabilityError` - capability/permission related error type (optional `details`).
 
 ## Built-in events (app subscriptions via `app.on`)
 
@@ -107,3 +115,9 @@ const caps = app.capabilities();
 ```
 
 Use this during startup and troubleshooting.
+
+## DX helpers on `AppBridge`
+
+- `app.catalog()` — same surface as `getShardwireCatalog()`.
+- `app.explainCapability({ kind: 'event' | 'action', name })` — built-in vs negotiated allow/deny.
+- `app.preflight(desired?)` — diagnostics (`issues[]`); call before `app.on(...)` to validate planned `events` / `actions` only.
