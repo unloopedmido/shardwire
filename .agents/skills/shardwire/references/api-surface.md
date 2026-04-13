@@ -1,57 +1,18 @@
-# API Surface
+# Shardwire API Surface (Current)
 
-Use this file when you need the current public Shardwire contract.
+## Public entry points
 
-## Root exports
+```ts
+import { createBotBridge, connectBotBridge } from "shardwire";
+```
 
-- `createBotBridge(options: BotBridgeOptions): BotBridge`
-- `connectBotBridge(options: AppBridgeOptions): AppBridge`
-- Public types from [src/discord/types.ts](../../../../src/discord/types.ts)
+## Primary APIs
 
-## Bot bridge
+- `createBotBridge(options)` - starts bot-side bridge runtime/server.
+- `connectBotBridge(options)` - app-side client connection to bridge.
+- `BridgeCapabilityError` - capability/permission related error type.
 
-`createBotBridge(...)` is token-first. The caller provides:
-
-- `token`
-- `intents`
-- `server.port`
-- optional `server.host`, `server.path`, `server.heartbeatMs`, `server.maxPayloadBytes`
-- `server.secrets`
-
-`server.secrets` supports:
-
-- `"shared-secret"` for full access
-- `{ id?, value, allow?: { events?: "*" | BotEventName[]; actions?: "*" | BotActionName[] } }` for scoped access
-
-`BotBridge` methods:
-
-- `ready()`
-- `close()`
-- `status() -> { ready, connectionCount }`
-
-## App bridge
-
-`connectBotBridge(...)` takes:
-
-- `url`
-- `secret`
-- optional `secretId`
-- optional `appName`
-- optional reconnect config
-- optional `requestTimeoutMs`
-
-`AppBridge` methods:
-
-- `ready()`
-- `close()`
-- `connected()`
-- `connectionId()`
-- `capabilities()`
-- `on(eventName, handler, filter?)`
-- `off(eventName, handler)`
-- `actions.<builtInAction>(payload, options?)`
-
-## Built-in events
+## Built-in events (app subscriptions via `app.on`)
 
 - `ready`
 - `interactionCreate`
@@ -63,21 +24,14 @@ Use this file when you need the current public Shardwire contract.
 - `guildMemberAdd`
 - `guildMemberRemove`
 
-Required intents:
+## Subscription filters
 
-- `ready`: none
-- `interactionCreate`: none
-- `messageCreate`, `messageUpdate`, `messageDelete`: `GuildMessages`
-- `messageReactionAdd`, `messageReactionRemove`: `GuildMessageReactions`
-- `guildMemberAdd`, `guildMemberRemove`: `GuildMembers`
+- `guildId`
+- `channelId`
+- `userId`
+- `commandName` (for `interactionCreate`)
 
-Notes:
-
-- `MessageContent` is needed if the app needs message text instead of metadata-only delivery.
-- Event subscriptions are app-driven. The bot does not register events manually.
-- The host only forwards events that at least one connected app subscribed to.
-
-## Built-in actions
+## Built-in actions (`app.actions.*`)
 
 - `sendMessage`
 - `editMessage`
@@ -92,36 +46,33 @@ Notes:
 - `addMessageReaction`
 - `removeOwnMessageReaction`
 
-All actions return `Promise<ActionResult<T>>`, not thrown success values.
+## Action result shape
 
-## Key payload families
+```ts
+type ActionResult<T> =
+  | { ok: true; requestId: string; ts: number; data: T }
+  | { ok: false; requestId: string; ts: number; error: { code: string; message: string; details?: unknown } };
+```
 
-- Event payloads: `BotEventPayloadMap`
-- Action payloads: `BotActionPayloadMap`
-- Action results: `BotActionResultDataMap`
-- JSON entity types:
-  - `BridgeUser`
-  - `BridgeMessage`
-  - `BridgeDeletedMessage`
-  - `BridgeInteraction`
-  - `BridgeGuildMember`
+Always branch on `result.ok` before using `data`.
 
-These are normalized Shardwire payloads, not raw `discord.js` instances.
+## Intent alignment notes
 
-## Filters
+- `ready` and `interactionCreate`: no specific event intent requirement.
+- `messageCreate`, `messageUpdate`, `messageDelete`: `GuildMessages`
+- `messageReactionAdd`, `messageReactionRemove`: `GuildMessageReactions`
+- `guildMemberAdd`, `guildMemberRemove`: `GuildMembers`
 
-`app.on(name, handler, filter?)` supports:
+## Secret permissions model
 
-- `guildId`
-- `channelId`
-- `userId`
-- `commandName`
+Server accepts:
+- Plain string secret for full access.
+- Scoped secret object with `allow.events` and `allow.actions`.
 
-Use filters to reduce traffic for high-volume events such as `messageCreate`.
+App can inspect negotiated capabilities using:
 
-## Capability rules
+```ts
+const caps = app.capabilities();
+```
 
-- Capabilities are negotiated during auth.
-- Available events depend on enabled intents and secret scopes.
-- Available actions depend on secret scopes.
-- If the app subscribes to an unavailable event before `ready()`, `app.ready()` can reject with `BridgeCapabilityError`.
+Use this during startup and troubleshooting.

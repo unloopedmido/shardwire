@@ -1,25 +1,28 @@
 # Shardwire
 
-Discord events and bot actions, streamed to your app over a single WebSocket bridge.
+[![npm version](https://img.shields.io/npm/v/shardwire)](https://www.npmjs.com/package/shardwire)
+[![npm downloads](https://img.shields.io/npm/dm/shardwire)](https://www.npmjs.com/package/shardwire)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D18.18-339933)](https://nodejs.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
-Shardwire runs your bot connection, listens to Discord, and exposes a clean app-facing API for:
+Discord-first bridge for streaming bot events to external apps and executing bot actions over one WebSocket connection.
 
-- subscribing to Discord events
-- replying to interactions
-- sending and editing messages
-- moderation actions like ban, kick, and role changes
-
-It is designed for one common setup:
-
-> your Discord bot lives in one process, while your web app, backend, or worker lives somewhere else
+Shardwire is built for a common architecture: your Discord bot runs in one process, while your web app, backend API, worker, or dashboard runs in another.
 
 ## Why Shardwire
 
-- **Discord-first**: no generic command bus or event map setup
-- **Token-first**: start the bot bridge with `token`, `intents`, and `server`
-- **App-friendly payloads**: normalized JSON, not live `discord.js` objects
-- **Built-in actions**: call `app.actions.sendMessage(...)`, `app.actions.replyToInteraction(...)`, and more
-- **Scoped secrets**: optionally limit which apps can subscribe to which events or invoke which actions
+- **Discord-first API**: no generic command bus wiring required.
+- **App-friendly payloads**: receive normalized JSON payloads instead of live `discord.js` objects.
+- **Built-in actions**: send messages, reply to interactions, moderate members, and more from your app process.
+- **Scoped permissions**: restrict each app secret to specific events and actions.
+- **Capability-aware runtime**: apps can inspect what they are allowed to subscribe to and invoke.
+
+## Requirements
+
+- Node.js `>=18.18`
+- A Discord bot token (`DISCORD_TOKEN`)
+- At least one shared bridge secret (`SHARDWIRE_SECRET`)
+- Discord gateway intents that match the events you want
 
 ## Install
 
@@ -29,7 +32,7 @@ npm install shardwire
 
 ## Quick Start
 
-### 1. Start the bot bridge
+### 1) Start the bot bridge process
 
 ```ts
 import { createBotBridge } from "shardwire";
@@ -44,9 +47,10 @@ const bridge = createBotBridge({
 });
 
 await bridge.ready();
+console.log("Bot bridge listening on ws://127.0.0.1:3001/shardwire");
 ```
 
-### 2. Connect from your app
+### 2) Connect from your app process
 
 ```ts
 import { connectBotBridge } from "shardwire";
@@ -65,47 +69,37 @@ app.on("messageCreate", ({ message }) => {
   console.log(message.channelId, message.content);
 });
 
-app.on("messageReactionAdd", ({ reaction }) => {
-  console.log("reaction:", reaction.messageId, reaction.emoji.name ?? reaction.emoji.id);
-});
-
 await app.ready();
 ```
 
-### 2.5 Filter subscriptions when you need less noise
-
-```ts
-app.on(
-  "messageCreate",
-  ({ message }) => {
-    console.log("Only channel 123:", message.content);
-  },
-  { channelId: "123456789012345678" },
-);
-```
-
-### 3. Call built-in bot actions
+### 3) Call bot actions from your app
 
 ```ts
 const result = await app.actions.sendMessage({
   channelId: "123456789012345678",
-  content: "Hello from the app side",
+  content: "Hello from app side",
 });
 
 if (!result.ok) {
   console.error(result.error.code, result.error.message);
 }
+```
 
-await app.actions.addMessageReaction({
-  channelId: "123456789012345678",
-  messageId: "123456789012345679",
-  emoji: "🔥",
-});
+### 4) Filter subscriptions when needed
+
+```ts
+app.on(
+  "messageCreate",
+  ({ message }) => {
+    console.log("Only this channel:", message.content);
+  },
+  { channelId: "123456789012345678" },
+);
 ```
 
 ## Built-In Events
 
-Shardwire currently exposes these bot-side events:
+Apps subscribe to events with `app.on(...)`. The bridge forwards only what each app subscribes to.
 
 - `ready`
 - `interactionCreate`
@@ -117,18 +111,23 @@ Shardwire currently exposes these bot-side events:
 - `guildMemberAdd`
 - `guildMemberRemove`
 
-Subscriptions are app-driven. The bot bridge does not need per-event setup. Your app subscribes by calling `app.on(...)`, and the host only forwards the events that app is listening to.
-
-Optional filters can narrow delivery by:
+Supported filters:
 
 - `guildId`
 - `channelId`
 - `userId`
-- `commandName` for `interactionCreate`
+- `commandName` (for `interactionCreate`)
+
+### Intent Notes
+
+- `ready` and `interactionCreate`: no specific event intent requirement
+- `messageCreate`, `messageUpdate`, `messageDelete`: `GuildMessages`
+- `messageReactionAdd`, `messageReactionRemove`: `GuildMessageReactions`
+- `guildMemberAdd`, `guildMemberRemove`: `GuildMembers`
 
 ## Built-In Actions
 
-`app.actions.*` currently includes:
+`app.actions.*` includes:
 
 - `sendMessage`
 - `editMessage`
@@ -143,7 +142,7 @@ Optional filters can narrow delivery by:
 - `addMessageReaction`
 - `removeOwnMessageReaction`
 
-Every action returns an `ActionResult<T>`:
+All actions return:
 
 ```ts
 type ActionResult<T> =
@@ -153,7 +152,7 @@ type ActionResult<T> =
 
 ## Secret Scopes
 
-Use a plain string secret for full access:
+Use a plain string secret for full event/action access:
 
 ```ts
 server: {
@@ -162,7 +161,7 @@ server: {
 }
 ```
 
-Or scope a secret to specific events and actions:
+Use a scoped secret to limit what an app can do:
 
 ```ts
 server: {
@@ -180,12 +179,31 @@ server: {
 }
 ```
 
-On the app side, you can inspect what the connection is allowed to do:
+Inspect negotiated capabilities in the app:
 
 ```ts
 const capabilities = app.capabilities();
 console.log(capabilities.events, capabilities.actions);
 ```
+
+## Run the Included Examples
+
+In two terminals:
+
+```bash
+# terminal 1
+DISCORD_TOKEN=your-token SHARDWIRE_SECRET=dev-secret npm run example:bot
+```
+
+```bash
+# terminal 2
+SHARDWIRE_SECRET=dev-secret npm run example:app
+```
+
+Examples:
+
+- Bot bridge: `examples/bot-basic.ts`
+- App client: `examples/app-basic.ts`
 
 ## Public API
 
@@ -193,23 +211,25 @@ console.log(capabilities.events, capabilities.actions);
 import { createBotBridge, connectBotBridge } from "shardwire";
 ```
 
-Main exports:
+Main exports include:
 
 - `createBotBridge(options)`
 - `connectBotBridge(options)`
 - `BridgeCapabilityError`
 - bot/app option types
-- normalized event payload types like `BridgeMessage`, `BridgeInteraction`, and `BridgeGuildMember`
-- action payload/result types
+- normalized event payload types (for example `BridgeMessage`, `BridgeInteraction`, `BridgeGuildMember`)
+- action payload and result types
 
-## Notes
+## Security and Transport Notes
 
-- Non-loopback app connections should use `wss://`
-- `discord.js` is used internally by the default runtime, but apps interact with Shardwire through Shardwire's own JSON payloads
-- Event availability depends on the intents you enable for the bot bridge
-- `messageReactionAdd` and `messageReactionRemove` require `GuildMessageReactions`
+- Use `wss://` for non-loopback deployments.
+- `ws://` is only accepted for loopback hosts (`127.0.0.1`, `localhost`, `::1`).
+- Event availability depends on enabled intents and secret scope.
 
-## Examples
+## Contributing
 
-- Bot: [examples/bot-basic.ts](./examples/bot-basic.ts)
-- App: [examples/app-basic.ts](./examples/app-basic.ts)
+Issues and pull requests are welcome: [github.com/unloopedmido/shardwire](https://github.com/unloopedmido/shardwire).
+
+## License
+
+MIT - see [`LICENSE`](./LICENSE).
