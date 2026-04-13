@@ -139,7 +139,7 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
 
   function evaluateSubscriptions(): Map<string, EventSubscription> {
     const desiredSubscriptions = new Map<string, EventSubscription>();
-    if (currentCapabilities.events.length === 0) {
+    if (!isAuthed && currentCapabilities.events.length === 0) {
       capabilityError = null;
       for (const handlers of eventHandlers.values()) {
         for (const entry of handlers) {
@@ -430,6 +430,8 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
     kickMember: (payload, sendOptions) => invokeAction("kickMember", payload, sendOptions),
     addMemberRole: (payload, sendOptions) => invokeAction("addMemberRole", payload, sendOptions),
     removeMemberRole: (payload, sendOptions) => invokeAction("removeMemberRole", payload, sendOptions),
+    addMessageReaction: (payload, sendOptions) => invokeAction("addMessageReaction", payload, sendOptions),
+    removeOwnMessageReaction: (payload, sendOptions) => invokeAction("removeOwnMessageReaction", payload, sendOptions),
   };
 
   return {

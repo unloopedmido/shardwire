@@ -119,6 +119,22 @@ function eventMetadata(name: BotEventName, payload: unknown): {
         channelId: messagePayload.message.channelId,
       };
     }
+    case "messageReactionAdd": {
+      const reactionPayload = payload as BotEventPayloadMap["messageReactionAdd"];
+      return {
+        ...(reactionPayload.reaction.guildId ? { guildId: reactionPayload.reaction.guildId } : {}),
+        channelId: reactionPayload.reaction.channelId,
+        ...(reactionPayload.reaction.user ? { userId: reactionPayload.reaction.user.id } : {}),
+      };
+    }
+    case "messageReactionRemove": {
+      const reactionPayload = payload as BotEventPayloadMap["messageReactionRemove"];
+      return {
+        ...(reactionPayload.reaction.guildId ? { guildId: reactionPayload.reaction.guildId } : {}),
+        channelId: reactionPayload.reaction.channelId,
+        ...(reactionPayload.reaction.user ? { userId: reactionPayload.reaction.user.id } : {}),
+      };
+    }
     case "guildMemberAdd": {
       const memberPayload = payload as BotEventPayloadMap["guildMemberAdd"];
       return {

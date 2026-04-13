@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented in this file.
 
+## 1.1.0 (unreleased)
+
+- Added `messageReactionAdd` and `messageReactionRemove` built-in events, including normalized reaction payload types and subscription filtering support.
+- Added `addMessageReaction` and `removeOwnMessageReaction` built-in app actions with runtime support in the default `discord.js` adapter.
+- Expanded Discord alignment by deriving supported bot intent names from `discord.js` `GatewayIntentBits` and using `discord.js` `Events` constants for runtime event binding.
+- Improved action error mapping in the `discord.js` runtime adapter so Discord API failures are surfaced as structured `FORBIDDEN`, `NOT_FOUND`, and `INVALID_REQUEST` results where applicable.
+- Updated event capability gating so `interactionCreate` is available without requiring `Guilds` intent.
+- Removed unused secret-scope helper exports and fixed app capability validation behavior when negotiated event capabilities are empty.
+- Updated README, examples, and integration references to document reaction intents/events/actions and current intent requirements.
+
 ## 1.0.0
 
 - Breaking: replaced the generic host/consumer websocket bridge API with a Discord-first public API centered on `createBotBridge(...)` and `connectBotBridge(...)`.

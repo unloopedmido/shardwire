@@ -158,6 +158,16 @@ describe("discord-first bridge integration", () => {
       guildId,
       roles: [roleId],
     }));
+    runtime.setActionHandler("addMessageReaction", async ({ channelId, messageId, emoji }) => ({
+      channelId,
+      messageId,
+      emoji,
+    }));
+    runtime.setActionHandler("removeOwnMessageReaction", async ({ channelId, messageId, emoji }) => ({
+      channelId,
+      messageId,
+      emoji,
+    }));
 
     const app = connectBotBridge({
       url: `ws://127.0.0.1:${port}/shardwire`,
@@ -179,10 +189,22 @@ describe("discord-first bridge integration", () => {
       userId: "user-1",
       roleId: "role-1",
     });
+    const reactionAdded = await app.actions.addMessageReaction({
+      channelId: "channel-1",
+      messageId: "msg-1",
+      emoji: "🔥",
+    });
+    const reactionRemoved = await app.actions.removeOwnMessageReaction({
+      channelId: "channel-1",
+      messageId: "msg-1",
+      emoji: "🔥",
+    });
 
     expect(sent.ok).toBe(true);
     expect(banned.ok).toBe(true);
     expect(roleAdded.ok).toBe(true);
+    expect(reactionAdded.ok).toBe(true);
+    expect(reactionRemoved.ok).toBe(true);
 
     if (sent.ok) {
       expect(sent.data.content).toBe("hello");
@@ -192,6 +214,20 @@ describe("discord-first bridge integration", () => {
     }
     if (roleAdded.ok) {
       expect(roleAdded.data.roles).toEqual(["role-1"]);
+    }
+    if (reactionAdded.ok) {
+      expect(reactionAdded.data).toEqual({
+        channelId: "channel-1",
+        messageId: "msg-1",
+        emoji: "🔥",
+      });
+    }
+    if (reactionRemoved.ok) {
+      expect(reactionRemoved.data).toEqual({
+        channelId: "channel-1",
+        messageId: "msg-1",
+        emoji: "🔥",
+      });
     }
 
     await app.close();

@@ -11,7 +11,7 @@ if (!token) {
 async function main(): Promise<void> {
   const bridge = createBotBridge({
     token,
-    intents: ["Guilds", "GuildMessages", "MessageContent", "GuildMembers"],
+    intents: ["Guilds", "GuildMessages", "GuildMessageReactions", "MessageContent", "GuildMembers"],
     server: {
       port,
       secrets: [secret],
