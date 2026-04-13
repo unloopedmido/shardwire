@@ -24,6 +24,7 @@
 - [API Overview](#api-overview)
 - [Configuration](#configuration)
 - [Error Model](#error-model)
+- [Recipes and Troubleshooting](#recipes-and-troubleshooting)
 - [Compatibility](#compatibility)
 - [Security Notes](#security-notes)
 - [Roadmap Constraints (v1)](#roadmap-constraints-v1)
@@ -44,6 +45,7 @@ Running bot logic inside your Discord host process while orchestrating it from e
 - **Single factory API** (`createShardwire`) with host and consumer overloads.
 - **Built-in reliability controls** with reconnect backoff, jitter, and timeouts.
 - **Runtime input validation** for config, names, and JSON-serializable payloads.
+- **Optional schema validation** for command and event payloads.
 - **Optional token-only Discord mode** where shardwire can own client lifecycle.
 - **Dual package output** for ESM and CJS consumers.
 
@@ -59,7 +61,10 @@ Define shared message contracts:
 
 ```ts
 type Commands = {
-  "ban-user": { userId: string };
+  "ban-user": {
+    request: { userId: string };
+    response: { banned: true; userId: string };
+  };
 };
 
 type Events = {
@@ -73,7 +78,10 @@ type Events = {
 import { createShardwire } from "shardwire";
 
 type Commands = {
-  "ban-user": { userId: string };
+  "ban-user": {
+    request: { userId: string };
+    response: { banned: true; userId: string };
+  };
 };
 
 type Events = {
@@ -104,7 +112,10 @@ wire.emitEvent("member-joined", { userId: "123", guildId: "456" });
 import { createShardwire } from "shardwire";
 
 type Commands = {
-  "ban-user": { userId: string };
+  "ban-user": {
+    request: { userId: string };
+    response: { banned: true; userId: string };
+  };
 };
 
 type Events = {
@@ -115,6 +126,7 @@ const wire = createShardwire<Commands, Events>({
   url: "ws://localhost:3001/shardwire",
   secret: process.env.SHARDWIRE_SECRET!,
   secretId: "s0",
+  clientName: "dashboard-api",
 });
 
 const result = await wire.send("ban-user", { userId: "123" });
@@ -128,6 +140,12 @@ if (result.ok) {
 wire.on("member-joined", (payload, meta) => {
   console.log("event", payload, meta.ts);
 });
+
+wire.onReconnecting(({ attempt, delayMs }) => {
+  console.warn(`reconnecting attempt ${attempt} in ${delayMs}ms`);
+});
+
+await wire.ready();
 ```
 
 ## Token-Only Host (No Existing discord.js Client)
@@ -167,6 +185,38 @@ const wire = createShardwire({
 });
 ```
 
+## Schema Validation (Zod)
+
+Use runtime schemas to validate command request/response payloads and emitted event payloads.
+
+```ts
+import { z } from "zod";
+import { createShardwire, fromZodSchema } from "shardwire";
+
+type Commands = {
+  "ban-user": {
+    request: { userId: string };
+    response: { banned: true; userId: string };
+  };
+};
+
+const wire = createShardwire<Commands, {}>({
+  server: {
+    port: 3001,
+    secrets: [process.env.SHARDWIRE_SECRET!],
+    primarySecretId: "s0",
+  },
+  validation: {
+    commands: {
+      "ban-user": {
+        request: fromZodSchema(z.object({ userId: z.string().min(3) })),
+        response: fromZodSchema(z.object({ banned: z.literal(true), userId: z.string() })),
+      },
+    },
+  },
+});
+```
+
 ## API Overview
 
 ### Host API
@@ -181,7 +231,12 @@ const wire = createShardwire({
 - `wire.send(name, payload, options?)` send command and await typed result.
 - `wire.on(name, handler)` subscribe to events.
 - `wire.off(name, handler)` unsubscribe a specific handler.
+- `wire.ready()` wait for authenticated connection.
+- `wire.onConnected(handler)` subscribe to authenticated connection events.
+- `wire.onDisconnected(handler)` subscribe to disconnect events.
+- `wire.onReconnecting(handler)` subscribe to reconnect scheduling events.
 - `wire.connected()` check authenticated connection state.
+- `wire.connectionId()` get current authenticated connection id (or `null`).
 - `wire.close()` close socket and stop reconnect attempts.
 
 ## Configuration
@@ -205,6 +260,7 @@ const wire = createShardwire({
 - `url` host endpoint (for example `ws://localhost:3001/shardwire`).
 - `secret` shared secret matching host.
 - `secretId` optional secret id (for example `"s0"`) used during handshake.
+- `clientName` optional identity sent during auth handshake for host-side telemetry.
 - `requestTimeoutMs` default timeout for `send`.
 - `reconnect` reconnect policy (`enabled`, delays, jitter).
 - `webSocketFactory` optional custom client implementation.
@@ -219,13 +275,45 @@ const wire = createShardwire({
 - success: `{ ok: true, requestId, ts, data }`
 - failure: `{ ok: false, requestId, ts, error }`
 
+When `error.code === "VALIDATION_ERROR"`, `error.details` includes:
+
+- `name`: command/event name
+- `stage`: `"command.request" | "command.response" | "event.emit"`
+- `issues`: optional normalized issue list (`path`, `message`)
+
 Failure codes:
 
 - `UNAUTHORIZED`
 - `TIMEOUT`
+- `DISCONNECTED`
 - `COMMAND_NOT_FOUND`
 - `VALIDATION_ERROR`
 - `INTERNAL_ERROR`
+
+## Recipes and Troubleshooting
+
+Run local examples:
+
+```bash
+pnpm run example:host
+pnpm run example:consumer
+pnpm run example:host:schema
+pnpm run example:consumer:schema
+```
+
+Practical guides:
+
+- [Integration reference](./.agents/skills/shardwire/references.md)
+- [Add command + event flow](./.agents/skills/shardwire/examples/command-event-change.md)
+- [Reconnect hardening](./.agents/skills/shardwire/examples/reconnect-hardening.md)
+- [Token-only host setup](./.agents/skills/shardwire/examples/token-only-host.md)
+- [Troubleshooting flow](./.agents/skills/shardwire/examples/troubleshooting-flow.md)
+
+Common symptoms:
+
+- `UNAUTHORIZED`: verify `secret`, `secretId`, and host `server.secrets` ordering.
+- `DISCONNECTED`: host unavailable or connection dropped before response completed.
+- Frequent `TIMEOUT`: increase `requestTimeoutMs` and inspect host command handler duration.
 
 ## Compatibility
 

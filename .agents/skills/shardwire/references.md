@@ -16,9 +16,21 @@ Constraints to keep in mind:
 Host (bot side):
 
 ```ts
+import { z } from "zod";
+import { createShardwire, fromZodSchema } from "shardwire";
+
 const wire = createShardwire<Commands, Events>({
   client: discordClient, // or token
   server: { port: 3001, secrets: ["..."], primarySecretId: "s0" },
+  // optional runtime payload validation
+  validation: {
+    commands: {
+      "ban-user": {
+        request: fromZodSchema(z.object({ userId: z.string().min(3) })),
+        response: fromZodSchema(z.object({ banned: z.literal(true), userId: z.string() })),
+      },
+    },
+  },
 });
 ```
 
@@ -75,8 +87,14 @@ Common error codes:
 - `UNAUTHORIZED` secret mismatch or handshake issue
 - `TIMEOUT` host unavailable or command exceeded timeout
 - `COMMAND_NOT_FOUND` handler missing on host
-- `VALIDATION_ERROR` invalid envelope/name/payload
+- `VALIDATION_ERROR` invalid envelope/name/payload or schema validation failure
 - `INTERNAL_ERROR` unhandled host command failure
+
+When schema validation is enabled, `VALIDATION_ERROR` may include:
+
+- `error.details.name` command/event name
+- `error.details.stage` one of `command.request`, `command.response`, `event.emit`
+- `error.details.issues` normalized issue list (`path`, `message`) when adapter supports it
 
 ## Common Pitfalls
 

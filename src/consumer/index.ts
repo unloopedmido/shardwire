@@ -1,6 +1,8 @@
 import type {
   CommandFailure,
   CommandMap,
+  CommandRequestOf,
+  CommandResponseOf,
   CommandResult,
   ConsumerOptions,
   ConsumerShardwire,
@@ -25,11 +27,21 @@ type EventHandler = (payload: unknown, meta: EventMeta) => void;
 
 interface PendingRequest {
   resolve: (value: CommandResult) => void;
-  reject: (error: Error) => void;
+  reject: (error: CommandRequestError) => void;
   timer: NodeJS.Timeout;
 }
 
 const DEFAULT_REQUEST_TIMEOUT_MS = 10000;
+
+class CommandRequestError extends Error {
+  constructor(
+    public readonly code: "TIMEOUT" | "DISCONNECTED" | "UNAUTHORIZED",
+    message: string,
+  ) {
+    super(message);
+    this.name = "CommandRequestError";
+  }
+}
 
 export function createConsumerShardwire<C extends CommandMap, E extends EventMap>(
   options: ConsumerOptions<C, E>,
@@ -50,9 +62,15 @@ export function createConsumerShardwire<C extends CommandMap, E extends EventMap
   let connectResolve: (() => void) | null = null;
   let connectReject: ((error: Error) => void) | null = null;
   let authTimeoutTimer: NodeJS.Timeout | null = null;
+  let currentConnectionId: string | null = null;
 
   const pendingRequests = new Map<string, PendingRequest>();
   const eventHandlers = new Map<string, Set<EventHandler>>();
+  const connectedHandlers = new Set<(info: { connectionId: string; connectedAt: number }) => void>();
+  const disconnectedHandlers = new Set<
+    (info: { reason: string; at: number; willReconnect: boolean }) => void
+  >();
+  const reconnectingHandlers = new Set<(info: { attempt: number; delayMs: number; at: number }) => void>();
 
   function clearAuthTimeout(): void {
     if (authTimeoutTimer) {
@@ -86,10 +104,13 @@ export function createConsumerShardwire<C extends CommandMap, E extends EventMap
     socket.send(data);
   }
 
-  function rejectAllPending(reason: string): void {
+  function rejectAllPending(
+    code: "TIMEOUT" | "DISCONNECTED" | "UNAUTHORIZED",
+    reason: string,
+  ): void {
     for (const [requestId, pending] of pendingRequests.entries()) {
       clearTimeout(pending.timer);
-      pending.reject(new Error(reason));
+      pending.reject(new CommandRequestError(code, reason));
       pendingRequests.delete(requestId);
     }
   }
@@ -100,6 +121,13 @@ export function createConsumerShardwire<C extends CommandMap, E extends EventMap
     }
     const delay = getBackoffDelay(reconnectAttempts, { initialDelayMs, maxDelayMs, jitter });
     reconnectAttempts += 1;
+    for (const handler of reconnectingHandlers) {
+      try {
+        handler({ attempt: reconnectAttempts, delayMs: delay, at: Date.now() });
+      } catch (error) {
+        logger.warn("Reconnect handler threw an error.", { error: String(error) });
+      }
+    }
     reconnectTimer = setTimeout(() => {
       reconnectTimer = null;
       void connect().catch((error) => {
@@ -145,9 +173,11 @@ export function createConsumerShardwire<C extends CommandMap, E extends EventMap
     socket.on("open", () => {
       reconnectAttempts = 0;
       isAuthed = false;
+      currentConnectionId = null;
       const hello = makeEnvelope("auth.hello", {
         secret: options.secret,
         secretId: options.secretId,
+        clientName: options.clientName,
       });
       socket?.send(stringifyEnvelope(hello));
       authTimeoutTimer = setTimeout(() => {
@@ -165,6 +195,23 @@ export function createConsumerShardwire<C extends CommandMap, E extends EventMap
         switch (envelope.type) {
           case "auth.ok":
             isAuthed = true;
+            if (
+              envelope.payload &&
+              typeof envelope.payload === "object" &&
+              "connectionId" in envelope.payload &&
+              typeof (envelope.payload as { connectionId?: unknown }).connectionId === "string"
+            ) {
+              currentConnectionId = (envelope.payload as { connectionId: string }).connectionId;
+            }
+            if (currentConnectionId) {
+              for (const handler of connectedHandlers) {
+                try {
+                  handler({ connectionId: currentConnectionId, connectedAt: Date.now() });
+                } catch (error) {
+                  logger.warn("Connected handler threw an error.", { error: String(error) });
+                }
+              }
+            }
             resolveConnect();
             break;
           case "auth.error": {
@@ -174,7 +221,7 @@ export function createConsumerShardwire<C extends CommandMap, E extends EventMap
               message: payload.message,
             });
             rejectConnect(payload.message);
-            rejectAllPending("Shardwire authentication failed.");
+            rejectAllPending("UNAUTHORIZED", "Shardwire authentication failed.");
             socket?.close();
             break;
           }
@@ -214,8 +261,22 @@ export function createConsumerShardwire<C extends CommandMap, E extends EventMap
     });
 
     socket.on("close", () => {
+      const willReconnect = !isClosed && reconnectEnabled;
       rejectConnect("Shardwire connection closed.");
       isAuthed = false;
+      currentConnectionId = null;
+      rejectAllPending("DISCONNECTED", "Shardwire connection closed before command completed.");
+      for (const handler of disconnectedHandlers) {
+        try {
+          handler({
+            reason: "Shardwire connection closed.",
+            at: Date.now(),
+            willReconnect,
+          });
+        } catch (error) {
+          logger.warn("Disconnected handler threw an error.", { error: String(error) });
+        }
+      }
       if (!isClosed) {
         scheduleReconnect();
       }
@@ -234,7 +295,11 @@ export function createConsumerShardwire<C extends CommandMap, E extends EventMap
 
   return {
     mode: "consumer",
-    async send(name, payload, sendOptions) {
+    async send<K extends keyof C & string>(
+      name: K,
+      payload: CommandRequestOf<C[K]>,
+      sendOptions?: { timeoutMs?: number; requestId?: string },
+    ): Promise<CommandResult<CommandResponseOf<C[K]>>> {
       assertMessageName("command", name);
       assertJsonPayload("command", name, payload);
       if (!isAuthed) {
@@ -258,7 +323,7 @@ export function createConsumerShardwire<C extends CommandMap, E extends EventMap
           requestId: sendOptions?.requestId ?? "unknown",
           ts: Date.now(),
           error: {
-            code: "TIMEOUT",
+            code: "DISCONNECTED",
             message: "Not connected to Shardwire host.",
           },
         } satisfies CommandFailure;
@@ -270,10 +335,14 @@ export function createConsumerShardwire<C extends CommandMap, E extends EventMap
       const promise = new Promise<CommandResult>((resolve, reject) => {
         const timer = setTimeout(() => {
           pendingRequests.delete(requestId);
-          reject(new Error(`Command "${name}" timed out after ${timeoutMs}ms.`));
+          reject(new CommandRequestError("TIMEOUT", `Command "${name}" timed out after ${timeoutMs}ms.`));
         }, timeoutMs);
 
-        pendingRequests.set(requestId, { resolve, reject, timer });
+        pendingRequests.set(requestId, {
+          resolve,
+          reject: (error) => reject(error),
+          timer,
+        });
       });
 
       sendRaw(
@@ -290,15 +359,21 @@ export function createConsumerShardwire<C extends CommandMap, E extends EventMap
       );
 
       try {
-        return await promise;
+        return (await promise) as CommandResult<CommandResponseOf<C[K]>>;
       } catch (error) {
+        const failureCode =
+          error instanceof CommandRequestError
+            ? error.code
+            : !socket || socket.readyState !== 1
+              ? "DISCONNECTED"
+              : "TIMEOUT";
         return {
           ok: false,
           requestId,
           ts: Date.now(),
           error: {
-            code: "TIMEOUT",
-            message: error instanceof Error ? error.message : "Command request timeout.",
+            code: failureCode,
+            message: error instanceof Error ? error.message : "Command request failed.",
           },
         } satisfies CommandFailure;
       }
@@ -334,18 +409,43 @@ export function createConsumerShardwire<C extends CommandMap, E extends EventMap
         eventHandlers.delete(name);
       }
     },
+    onConnected(handler) {
+      connectedHandlers.add(handler);
+      return () => {
+        connectedHandlers.delete(handler);
+      };
+    },
+    onDisconnected(handler) {
+      disconnectedHandlers.add(handler);
+      return () => {
+        disconnectedHandlers.delete(handler);
+      };
+    },
+    onReconnecting(handler) {
+      reconnectingHandlers.add(handler);
+      return () => {
+        reconnectingHandlers.delete(handler);
+      };
+    },
+    ready() {
+      return connect();
+    },
     connected() {
       return Boolean(socket && socket.readyState === 1 && isAuthed);
+    },
+    connectionId() {
+      return currentConnectionId;
     },
     async close() {
       isClosed = true;
       isAuthed = false;
+      currentConnectionId = null;
       rejectConnect("Shardwire consumer has been closed.");
       if (reconnectTimer) {
         clearTimeout(reconnectTimer);
         reconnectTimer = null;
       }
-      rejectAllPending("Shardwire consumer has been closed.");
+      rejectAllPending("DISCONNECTED", "Shardwire consumer has been closed.");
       if (!socket) {
         return;
       }

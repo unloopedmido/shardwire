@@ -1,5 +1,21 @@
-export type CommandMap = Record<string, unknown>;
+export interface CommandSchema<Request = unknown, Response = unknown> {
+  request: Request;
+  response: Response;
+}
+
+export type CommandMap = Record<string, unknown | CommandSchema>;
 export type EventMap = Record<string, unknown>;
+export interface SchemaValidationIssue {
+  path: string;
+  message: string;
+}
+
+export interface RuntimeSchema<T = unknown> {
+  parse: (value: unknown) => T;
+}
+
+export type CommandRequestOf<T> = T extends CommandSchema<infer Request, any> ? Request : T;
+export type CommandResponseOf<T> = T extends CommandSchema<any, infer Response> ? Response : unknown;
 
 export type Unsubscribe = () => void;
 
@@ -45,6 +61,7 @@ export interface CommandFailure {
     code:
       | "UNAUTHORIZED"
       | "TIMEOUT"
+      | "DISCONNECTED"
       | "COMMAND_NOT_FOUND"
       | "VALIDATION_ERROR"
       | "INTERNAL_ERROR";
@@ -69,6 +86,17 @@ export interface HostOptions<C extends CommandMap, E extends EventMap> {
     maxPayloadBytes?: number;
     corsOrigins?: string[];
   };
+  validation?: {
+    commands?: Partial<{
+      [K in keyof C & string]: {
+        request?: RuntimeSchema<CommandRequestOf<C[K]>>;
+        response?: RuntimeSchema<CommandResponseOf<C[K]>>;
+      };
+    }>;
+    events?: Partial<{
+      [K in keyof E & string]: RuntimeSchema<E[K]>;
+    }>;
+  };
   name?: string;
   logger?: ShardwireLogger;
 }
@@ -77,6 +105,7 @@ export interface ConsumerOptions<C extends CommandMap, E extends EventMap> {
   url: string;
   secret: string;
   secretId?: string;
+  clientName?: string;
   webSocketFactory?: (url: string) => {
     readyState: number;
     send(data: string): void;
@@ -98,7 +127,10 @@ export interface HostShardwire<C extends CommandMap, E extends EventMap> {
   mode: "host";
   onCommand<K extends keyof C & string>(
     name: K,
-    handler: (payload: C[K], ctx: CommandContext) => Promise<unknown> | unknown,
+    handler: (
+      payload: CommandRequestOf<C[K]>,
+      ctx: CommandContext,
+    ) => Promise<CommandResponseOf<C[K]>> | CommandResponseOf<C[K]>,
   ): Unsubscribe;
   emitEvent<K extends keyof E & string>(name: K, payload: E[K]): void;
   broadcast<K extends keyof E & string>(name: K, payload: E[K]): void;
@@ -109,9 +141,9 @@ export interface ConsumerShardwire<C extends CommandMap, E extends EventMap> {
   mode: "consumer";
   send<K extends keyof C & string>(
     name: K,
-    payload: C[K],
+    payload: CommandRequestOf<C[K]>,
     options?: { timeoutMs?: number; requestId?: string },
-  ): Promise<CommandResult>;
+  ): Promise<CommandResult<CommandResponseOf<C[K]>>>;
   on<K extends keyof E & string>(
     name: K,
     handler: (payload: E[K], meta: EventMeta) => void,
@@ -120,7 +152,18 @@ export interface ConsumerShardwire<C extends CommandMap, E extends EventMap> {
     name: K,
     handler: (payload: E[K], meta: EventMeta) => void,
   ): void;
+  onConnected(
+    handler: (info: { connectionId: string; connectedAt: number }) => void,
+  ): Unsubscribe;
+  onDisconnected(
+    handler: (info: { reason: string; at: number; willReconnect: boolean }) => void,
+  ): Unsubscribe;
+  onReconnecting(
+    handler: (info: { attempt: number; delayMs: number; at: number }) => void,
+  ): Unsubscribe;
+  ready(): Promise<void>;
   connected(): boolean;
+  connectionId(): string | null;
   close(): Promise<void>;
 }
 

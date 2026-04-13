@@ -1,6 +1,6 @@
 {
   "name": "shardwire",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "Lightweight Discord-hosted WebSocket bridge for commands and events.",
   "homepage": "https://www.npmjs.com/package/shardwire",
   "repository": {
@@ -28,6 +28,8 @@
     "test": "vitest run",
     "example:host": "tsx examples/host-basic.ts",
     "example:consumer": "tsx examples/consumer-basic.ts",
+    "example:host:schema": "tsx examples/host-schema-zod.ts",
+    "example:consumer:schema": "tsx examples/consumer-schema-zod.ts",
     "verify": "pnpm test && pnpm typecheck && pnpm build",
     "prepublishOnly": "pnpm verify"
   },
@@ -61,13 +63,14 @@
     }
   },
   "dependencies": {
-    "ws": "^8.18.3"
+    "ws": "^8.18.3",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/node": "^24.5.2",
     "@types/ws": "^8.18.1",
-    "tsx": "^4.20.6",
     "tsup": "^8.5.0",
+    "tsx": "^4.20.6",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"
   },

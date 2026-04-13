@@ -60,19 +60,28 @@ export function createShardwire<C extends CommandMap = {}, E extends EventMap = 
   });
 }
 
+export { fromSafeParseSchema } from "./schema";
+export { fromZodSchema } from "./schema/zod";
+
 export type {
   CommandContext,
   CommandFailure,
   CommandMap,
+  CommandRequestOf,
   CommandResult,
+  CommandResponseOf,
+  CommandSchema,
   CommandSuccess,
   ConsumerOptions,
   ConsumerShardwire,
+  CreateShardwire,
   DiscordClientLike,
   EventMap,
   EventMeta,
   HostOptions,
   HostShardwire,
+  RuntimeSchema,
+  SchemaValidationIssue,
   ShardwireLogger,
   Unsubscribe,
 } from "./core/types";
