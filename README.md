@@ -84,7 +84,8 @@ const wire = createShardwire<Commands, Events>({
   client: discordClient,
   server: {
     port: 3001,
-    secret: process.env.SHARDWIRE_SECRET!,
+    secrets: [process.env.SHARDWIRE_SECRET!],
+    primarySecretId: "s0",
   },
   name: "bot-host",
 });
@@ -113,6 +114,7 @@ type Events = {
 const wire = createShardwire<Commands, Events>({
   url: "ws://localhost:3001/shardwire",
   secret: process.env.SHARDWIRE_SECRET!,
+  secretId: "s0",
 });
 
 const result = await wire.send("ban-user", { userId: "123" });
@@ -137,7 +139,8 @@ const wire = createShardwire<Commands, Events>({
   token: process.env.DISCORD_BOT_TOKEN!,
   server: {
     port: 3001,
-    secret: process.env.SHARDWIRE_SECRET!,
+    secrets: [process.env.SHARDWIRE_SECRET!],
+    primarySecretId: "s0",
   },
 });
 ```
@@ -153,6 +156,7 @@ For unstable networks, tune reconnect behavior and request timeout explicitly:
 const wire = createShardwire({
   url: "ws://bot-host:3001/shardwire",
   secret: process.env.SHARDWIRE_SECRET!,
+  secretId: "s0",
   requestTimeoutMs: 10_000,
   reconnect: {
     enabled: true,
@@ -185,7 +189,8 @@ const wire = createShardwire({
 ### Host options
 
 - `server.port` required port.
-- `server.secret` shared secret for authentication.
+- `server.secrets` required shared secret list for authentication.
+- `server.primarySecretId` optional preferred secret id (for example `"s0"`).
 - `server.path` optional WebSocket path (default `/shardwire`).
 - `server.host` optional bind host.
 - `server.heartbeatMs` heartbeat interval.
@@ -199,6 +204,7 @@ const wire = createShardwire({
 
 - `url` host endpoint (for example `ws://localhost:3001/shardwire`).
 - `secret` shared secret matching host.
+- `secretId` optional secret id (for example `"s0"`) used during handshake.
 - `requestTimeoutMs` default timeout for `send`.
 - `reconnect` reconnect policy (`enabled`, delays, jitter).
 - `webSocketFactory` optional custom client implementation.
@@ -215,7 +221,7 @@ const wire = createShardwire({
 
 Failure codes:
 
-- `AUTH_ERROR`
+- `UNAUTHORIZED`
 - `TIMEOUT`
 - `COMMAND_NOT_FOUND`
 - `VALIDATION_ERROR`
@@ -231,7 +237,7 @@ Failure codes:
 ## Security Notes
 
 - Use strong, rotated secrets via environment variables.
-- v1 secret rotation is static (restart host after rotation).
+- Rotate with overlapping `server.secrets` entries and explicit `secretId` cutovers.
 - Set payload and timeout limits appropriate for your workload.
 - Configure `server.corsOrigins` when exposing browser consumers.
 

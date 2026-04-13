@@ -15,7 +15,7 @@ Use this skill when the user asks about:
 - Designing command/event payload schemas
 - Shared secret setup, path/URL wiring, or connection lifecycle
 - Reconnect behavior and timeout tuning
-- Error handling for `CommandResult` (`AUTH_ERROR`, `TIMEOUT`, etc.)
+- Error handling for `CommandResult` (`UNAUTHORIZED`, `TIMEOUT`, etc.)
 - Practical examples for Discord bot + web/backend integration
 
 Do not use this skill for:

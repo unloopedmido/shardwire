@@ -24,6 +24,7 @@ export type WireEnvelope<TType extends WireType = WireType, TPayload = unknown> 
 
 export interface AuthHelloPayload {
   secret: string;
+  secretId?: string;
   clientName?: string;
 }
 
@@ -32,7 +33,8 @@ export interface AuthOkPayload {
 }
 
 export interface AuthErrorPayload {
-  code: "AUTH_ERROR";
+  code: "UNAUTHORIZED";
+  reason: "unknown_secret_id" | "invalid_secret";
   message: string;
 }
 

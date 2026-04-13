@@ -43,7 +43,7 @@ export interface CommandFailure {
   ts: number;
   error: {
     code:
-      | "AUTH_ERROR"
+      | "UNAUTHORIZED"
       | "TIMEOUT"
       | "COMMAND_NOT_FOUND"
       | "VALIDATION_ERROR"
@@ -61,7 +61,8 @@ export interface HostOptions<C extends CommandMap, E extends EventMap> {
   server: {
     port: number;
     host?: string;
-    secret: string;
+    secrets: string[];
+    primarySecretId?: string;
     path?: string;
     heartbeatMs?: number;
     commandTimeoutMs?: number;
@@ -75,6 +76,7 @@ export interface HostOptions<C extends CommandMap, E extends EventMap> {
 export interface ConsumerOptions<C extends CommandMap, E extends EventMap> {
   url: string;
   secret: string;
+  secretId?: string;
   webSocketFactory?: (url: string) => {
     readyState: number;
     send(data: string): void;

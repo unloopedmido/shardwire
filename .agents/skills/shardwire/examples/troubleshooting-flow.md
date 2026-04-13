@@ -4,7 +4,7 @@ Use this when consumers cannot connect, commands fail, or events are missing.
 
 ## Symptom -> likely cause
 
-- `AUTH_ERROR` -> `secret` mismatch between host and consumer
+- `UNAUTHORIZED` -> `secret` or `secretId` mismatch between host and consumer
 - `TIMEOUT` on `send` -> host unreachable, wrong URL/path, or long-running command
 - `COMMAND_NOT_FOUND` -> host never registered handler with matching name
 - No events received -> wrong event name or listener not attached on consumer

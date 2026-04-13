@@ -28,9 +28,9 @@ describe("shardwire validation", () => {
   it("throws for invalid host server config", () => {
     expect(() =>
       createShardwire({
-        server: { port: 0, secret: "" },
+        server: { port: 0, secrets: [""] },
       } as any),
-    ).toThrow(/port|secret/i);
+    ).toThrow(/port|secrets/i);
   });
 
   it("throws for invalid consumer config", () => {
@@ -54,7 +54,7 @@ describe("shardwire validation", () => {
 
     const host = createShardwire({
       client: fakeClient,
-      server: { port, secret: "x" },
+      server: { port, secrets: ["x"] },
     });
 
     expect(() => host.onCommand("" as any, () => null)).toThrow(/non-empty/i);
