@@ -266,7 +266,8 @@ Main exports include:
 - Use `wss://` for non-loopback deployments.
 - `ws://` is only accepted for loopback hosts (`127.0.0.1`, `localhost`, `::1`).
 - Event availability depends on enabled intents and secret scope.
-- For vulnerability reporting and security policy, see [`SECURITY.md`](./SECURITY.md).
+
+**Reporting vulnerabilities:** email [cored.developments@gmail.com](mailto:cored.developments@gmail.com) with enough detail to reproduce the issue (versions, config shape, and steps). Do not open a public issue for undisclosed security problems.
 
 ## Contributing
 
