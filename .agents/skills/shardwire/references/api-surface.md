@@ -3,7 +3,7 @@
 ## Public entry points
 
 ```ts
-import { createBotBridge, connectBotBridge } from "shardwire";
+import { createBotBridge, connectBotBridge } from 'shardwire';
 ```
 
 ## Primary APIs
@@ -65,8 +65,8 @@ import { createBotBridge, connectBotBridge } from "shardwire";
 
 ```ts
 type ActionResult<T> =
-  | { ok: true; requestId: string; ts: number; data: T }
-  | { ok: false; requestId: string; ts: number; error: { code: string; message: string; details?: unknown } };
+	| { ok: true; requestId: string; ts: number; data: T }
+	| { ok: false; requestId: string; ts: number; error: { code: string; message: string; details?: unknown } };
 ```
 
 Always branch on `result.ok` before using `data`.
@@ -81,6 +81,7 @@ Always branch on `result.ok` before using `data`.
 ## Secret permissions model
 
 Server accepts:
+
 - Plain string secret for full access.
 - Scoped secret object with `allow.events` and `allow.actions`.
 

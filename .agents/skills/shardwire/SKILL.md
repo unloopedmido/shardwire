@@ -8,6 +8,7 @@ description: Use this skill whenever a user mentions Shardwire, Discord bot/app 
 Guide agents to build, modify, and debug integrations with the `shardwire` package.
 
 Shardwire connects two processes:
+
 - Bot process: runs Discord gateway/runtime and exposes bridge server.
 - App process: connects over WebSocket, subscribes to normalized events, and invokes built-in actions.
 
@@ -69,6 +70,7 @@ When wiring logic, stick to built-in names:
 - Actions: `sendMessage`, `editMessage`, `deleteMessage`, `replyToInteraction`, `deferInteraction`, `followUpInteraction`, `banMember`, `kickMember`, `addMemberRole`, `removeMemberRole`, `addMessageReaction`, `removeOwnMessageReaction`
 
 If user asks for behavior outside this surface:
+
 - First map the request to the closest built-in action/event combo.
 - Only propose extension patterns when built-ins clearly cannot satisfy the requirement.
 
