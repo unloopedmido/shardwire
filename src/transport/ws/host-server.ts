@@ -20,7 +20,7 @@ const CLOSE_AUTH_FAILED = 4003;
 const CLOSE_INVALID_PAYLOAD = 4004;
 
 interface HostServerConfig {
-  options: HostOptions<any, any>;
+  options: HostOptions<Record<string, unknown>, Record<string, unknown>>;
   onCommandRequest: (
     connection: HostConnectionState,
     payload: CommandRequestPayload,
@@ -116,14 +116,26 @@ export class HostWebSocketServer {
       }
     }, this.authTimeoutMs);
 
-    socket.on("message", async (raw) => {
+    socket.on("message", (raw) => {
+      const serialized =
+        typeof raw === "string" ? raw : Buffer.isBuffer(raw) ? raw.toString("utf8") : undefined;
+      if (!serialized) {
+        this.logger.warn("Invalid message payload from client.", { error: "Unsupported payload type." });
+        socket.close(CLOSE_INVALID_PAYLOAD, "Invalid payload.");
+        return;
+      }
+      let parsed: WireEnvelope;
       try {
-        const parsed = parseEnvelope(raw.toString());
-        await this.handleMessage(state, parsed);
+        parsed = parseEnvelope(serialized);
       } catch (error) {
         this.logger.warn("Invalid message payload from client.", { error: String(error) });
         socket.close(CLOSE_INVALID_PAYLOAD, "Invalid payload.");
+        return;
       }
+      void this.handleMessage(state, parsed).catch((error: unknown) => {
+        this.logger.warn("Invalid message payload from client.", { error: String(error) });
+        socket.close(CLOSE_INVALID_PAYLOAD, "Invalid payload.");
+      });
     });
 
     socket.on("close", () => {

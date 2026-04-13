@@ -54,6 +54,7 @@ Do not use this skill for:
 - Use correct API forms:
   - host: `createShardwire({ server, client|token })`
   - consumer: `createShardwire({ url, secret })`
+- Recommend `wss://` for non-localhost consumers; only suggest `allowInsecureWs: true` when a trusted non-TLS path is explicitly intended.
 - Prefer typed examples with `createShardwire<Commands, Events>()`.
 - When validating payloads, show `validation` config and include `VALIDATION_ERROR.details` handling.
 - Keep payloads JSON-serializable and command/event names stable.

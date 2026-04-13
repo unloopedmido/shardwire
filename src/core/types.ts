@@ -14,8 +14,8 @@ export interface RuntimeSchema<T = unknown> {
   parse: (value: unknown) => T;
 }
 
-export type CommandRequestOf<T> = T extends CommandSchema<infer Request, any> ? Request : T;
-export type CommandResponseOf<T> = T extends CommandSchema<any, infer Response> ? Response : unknown;
+export type CommandRequestOf<T> = T extends CommandSchema<infer Request, unknown> ? Request : T;
+export type CommandResponseOf<T> = T extends CommandSchema<unknown, infer Response> ? Response : unknown;
 
 export type Unsubscribe = () => void;
 
@@ -101,16 +101,22 @@ export interface HostOptions<C extends CommandMap, E extends EventMap> {
   logger?: ShardwireLogger;
 }
 
-export interface ConsumerOptions<C extends CommandMap, E extends EventMap> {
+export interface ConsumerOptions {
   url: string;
   secret: string;
   secretId?: string;
   clientName?: string;
+  /**
+   * Allows plain `ws://` connections to non-loopback hosts.
+   *
+   * Keep this `false` unless you explicitly terminate TLS upstream and trust the network path.
+   */
+  allowInsecureWs?: boolean;
   webSocketFactory?: (url: string) => {
     readyState: number;
     send(data: string): void;
     close(code?: number, reason?: string): void;
-    on(event: "open" | "message" | "close" | "error", listener: (...args: any[]) => void): void;
+    on(event: "open" | "message" | "close" | "error", listener: (...args: unknown[]) => void): void;
     once(event: "close", listener: () => void): void;
   };
   reconnect?: {
@@ -172,6 +178,6 @@ export interface CreateShardwire {
     options: HostOptions<C, E>,
   ): HostShardwire<C, E>;
   <C extends CommandMap = {}, E extends EventMap = {}>(
-    options: ConsumerOptions<C, E>,
+    options: ConsumerOptions,
   ): ConsumerShardwire<C, E>;
 }

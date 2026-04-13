@@ -32,7 +32,7 @@ export function createHostShardwire<C extends CommandMap, E extends EventMap>(
   const hostServer = new HostWebSocketServer({
     options,
     onCommandRequest: async (connection, payload, requestId, source) => {
-      const cacheKey = `${requestId}:${payload.name}`;
+      const cacheKey = `${connection.id}:${requestId}:${payload.name}`;
       const cached = dedupeCache.get(cacheKey);
       if (cached) {
         return cached;

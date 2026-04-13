@@ -25,6 +25,21 @@ async function getFreePort(): Promise<number> {
   });
 }
 
+async function waitFor(assertion: () => void, timeoutMs = 4000, intervalMs = 25): Promise<void> {
+  const start = Date.now();
+  let lastError: unknown;
+  while (Date.now() - start < timeoutMs) {
+    try {
+      assertion();
+      return;
+    } catch (error) {
+      lastError = error;
+      await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error("Timed out while waiting for condition.");
+}
+
 describe("shardwire integration", () => {
   it("executes commands end-to-end", async () => {
     type Commands = {
@@ -245,6 +260,114 @@ describe("shardwire integration", () => {
       );
     }
 
+    await consumer.close();
+    await host.close();
+  });
+
+  it("does not dedupe across different consumer connections", async () => {
+    type Commands = {
+      ping: {
+        request: { value: string };
+        response: { echoed: string; call: number };
+      };
+    };
+
+    const port = await getFreePort();
+    const host = createShardwire<Commands, {}>({
+      server: { port, secrets: ["shared-secret"] },
+    });
+
+    let calls = 0;
+    host.onCommand("ping", ({ value }) => {
+      calls += 1;
+      return { echoed: value, call: calls };
+    });
+
+    const consumerA = createShardwire<Commands, {}>({
+      url: `ws://127.0.0.1:${port}/shardwire`,
+      secret: "shared-secret",
+      secretId: "s0",
+    });
+    const consumerB = createShardwire<Commands, {}>({
+      url: `ws://127.0.0.1:${port}/shardwire`,
+      secret: "shared-secret",
+      secretId: "s0",
+    });
+
+    await Promise.all([consumerA.ready(), consumerB.ready()]);
+
+    const requestId = "req-shared";
+    const first = await consumerA.send("ping", { value: "a" }, { requestId });
+    const second = await consumerB.send("ping", { value: "b" }, { requestId });
+
+    expect(first.ok).toBe(true);
+    expect(second.ok).toBe(true);
+    if (first.ok && second.ok) {
+      expect(first.data.echoed).toBe("a");
+      expect(second.data.echoed).toBe("b");
+      expect(first.data.call).toBe(1);
+      expect(second.data.call).toBe(2);
+    }
+
+    await consumerA.close();
+    await consumerB.close();
+    await host.close();
+  });
+
+  it("reconnects automatically and resumes command delivery", async () => {
+    type Commands = {
+      ping: {
+        request: { value: string };
+        response: { echoed: string };
+      };
+    };
+
+    const port = await getFreePort();
+    let host = createShardwire<Commands, {}>({
+      server: { port, secrets: ["reconnect-secret"] },
+    });
+    host.onCommand("ping", ({ value }) => ({ echoed: value }));
+
+    const consumer = createShardwire<Commands, {}>({
+      url: `ws://127.0.0.1:${port}/shardwire`,
+      secret: "reconnect-secret",
+      reconnect: {
+        enabled: true,
+        initialDelayMs: 50,
+        maxDelayMs: 100,
+        jitter: false,
+      },
+      requestTimeoutMs: 1000,
+    });
+
+    let reconnectSignals = 0;
+    const stop = consumer.onReconnecting(() => {
+      reconnectSignals += 1;
+    });
+
+    await consumer.ready();
+    await host.close();
+
+    await waitFor(() => {
+      expect(reconnectSignals).toBeGreaterThan(0);
+    });
+
+    host = createShardwire<Commands, {}>({
+      server: { port, secrets: ["reconnect-secret"] },
+    });
+    host.onCommand("ping", ({ value }) => ({ echoed: value }));
+
+    await waitFor(() => {
+      expect(consumer.connected()).toBe(true);
+    }, 5000);
+
+    const result = await consumer.send("ping", { value: "ok" });
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.data).toEqual({ echoed: "ok" });
+    }
+
+    stop();
     await consumer.close();
     await host.close();
   });

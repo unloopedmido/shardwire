@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.2.0
+
+- Breaking: consumer URL validation now rejects insecure `ws://` for non-loopback hosts by default; use `wss://` or explicitly set `allowInsecureWs: true`.
+- Fixed host command dedupe cache scoping to include authenticated connection id, preventing cross-consumer cache collisions when request ids are reused.
+- Added integration coverage for reconnect recovery and multi-consumer dedupe isolation.
+- Added strict type-aware ESLint configuration and lint scripts (`lint`, `lint:fix`) for consistent code quality enforcement.
+
 ## 0.1.0
 
 - Added optional runtime schema validation for host command request/response and emitted event payloads.

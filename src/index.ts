@@ -12,7 +12,7 @@ import type {
 } from "./core/types";
 
 function isHostOptions<C extends CommandMap, E extends EventMap>(
-  options: HostOptions<C, E> | ConsumerOptions<C, E>,
+  options: HostOptions<C, E> | ConsumerOptions,
 ): options is HostOptions<C, E> {
   return "server" in options;
 }
@@ -21,10 +21,10 @@ export function createShardwire<C extends CommandMap = {}, E extends EventMap = 
   options: HostOptions<C, E>,
 ): HostShardwire<C, E>;
 export function createShardwire<C extends CommandMap = {}, E extends EventMap = {}>(
-  options: ConsumerOptions<C, E>,
+  options: ConsumerOptions,
 ): ConsumerShardwire<C, E>;
 export function createShardwire<C extends CommandMap = {}, E extends EventMap = {}>(
-  options: HostOptions<C, E> | ConsumerOptions<C, E>,
+  options: HostOptions<C, E> | ConsumerOptions,
 ): HostShardwire<C, E> | ConsumerShardwire<C, E> {
   if (!isHostOptions(options)) {
     assertConsumerOptions(options);

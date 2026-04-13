@@ -261,6 +261,7 @@ const wire = createShardwire<Commands, {}>({
 - `secret` shared secret matching host.
 - `secretId` optional secret id (for example `"s0"`) used during handshake.
 - `clientName` optional identity sent during auth handshake for host-side telemetry.
+- `allowInsecureWs` optional escape hatch to allow `ws://` for non-loopback hosts (defaults to `false`).
 - `requestTimeoutMs` default timeout for `send`.
 - `reconnect` reconnect policy (`enabled`, delays, jitter).
 - `webSocketFactory` optional custom client implementation.
@@ -326,6 +327,7 @@ Common symptoms:
 
 - Use strong, rotated secrets via environment variables.
 - Rotate with overlapping `server.secrets` entries and explicit `secretId` cutovers.
+- Use `wss://` for non-localhost deployments. By default, consumer `ws://` is only accepted for loopback hosts.
 - Set payload and timeout limits appropriate for your workload.
 - Configure `server.corsOrigins` when exposing browser consumers.
 

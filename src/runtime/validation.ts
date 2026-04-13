@@ -24,7 +24,7 @@ function assertPositiveNumber(name: string, value: unknown): void {
   }
 }
 
-export function assertHostOptions(options: HostOptions<any, any>): void {
+export function assertHostOptions(options: HostOptions<Record<string, unknown>, Record<string, unknown>>): void {
   if (!options.server) {
     throw new Error("Host mode requires a server configuration.");
   }
@@ -54,9 +54,25 @@ export function assertHostOptions(options: HostOptions<any, any>): void {
   }
 }
 
-export function assertConsumerOptions(options: ConsumerOptions<any, any>): void {
+export function assertConsumerOptions(options: ConsumerOptions): void {
   if (!isNonEmptyString(options.url)) {
     throw new Error("Consumer mode requires `url`.");
+  }
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(options.url);
+  } catch {
+    throw new Error("Consumer option `url` must be a valid URL.");
+  }
+  if (parsedUrl.protocol !== "ws:" && parsedUrl.protocol !== "wss:") {
+    throw new Error("Consumer option `url` must use `ws://` or `wss://`.");
+  }
+  const isLoopbackHost =
+    parsedUrl.hostname === "localhost" || parsedUrl.hostname === "127.0.0.1" || parsedUrl.hostname === "::1";
+  if (parsedUrl.protocol === "ws:" && !isLoopbackHost && !options.allowInsecureWs) {
+    throw new Error(
+      "Insecure `ws://` is only allowed for loopback hosts by default. Use `wss://` or set `allowInsecureWs` to true.",
+    );
   }
   if (!isNonEmptyString(options.secret)) {
     throw new Error("Consumer mode requires `secret`.");
