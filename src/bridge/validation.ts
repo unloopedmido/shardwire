@@ -108,6 +108,15 @@ export function assertBotBridgeOptions(options: BotBridgeOptions): void {
   if (options.server.maxPayloadBytes !== undefined) {
     assertPositiveNumber("server.maxPayloadBytes", options.server.maxPayloadBytes);
   }
+  if (options.server.maxConnections !== undefined) {
+    assertPositiveNumber("server.maxConnections", options.server.maxConnections);
+  }
+  if (options.server.maxConcurrentActions !== undefined) {
+    assertPositiveNumber("server.maxConcurrentActions", options.server.maxConcurrentActions);
+  }
+  if (options.server.actionQueueTimeoutMs !== undefined) {
+    assertPositiveNumber("server.actionQueueTimeoutMs", options.server.actionQueueTimeoutMs);
+  }
   if (!Array.isArray(options.server.secrets) || options.server.secrets.length === 0) {
     throw new Error("server.secrets must contain at least one secret.");
   }

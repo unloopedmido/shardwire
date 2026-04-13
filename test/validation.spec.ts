@@ -42,6 +42,20 @@ describe("discord-first bridge validation", () => {
     ).toThrow(/token|intent|port|secret/i);
   });
 
+  it("throws for invalid production limit options", () => {
+    expect(() =>
+      createBotBridge({
+        token: "fake-token",
+        intents: ["Guilds"],
+        server: {
+          port: 3001,
+          secrets: ["secret"],
+          maxConnections: 0,
+        },
+      }),
+    ).toThrow(/maxConnections/i);
+  });
+
   it("rejects duplicate secret values even when ids differ", () => {
     expect(() =>
       createBotBridge({

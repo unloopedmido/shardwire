@@ -62,6 +62,8 @@ export interface DiscordEventPayload<TName extends keyof BotEventPayloadMap = ke
 export interface ActionRequestPayload {
   name: BotActionName;
   data: unknown;
+  /** When set, duplicate keys on the same connection within ~2 minutes return the first result (best-effort). */
+  idempotencyKey?: string;
 }
 
 export type ActionResponsePayload = ActionResult<unknown>;

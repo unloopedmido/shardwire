@@ -34,6 +34,15 @@ describe("discord.js adapter error mapping", () => {
     expect(mapped?.code).toBe("INVALID_REQUEST");
   });
 
+  it("maps rate limit status to service unavailable", () => {
+    const mapped = mapDiscordErrorToActionExecutionError({
+      status: 429,
+      message: "Too many requests",
+    });
+    expect(mapped?.code).toBe("SERVICE_UNAVAILABLE");
+    expect(mapped?.details).toMatchObject({ retryable: true, discordStatus: 429 });
+  });
+
   it("returns null for unmapped errors", () => {
     const mapped = mapDiscordErrorToActionExecutionError(new Error("Unexpected crash"));
     expect(mapped).toBeNull();

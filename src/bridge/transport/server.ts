@@ -1,3 +1,4 @@
+import type { IncomingMessage } from "node:http";
 import { WebSocketServer, type WebSocket } from "ws";
 import type {
   ActionResult,
@@ -22,10 +23,13 @@ import {
   type AuthHelloPayload,
   type WireEnvelope,
 } from "./protocol";
+import { AsyncSemaphore } from "../../utils/semaphore";
 
 const CLOSE_AUTH_REQUIRED = 4001;
 const CLOSE_AUTH_FAILED = 4003;
 const CLOSE_INVALID_PAYLOAD = 4004;
+const CLOSE_SERVER_FULL = 4029;
+const CLOSE_AUTH_RATE_LIMITED = 4031;
 
 interface AuthSuccess {
   ok: true;
@@ -43,6 +47,7 @@ interface BridgeConnectionState {
   socket: WebSocket;
   authenticated: boolean;
   lastHeartbeatAt: number;
+  remoteAddress?: string;
   appName?: string;
   secret?: NormalizedSecretConfig;
   capabilities?: BridgeCapabilities;
@@ -69,10 +74,17 @@ export class BridgeTransportServer {
   private readonly interval: NodeJS.Timeout;
   private readonly connections = new Map<WebSocket, BridgeConnectionState>();
   private readonly stickyEvents = new Map<BotEventName, BotEventPayloadMap[BotEventName]>();
+  private readonly actionSemaphore: AsyncSemaphore;
+  private readonly idempotencyCache = new Map<string, { result: ActionResult<unknown>; expires: number }>();
+  private readonly idempotencyTtlMs = 120_000;
+  private readonly authBuckets = new Map<string, { count: number; resetAt: number }>();
 
   constructor(private readonly config: BridgeTransportServerConfig) {
     this.logger = withLogger(config.logger);
     this.heartbeatMs = config.options.server.heartbeatMs ?? 30000;
+    const maxConcurrent = config.options.server.maxConcurrentActions ?? 32;
+    const queueTimeout = config.options.server.actionQueueTimeoutMs ?? 5000;
+    this.actionSemaphore = new AsyncSemaphore(maxConcurrent, queueTimeout);
 
     this.wss = new WebSocketServer({
       host: config.options.server.host,
@@ -81,7 +93,7 @@ export class BridgeTransportServer {
       maxPayload: config.options.server.maxPayloadBytes ?? 65536,
     });
 
-    this.wss.on("connection", (socket) => this.handleConnection(socket));
+    this.wss.on("connection", (socket, request) => this.handleConnection(socket, request));
     this.wss.on("error", (error) => this.logger.error("Bridge transport server error.", { error: String(error) }));
     this.interval = setInterval(() => {
       this.checkHeartbeats();
@@ -135,12 +147,14 @@ export class BridgeTransportServer {
     });
   }
 
-  private handleConnection(socket: WebSocket): void {
+  private handleConnection(socket: WebSocket, request?: IncomingMessage): void {
+    const remoteAddress = request?.socket?.remoteAddress ?? "unknown";
     const state: BridgeConnectionState = {
       id: createConnectionId(),
       socket,
       authenticated: false,
       lastHeartbeatAt: Date.now(),
+      remoteAddress,
       subscriptions: new Map(),
     };
     this.connections.set(socket, state);
@@ -198,6 +212,21 @@ export class BridgeTransportServer {
         state.socket.close(CLOSE_AUTH_REQUIRED, "Authentication required.");
         return;
       }
+      if (this.isAuthRateLimited(state.remoteAddress ?? "unknown")) {
+        this.logger.warn("Bridge auth rate limited.", { connectionId: state.id, remoteAddress: state.remoteAddress });
+        this.safeSend(
+          state.socket,
+          stringifyEnvelope(
+            makeEnvelope("auth.error", {
+              code: "UNAUTHORIZED",
+              reason: "invalid_secret",
+              message: "Too many authentication attempts. Try again later.",
+            }),
+          ),
+        );
+        state.socket.close(CLOSE_AUTH_RATE_LIMITED, "Rate limited.");
+        return;
+      }
       const authResult = this.config.authenticate(envelope.payload as AuthHelloPayload);
       if (!authResult.ok) {
         const message =
@@ -215,6 +244,26 @@ export class BridgeTransportServer {
           ),
         );
         state.socket.close(CLOSE_AUTH_FAILED, "Invalid secret.");
+        return;
+      }
+
+      const maxConnections = this.config.options.server.maxConnections;
+      if (maxConnections !== undefined && this.connectionCount() >= maxConnections) {
+        this.logger.warn("Bridge connection rejected: server full.", {
+          connectionId: state.id,
+          maxConnections,
+        });
+        this.safeSend(
+          state.socket,
+          stringifyEnvelope(
+            makeEnvelope("auth.error", {
+              code: "UNAUTHORIZED",
+              reason: "invalid_secret",
+              message: "Server is at maximum connection capacity.",
+            }),
+          ),
+        );
+        state.socket.close(CLOSE_SERVER_FULL, "Server full.");
         return;
       }
 
@@ -289,17 +338,86 @@ export class BridgeTransportServer {
         if (!requestId || !payload || typeof payload.name !== "string") {
           return;
         }
-        const result = await this.config.onActionRequest(
-          {
-            id: state.id,
-            ...(state.appName ? { appName: state.appName } : {}),
-            secret: state.secret,
-            capabilities: state.capabilities,
-          },
-          payload.name,
-          payload.data,
+        const activeSecret = state.secret;
+        const activeCapabilities = state.capabilities;
+        if (!activeSecret || !activeCapabilities) {
+          state.socket.close(CLOSE_AUTH_FAILED, "Invalid state.");
+          return;
+        }
+        const idempotencyRaw = payload.idempotencyKey;
+        const idempotencyKey =
+          typeof idempotencyRaw === "string" && idempotencyRaw.length > 0 && idempotencyRaw.length <= 256
+            ? idempotencyRaw
+            : undefined;
+        const idempotencyCacheKey = idempotencyKey ? `${state.id}:${idempotencyKey}` : undefined;
+        if (idempotencyCacheKey) {
+          this.pruneIdempotencyCache(Date.now());
+          const cached = this.idempotencyCache.get(idempotencyCacheKey);
+          if (cached && cached.expires > Date.now()) {
+            const replay: ActionResult<unknown> = cached.result.ok
+              ? { ok: true, requestId, ts: Date.now(), data: cached.result.data }
+              : { ok: false, requestId, ts: Date.now(), error: cached.result.error };
+            this.logger.info("Bridge action idempotent replay.", {
+              connectionId: state.id,
+              requestId,
+              action: payload.name,
+            });
+            this.safeSend(
+              state.socket,
+              stringifyEnvelope(
+                makeEnvelope(replay.ok ? "action.result" : "action.error", replay, { requestId }),
+              ),
+            );
+            return;
+          }
+        }
+
+        const started = Date.now();
+        let result: ActionResult<unknown>;
+        try {
+          result = await this.actionSemaphore.run(() =>
+            this.config.onActionRequest(
+              {
+                id: state.id,
+                ...(state.appName ? { appName: state.appName } : {}),
+                secret: activeSecret,
+                capabilities: activeCapabilities,
+              },
+              payload.name,
+              payload.data,
+              requestId,
+            ),
+          );
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "Action queue saturated.";
+          result = {
+            ok: false,
+            requestId,
+            ts: Date.now(),
+            error: {
+              code: "SERVICE_UNAVAILABLE",
+              message,
+              details: { retryable: true, reason: "action_queue" },
+            },
+          };
+        }
+
+        if (idempotencyCacheKey) {
+          this.idempotencyCache.set(idempotencyCacheKey, {
+            result,
+            expires: Date.now() + this.idempotencyTtlMs,
+          });
+        }
+
+        this.logger.info("Bridge action completed.", {
+          connectionId: state.id,
           requestId,
-        );
+          action: payload.name,
+          durationMs: Date.now() - started,
+          ok: result.ok,
+          appName: state.appName,
+        });
+
         this.safeSend(
           state.socket,
           stringifyEnvelope(makeEnvelope(result.ok ? "action.result" : "action.error", result, { requestId })),
@@ -333,6 +451,30 @@ export class BridgeTransportServer {
   private safeSend(socket: WebSocket, payload: string): void {
     if (socket.readyState === 1) {
       socket.send(payload);
+    }
+  }
+
+  private isAuthRateLimited(remoteAddress: string): boolean {
+    const windowMs = 60_000;
+    const limit = 40;
+    const now = Date.now();
+    let bucket = this.authBuckets.get(remoteAddress);
+    if (!bucket || now > bucket.resetAt) {
+      bucket = { count: 0, resetAt: now + windowMs };
+      this.authBuckets.set(remoteAddress, bucket);
+    }
+    bucket.count += 1;
+    return bucket.count > limit;
+  }
+
+  private pruneIdempotencyCache(now: number): void {
+    if (this.idempotencyCache.size < 200) {
+      return;
+    }
+    for (const [key, entry] of this.idempotencyCache.entries()) {
+      if (entry.expires <= now) {
+        this.idempotencyCache.delete(key);
+      }
     }
   }
 }

@@ -412,4 +412,128 @@ describe("discord-first bridge integration", () => {
     await app.close();
     await bot.close();
   });
+
+  it("supports interactionCreate filtering by customId and interactionKind", async () => {
+    const port = await getFreePort();
+    const runtime = new FakeDiscordRuntime();
+    const bot = createBotBridgeWithRuntime(
+      {
+        token: "fake-token",
+        intents: ["Guilds"],
+        server: {
+          port,
+          secrets: ["shared-secret"],
+        },
+      },
+      runtime,
+    );
+
+    const app = connectBotBridge({
+      url: `ws://127.0.0.1:${port}/shardwire`,
+      secret: "shared-secret",
+    });
+
+    const hits: string[] = [];
+    app.on(
+      "interactionCreate",
+      ({ interaction }) => {
+        hits.push(interaction.id);
+      },
+      { customId: "btn.accept", interactionKind: "button" },
+    );
+
+    await Promise.all([bot.ready(), app.ready()]);
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    runtime.emit("interactionCreate", {
+      receivedAt: Date.now(),
+      interaction: {
+        id: "i1",
+        applicationId: "app",
+        kind: "button",
+        user: {
+          id: "u1",
+          username: "tester",
+          discriminator: "0",
+          bot: false,
+          system: false,
+        },
+        customId: "btn.accept",
+      },
+    });
+    runtime.emit("interactionCreate", {
+      receivedAt: Date.now(),
+      interaction: {
+        id: "i2",
+        applicationId: "app",
+        kind: "button",
+        user: {
+          id: "u1",
+          username: "tester",
+          discriminator: "0",
+          bot: false,
+          system: false,
+        },
+        customId: "btn.reject",
+      },
+    });
+
+    await waitFor(() => {
+      expect(hits).toEqual(["i1"]);
+    });
+
+    await app.close();
+    await bot.close();
+  });
+
+  it("deduplicates action requests when idempotencyKey is provided", async () => {
+    const port = await getFreePort();
+    const runtime = new FakeDiscordRuntime();
+    const bot = createBotBridgeWithRuntime(
+      {
+        token: "fake-token",
+        intents: ["Guilds", "GuildMessages"],
+        server: {
+          port,
+          secrets: ["shared-secret"],
+        },
+      },
+      runtime,
+    );
+
+    let calls = 0;
+    runtime.setActionHandler("sendMessage", async ({ channelId, content }) => {
+      calls += 1;
+      return {
+        id: "msg-idempotent",
+        channelId,
+        content,
+        attachments: [],
+        embeds: [],
+      };
+    });
+
+    const app = connectBotBridge({
+      url: `ws://127.0.0.1:${port}/shardwire`,
+      secret: "shared-secret",
+    });
+
+    await Promise.all([bot.ready(), app.ready()]);
+
+    const first = await app.actions.sendMessage(
+      { channelId: "channel-1", content: "hello" },
+      { idempotencyKey: "msg:channel-1:hello" },
+    );
+    const second = await app.actions.sendMessage(
+      { channelId: "channel-1", content: "hello" },
+      { idempotencyKey: "msg:channel-1:hello" },
+    );
+
+    expect(first.ok).toBe(true);
+    expect(second.ok).toBe(true);
+    expect(calls).toBe(1);
+
+    await app.close();
+    await bot.close();
+  });
 });
