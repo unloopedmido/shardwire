@@ -1,4 +1,11 @@
-import type { APIAllowedMentions, APIEmbed, Snowflake } from "discord-api-types/v10";
+import type {
+  APIActionRowComponent,
+  APIAllowedMentions,
+  APIComponentInMessageActionRow,
+  APIEmbed,
+  APITextInputComponent,
+  Snowflake,
+} from "discord-api-types/v10";
 import type { GatewayIntentBits } from "discord.js";
 
 export type Unsubscribe = () => void;
@@ -49,6 +56,25 @@ export interface BridgeGuildMember {
   communicationDisabledUntil?: string | null;
 }
 
+/** Normalized guild snapshot for `guildCreate` / `guildDelete` events. */
+export interface BridgeGuild {
+  id: Snowflake;
+  name: string;
+  icon?: string | null;
+  ownerId?: Snowflake;
+}
+
+/** Normalized thread channel snapshot for thread lifecycle events. */
+export interface BridgeThread {
+  id: Snowflake;
+  guildId: Snowflake;
+  parentId: Snowflake | null;
+  name: string;
+  type: number;
+  archived?: boolean;
+  locked?: boolean;
+}
+
 export interface BridgeMessage {
   id: Snowflake;
   channelId: Snowflake;
@@ -60,6 +86,8 @@ export interface BridgeMessage {
   editedAt?: string | null;
   attachments: BridgeAttachment[];
   embeds: APIEmbed[];
+  /** Message component rows (JSON-serializable API shape). */
+  components?: APIActionRowComponent<APIComponentInMessageActionRow>[];
   reference?: BridgeMessageReference;
 }
 
@@ -114,6 +142,7 @@ export interface BridgeInteraction {
 
 export interface EventEnvelopeBase {
   receivedAt: number;
+  /** Populated when the bot runs under `ShardingManager` (multi-shard). */
   shardId?: number;
 }
 
@@ -146,6 +175,32 @@ export interface GuildMemberRemoveEventPayload extends EventEnvelopeBase {
   member: BridgeGuildMember;
 }
 
+export interface GuildMemberUpdateEventPayload extends EventEnvelopeBase {
+  oldMember?: BridgeGuildMember;
+  member: BridgeGuildMember;
+}
+
+export interface GuildCreateEventPayload extends EventEnvelopeBase {
+  guild: BridgeGuild;
+}
+
+export interface GuildDeleteEventPayload extends EventEnvelopeBase {
+  guild: BridgeGuild;
+}
+
+export interface ThreadCreateEventPayload extends EventEnvelopeBase {
+  thread: BridgeThread;
+}
+
+export interface ThreadUpdateEventPayload extends EventEnvelopeBase {
+  oldThread?: BridgeThread;
+  thread: BridgeThread;
+}
+
+export interface ThreadDeleteEventPayload extends EventEnvelopeBase {
+  thread: BridgeThread;
+}
+
 export interface MessageReactionAddEventPayload extends EventEnvelopeBase {
   reaction: BridgeMessageReaction;
 }
@@ -162,8 +217,14 @@ export interface BotEventPayloadMap {
   messageDelete: MessageDeleteEventPayload;
   messageReactionAdd: MessageReactionAddEventPayload;
   messageReactionRemove: MessageReactionRemoveEventPayload;
+  guildCreate: GuildCreateEventPayload;
+  guildDelete: GuildDeleteEventPayload;
   guildMemberAdd: GuildMemberAddEventPayload;
   guildMemberRemove: GuildMemberRemoveEventPayload;
+  guildMemberUpdate: GuildMemberUpdateEventPayload;
+  threadCreate: ThreadCreateEventPayload;
+  threadUpdate: ThreadUpdateEventPayload;
+  threadDelete: ThreadDeleteEventPayload;
 }
 
 export type BotEventName = keyof BotEventPayloadMap;
@@ -172,6 +233,10 @@ export interface BridgeMessageInput {
   content?: string;
   embeds?: APIEmbed[];
   allowedMentions?: APIAllowedMentions;
+  components?: APIActionRowComponent<APIComponentInMessageActionRow>[];
+  /** Bitfield compatible with `MessageFlags` from discord.js / Discord API. */
+  flags?: number;
+  stickerIds?: Snowflake[];
 }
 
 export interface SendMessageActionPayload extends BridgeMessageInput {
@@ -201,6 +266,39 @@ export interface DeferInteractionActionPayload {
 export interface FollowUpInteractionActionPayload extends BridgeMessageInput {
   interactionId: Snowflake;
   ephemeral?: boolean;
+}
+
+export interface DeferUpdateInteractionActionPayload {
+  interactionId: Snowflake;
+}
+
+export interface EditInteractionReplyActionPayload extends BridgeMessageInput {
+  interactionId: Snowflake;
+}
+
+export interface DeleteInteractionReplyActionPayload {
+  interactionId: Snowflake;
+}
+
+export interface UpdateInteractionActionPayload extends BridgeMessageInput {
+  interactionId: Snowflake;
+}
+
+export interface ShowModalActionPayload {
+  interactionId: Snowflake;
+  title: string;
+  customId: string;
+  components: APIActionRowComponent<APITextInputComponent>[];
+}
+
+export interface FetchMessageActionPayload {
+  channelId: Snowflake;
+  messageId: Snowflake;
+}
+
+export interface FetchMemberActionPayload {
+  guildId: Snowflake;
+  userId: Snowflake;
 }
 
 export interface BanMemberActionPayload {
@@ -248,7 +346,14 @@ export interface BotActionPayloadMap {
   deleteMessage: DeleteMessageActionPayload;
   replyToInteraction: ReplyToInteractionActionPayload;
   deferInteraction: DeferInteractionActionPayload;
+  deferUpdateInteraction: DeferUpdateInteractionActionPayload;
   followUpInteraction: FollowUpInteractionActionPayload;
+  editInteractionReply: EditInteractionReplyActionPayload;
+  deleteInteractionReply: DeleteInteractionReplyActionPayload;
+  updateInteraction: UpdateInteractionActionPayload;
+  showModal: ShowModalActionPayload;
+  fetchMessage: FetchMessageActionPayload;
+  fetchMember: FetchMemberActionPayload;
   banMember: BanMemberActionPayload;
   kickMember: KickMemberActionPayload;
   addMemberRole: AddMemberRoleActionPayload;
@@ -265,6 +370,21 @@ export interface DeleteMessageActionResult {
 
 export interface DeferInteractionActionResult {
   deferred: true;
+  interactionId: Snowflake;
+}
+
+export interface DeferUpdateInteractionActionResult {
+  deferred: true;
+  interactionId: Snowflake;
+}
+
+export interface DeleteInteractionReplyActionResult {
+  deleted: true;
+  interactionId: Snowflake;
+}
+
+export interface ShowModalActionResult {
+  shown: true;
   interactionId: Snowflake;
 }
 
@@ -285,7 +405,14 @@ export interface BotActionResultDataMap {
   deleteMessage: DeleteMessageActionResult;
   replyToInteraction: BridgeMessage;
   deferInteraction: DeferInteractionActionResult;
+  deferUpdateInteraction: DeferUpdateInteractionActionResult;
   followUpInteraction: BridgeMessage;
+  editInteractionReply: BridgeMessage;
+  deleteInteractionReply: DeleteInteractionReplyActionResult;
+  updateInteraction: BridgeMessage;
+  showModal: ShowModalActionResult;
+  fetchMessage: BridgeMessage;
+  fetchMember: BridgeGuildMember;
   banMember: MemberModerationActionResult;
   kickMember: MemberModerationActionResult;
   addMemberRole: BridgeGuildMember;
@@ -306,6 +433,10 @@ export interface EventSubscriptionFilter {
   channelId?: Snowflake | readonly Snowflake[];
   userId?: Snowflake | readonly Snowflake[];
   commandName?: string | readonly string[];
+  /** Matches `BridgeInteraction.customId` when present (components, modals). */
+  customId?: string | readonly string[];
+  /** Matches `BridgeInteraction.kind`. */
+  interactionKind?: BridgeInteractionKind | readonly BridgeInteractionKind[];
 }
 
 export interface EventSubscription<K extends BotEventName = BotEventName> {
@@ -326,6 +457,15 @@ export interface ScopedSecretConfig {
 
 export type BotBridgeSecret = string | ScopedSecretConfig;
 
+/** Structured Discord / transport context for failed actions (machine-readable). */
+export interface ActionErrorDetails {
+  discordStatus?: number;
+  discordCode?: number;
+  /** When true, callers may retry with backoff (e.g. rate limits). */
+  retryable?: boolean;
+  [key: string]: unknown;
+}
+
 export interface BotBridgeOptions {
   token: string;
   intents: readonly BotIntentName[];
@@ -336,8 +476,24 @@ export interface BotBridgeOptions {
     heartbeatMs?: number;
     maxPayloadBytes?: number;
     secrets: readonly BotBridgeSecret[];
+    /** Reject new TCP connections when authenticated client count reaches this cap (default: unlimited). */
+    maxConnections?: number;
+    /** Max concurrent action executions per bot process (default: 32). */
+    maxConcurrentActions?: number;
+    /** When the queue is full, fail fast with `SERVICE_UNAVAILABLE` (default: 5000). */
+    actionQueueTimeoutMs?: number;
   };
   logger?: ShardwireLogger;
+}
+
+export interface AppBridgeMetricsHooks {
+  onActionComplete?: (meta: {
+    name: BotActionName;
+    requestId: string;
+    durationMs: number;
+    ok: boolean;
+    errorCode?: string;
+  }) => void;
 }
 
 export interface AppBridgeOptions {
@@ -353,6 +509,7 @@ export interface AppBridgeOptions {
   };
   requestTimeoutMs?: number;
   logger?: ShardwireLogger;
+  metrics?: AppBridgeMetricsHooks;
 }
 
 export interface ActionError {
@@ -363,9 +520,10 @@ export interface ActionError {
     | "FORBIDDEN"
     | "NOT_FOUND"
     | "INVALID_REQUEST"
-    | "INTERNAL_ERROR";
+    | "INTERNAL_ERROR"
+    | "SERVICE_UNAVAILABLE";
   message: string;
-  details?: unknown;
+  details?: ActionErrorDetails | unknown;
 }
 
 export interface ActionSuccess<T> {
@@ -397,10 +555,17 @@ export class BridgeCapabilityError extends Error {
 
 export type EventHandler<K extends BotEventName> = (payload: BotEventPayloadMap[K]) => void;
 
+export type AppBridgeActionInvokeOptions = {
+  timeoutMs?: number;
+  requestId?: string;
+  /** When set, duplicate keys within TTL return the first result (best-effort idempotency). */
+  idempotencyKey?: string;
+};
+
 export type AppBridgeActions = {
   [K in BotActionName]: (
     payload: BotActionPayloadMap[K],
-    options?: { timeoutMs?: number; requestId?: string },
+    options?: AppBridgeActionInvokeOptions,
   ) => Promise<ActionResult<BotActionResultDataMap[K]>>;
 };
 

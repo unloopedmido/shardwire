@@ -2,6 +2,7 @@ import type { APIEmbed } from "discord-api-types/v10";
 import type {
   AnySelectMenuInteraction,
   ChatInputCommandInteraction,
+  Guild,
   GuildMember,
   Interaction,
   Message,
@@ -11,15 +12,18 @@ import type {
   PartialMessage,
   PartialMessageReaction,
   PartialUser,
+  ThreadChannel,
   User,
 } from "discord.js";
 import type {
   BridgeDeletedMessage,
+  BridgeGuild,
   BridgeGuildMember,
   BridgeInteraction,
   BridgeMessage,
   BridgeMessageReaction,
   BridgeReactionEmoji,
+  BridgeThread,
   BridgeUser,
 } from "../types";
 
@@ -67,6 +71,11 @@ export function serializeMessage(message: Message | PartialMessage): BridgeMessa
       }
     : undefined;
 
+  const components =
+    "components" in message && message.components && message.components.length > 0
+      ? message.components.map((row) => row.toJSON())
+      : undefined;
+
   return {
     id: message.id,
     channelId: message.channelId,
@@ -87,7 +96,29 @@ export function serializeMessage(message: Message | PartialMessage): BridgeMessa
           }))
         : [],
     embeds: serializeEmbeds(message),
+    ...(components ? { components } : {}),
     ...(reference ? { reference } : {}),
+  } as BridgeMessage;
+}
+
+export function serializeGuild(guild: Guild): BridgeGuild {
+  return {
+    id: guild.id,
+    name: guild.name,
+    ...(guild.icon !== null && guild.icon !== undefined ? { icon: guild.icon } : { icon: null }),
+    ownerId: guild.ownerId,
+  };
+}
+
+export function serializeThread(thread: ThreadChannel): BridgeThread {
+  return {
+    id: thread.id,
+    guildId: thread.guildId,
+    parentId: thread.parentId,
+    name: thread.name,
+    type: thread.type,
+    ...(typeof thread.archived === "boolean" ? { archived: thread.archived } : {}),
+    ...(typeof thread.locked === "boolean" ? { locked: thread.locked } : {}),
   };
 }
 

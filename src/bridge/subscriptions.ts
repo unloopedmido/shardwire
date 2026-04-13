@@ -1,6 +1,7 @@
 import type {
   BotEventName,
   BotEventPayloadMap,
+  BridgeInteractionKind,
   EventSubscription,
   EventSubscriptionFilter,
 } from "../discord/types";
@@ -10,6 +11,8 @@ interface NormalizedEventSubscriptionFilter {
   channelId?: string[];
   userId?: string[];
   commandName?: string[];
+  customId?: string[];
+  interactionKind?: BridgeInteractionKind[];
 }
 
 export interface NormalizedEventSubscription<K extends BotEventName = BotEventName> {
@@ -26,6 +29,17 @@ function normalizeStringList(value: string | readonly string[] | undefined): str
   return normalized.length > 0 ? normalized : undefined;
 }
 
+function normalizeKindList(
+  value: BridgeInteractionKind | readonly BridgeInteractionKind[] | undefined,
+): BridgeInteractionKind[] | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  const rawValues = Array.isArray(value) ? value : [value];
+  const normalized = [...new Set(rawValues.filter((entry): entry is BridgeInteractionKind => typeof entry === "string"))].sort();
+  return normalized.length > 0 ? normalized : undefined;
+}
+
 export function normalizeEventSubscriptionFilter(
   filter?: EventSubscriptionFilter,
 ): NormalizedEventSubscriptionFilter | undefined {
@@ -37,6 +51,8 @@ export function normalizeEventSubscriptionFilter(
   const channelIds = normalizeStringList(filter.channelId);
   const userIds = normalizeStringList(filter.userId);
   const commandNames = normalizeStringList(filter.commandName);
+  const customIds = normalizeStringList(filter.customId);
+  const interactionKinds = normalizeKindList(filter.interactionKind);
 
   if (guildIds) {
     normalized.guildId = guildIds;
@@ -49,6 +65,12 @@ export function normalizeEventSubscriptionFilter(
   }
   if (commandNames) {
     normalized.commandName = commandNames;
+  }
+  if (customIds) {
+    normalized.customId = customIds;
+  }
+  if (interactionKinds) {
+    normalized.interactionKind = interactionKinds;
   }
 
   return Object.keys(normalized).length > 0 ? normalized : undefined;
@@ -78,22 +100,37 @@ function matchesField(value: string | undefined, allowed: string[] | undefined):
   return allowed.includes(value);
 }
 
+function matchesKind(value: BridgeInteractionKind | undefined, allowed: BridgeInteractionKind[] | undefined): boolean {
+  if (!allowed) {
+    return true;
+  }
+  if (!value) {
+    return false;
+  }
+  return allowed.includes(value);
+}
+
 function eventMetadata(name: BotEventName, payload: unknown): {
   guildId?: string;
   channelId?: string;
   userId?: string;
   commandName?: string;
+  customId?: string;
+  interactionKind?: BridgeInteractionKind;
 } {
   switch (name) {
     case "ready":
       return {};
     case "interactionCreate": {
       const interactionPayload = payload as BotEventPayloadMap["interactionCreate"];
+      const ix = interactionPayload.interaction;
       return {
-        ...(interactionPayload.interaction.guildId ? { guildId: interactionPayload.interaction.guildId } : {}),
-        ...(interactionPayload.interaction.channelId ? { channelId: interactionPayload.interaction.channelId } : {}),
-        userId: interactionPayload.interaction.user.id,
-        ...(interactionPayload.interaction.commandName ? { commandName: interactionPayload.interaction.commandName } : {}),
+        ...(ix.guildId ? { guildId: ix.guildId } : {}),
+        ...(ix.channelId ? { channelId: ix.channelId } : {}),
+        userId: ix.user.id,
+        ...(ix.commandName ? { commandName: ix.commandName } : {}),
+        ...(ix.customId ? { customId: ix.customId } : {}),
+        interactionKind: ix.kind,
       };
     }
     case "messageCreate": {
@@ -149,6 +186,31 @@ function eventMetadata(name: BotEventName, payload: unknown): {
         userId: memberPayload.member.id,
       };
     }
+    case "guildMemberUpdate": {
+      const memberPayload = payload as BotEventPayloadMap["guildMemberUpdate"];
+      return {
+        guildId: memberPayload.member.guildId,
+        userId: memberPayload.member.id,
+      };
+    }
+    case "guildCreate":
+    case "guildDelete": {
+      const guildPayload = payload as BotEventPayloadMap["guildCreate"];
+      return {
+        guildId: guildPayload.guild.id,
+      };
+    }
+    case "threadCreate":
+    case "threadUpdate":
+    case "threadDelete": {
+      const threadPayload = payload as BotEventPayloadMap["threadCreate"];
+      return {
+        guildId: threadPayload.thread.guildId,
+        ...(threadPayload.thread.parentId
+          ? { channelId: threadPayload.thread.parentId }
+          : { channelId: threadPayload.thread.id }),
+      };
+    }
     default:
       return {};
   }
@@ -165,6 +227,8 @@ export function matchesEventSubscription(subscription: EventSubscription, payloa
     matchesField(metadata.guildId, normalized.filter.guildId) &&
     matchesField(metadata.channelId, normalized.filter.channelId) &&
     matchesField(metadata.userId, normalized.filter.userId) &&
-    matchesField(metadata.commandName, normalized.filter.commandName)
+    matchesField(metadata.commandName, normalized.filter.commandName) &&
+    matchesField(metadata.customId, normalized.filter.customId) &&
+    matchesKind(metadata.interactionKind, normalized.filter.interactionKind)
   );
 }
