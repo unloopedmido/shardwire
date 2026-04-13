@@ -1,6 +1,6 @@
 {
   "name": "shardwire",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Lightweight Discord-hosted WebSocket bridge for commands and events.",
   "homepage": "https://www.npmjs.com/package/shardwire",
   "repository": {
@@ -25,6 +25,8 @@
     "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
     "build": "tsup src/index.ts --format esm,cjs --dts --sourcemap",
     "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix",
     "test": "vitest run",
     "example:host": "tsx examples/host-basic.ts",
     "example:consumer": "tsx examples/consumer-basic.ts",
@@ -67,10 +69,14 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@eslint/js": "^9.38.0",
     "@types/node": "^24.5.2",
     "@types/ws": "^8.18.1",
+    "eslint": "^9.38.0",
+    "globals": "^16.4.0",
     "tsup": "^8.5.0",
     "tsx": "^4.20.6",
+    "typescript-eslint": "^8.46.1",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"
   },

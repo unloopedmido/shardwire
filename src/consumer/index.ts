@@ -44,7 +44,7 @@ class CommandRequestError extends Error {
 }
 
 export function createConsumerShardwire<C extends CommandMap, E extends EventMap>(
-  options: ConsumerOptions<C, E>,
+  options: ConsumerOptions,
 ): ConsumerShardwire<C, E> {
   const logger = withLogger(options.logger);
   const reconnectEnabled = options.reconnect?.enabled ?? true;

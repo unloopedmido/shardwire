@@ -38,9 +38,11 @@ Consumer (dashboard/backend side):
 
 ```ts
 const wire = createShardwire<Commands, Events>({
-  url: "ws://host:3001/shardwire",
+  url: "wss://host.example.com/shardwire",
   secret: "...",
   secretId: "s0",
+  // only when explicitly needed outside localhost:
+  // allowInsecureWs: true,
 });
 ```
 
@@ -77,6 +79,7 @@ const wire = createShardwire<Commands, Events>({
 
 - Use a strong shared secret from env vars.
 - Keep host and consumers on same `secret`.
+- Prefer `wss://` outside loopback/localhost. Non-loopback `ws://` is rejected by default unless `allowInsecureWs: true`.
 - Consumer reconnect is built-in; tune `reconnect` config when needed.
 - `send()` returns `CommandResult` union:
   - success: `{ ok: true, data, ... }`

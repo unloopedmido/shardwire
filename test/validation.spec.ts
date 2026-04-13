@@ -42,6 +42,25 @@ describe("shardwire validation", () => {
     ).toThrow(/requires `url`|requires `secret`/i);
   });
 
+  it("rejects insecure non-loopback ws urls by default", () => {
+    expect(() =>
+      createShardwire({
+        url: "ws://example.com/shardwire",
+        secret: "abc",
+      } as any),
+    ).toThrow(/insecure|wss/i);
+  });
+
+  it("allows insecure non-loopback ws urls when explicitly enabled", () => {
+    expect(() =>
+      createShardwire({
+        url: "ws://example.com/shardwire",
+        secret: "abc",
+        allowInsecureWs: true,
+      } as any),
+    ).not.toThrow();
+  });
+
   it("throws for empty command/event names", async () => {
     const port = await getFreePort();
     const fakeClient = {
