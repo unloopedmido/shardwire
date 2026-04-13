@@ -1,4 +1,5 @@
 import type { APIAllowedMentions, APIEmbed, Snowflake } from "discord-api-types/v10";
+import type { GatewayIntentBits } from "discord.js";
 
 export type Unsubscribe = () => void;
 
@@ -9,11 +10,7 @@ export interface ShardwireLogger {
   error?: (message: string, meta?: Record<string, unknown>) => void;
 }
 
-export type BotIntentName =
-  | "Guilds"
-  | "GuildMembers"
-  | "GuildMessages"
-  | "MessageContent";
+export type BotIntentName = keyof typeof GatewayIntentBits;
 
 export interface BridgeUser {
   id: Snowflake;
@@ -71,6 +68,20 @@ export interface BridgeDeletedMessage {
   channelId: Snowflake;
   guildId?: Snowflake;
   deletedAt: string;
+}
+
+export interface BridgeReactionEmoji {
+  id?: Snowflake;
+  name?: string | null;
+  animated?: boolean;
+}
+
+export interface BridgeMessageReaction {
+  messageId: Snowflake;
+  channelId: Snowflake;
+  guildId?: Snowflake;
+  user?: BridgeUser;
+  emoji: BridgeReactionEmoji;
 }
 
 export type BridgeInteractionKind =
@@ -135,12 +146,22 @@ export interface GuildMemberRemoveEventPayload extends EventEnvelopeBase {
   member: BridgeGuildMember;
 }
 
+export interface MessageReactionAddEventPayload extends EventEnvelopeBase {
+  reaction: BridgeMessageReaction;
+}
+
+export interface MessageReactionRemoveEventPayload extends EventEnvelopeBase {
+  reaction: BridgeMessageReaction;
+}
+
 export interface BotEventPayloadMap {
   ready: ReadyEventPayload;
   interactionCreate: InteractionCreateEventPayload;
   messageCreate: MessageCreateEventPayload;
   messageUpdate: MessageUpdateEventPayload;
   messageDelete: MessageDeleteEventPayload;
+  messageReactionAdd: MessageReactionAddEventPayload;
+  messageReactionRemove: MessageReactionRemoveEventPayload;
   guildMemberAdd: GuildMemberAddEventPayload;
   guildMemberRemove: GuildMemberRemoveEventPayload;
 }
@@ -209,6 +230,18 @@ export interface RemoveMemberRoleActionPayload {
   reason?: string;
 }
 
+export interface AddMessageReactionActionPayload {
+  channelId: Snowflake;
+  messageId: Snowflake;
+  emoji: string;
+}
+
+export interface RemoveOwnMessageReactionActionPayload {
+  channelId: Snowflake;
+  messageId: Snowflake;
+  emoji: string;
+}
+
 export interface BotActionPayloadMap {
   sendMessage: SendMessageActionPayload;
   editMessage: EditMessageActionPayload;
@@ -220,6 +253,8 @@ export interface BotActionPayloadMap {
   kickMember: KickMemberActionPayload;
   addMemberRole: AddMemberRoleActionPayload;
   removeMemberRole: RemoveMemberRoleActionPayload;
+  addMessageReaction: AddMessageReactionActionPayload;
+  removeOwnMessageReaction: RemoveOwnMessageReactionActionPayload;
 }
 
 export interface DeleteMessageActionResult {
@@ -238,6 +273,12 @@ export interface MemberModerationActionResult {
   userId: Snowflake;
 }
 
+export interface MessageReactionActionResult {
+  messageId: Snowflake;
+  channelId: Snowflake;
+  emoji: string;
+}
+
 export interface BotActionResultDataMap {
   sendMessage: BridgeMessage;
   editMessage: BridgeMessage;
@@ -249,6 +290,8 @@ export interface BotActionResultDataMap {
   kickMember: MemberModerationActionResult;
   addMemberRole: BridgeGuildMember;
   removeMemberRole: BridgeGuildMember;
+  addMessageReaction: MessageReactionActionResult;
+  removeOwnMessageReaction: MessageReactionActionResult;
 }
 
 export type BotActionName = keyof BotActionPayloadMap;

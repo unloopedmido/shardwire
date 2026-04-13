@@ -36,7 +36,7 @@ import { createBotBridge } from "shardwire";
 
 const bridge = createBotBridge({
   token: process.env.DISCORD_TOKEN!,
-  intents: ["Guilds", "GuildMessages", "MessageContent", "GuildMembers"],
+  intents: ["Guilds", "GuildMessages", "GuildMessageReactions", "MessageContent", "GuildMembers"],
   server: {
     port: 3001,
     secrets: [process.env.SHARDWIRE_SECRET!],
@@ -65,6 +65,10 @@ app.on("messageCreate", ({ message }) => {
   console.log(message.channelId, message.content);
 });
 
+app.on("messageReactionAdd", ({ reaction }) => {
+  console.log("reaction:", reaction.messageId, reaction.emoji.name ?? reaction.emoji.id);
+});
+
 await app.ready();
 ```
 
@@ -91,6 +95,12 @@ const result = await app.actions.sendMessage({
 if (!result.ok) {
   console.error(result.error.code, result.error.message);
 }
+
+await app.actions.addMessageReaction({
+  channelId: "123456789012345678",
+  messageId: "123456789012345679",
+  emoji: "🔥",
+});
 ```
 
 ## Built-In Events
@@ -102,6 +112,8 @@ Shardwire currently exposes these bot-side events:
 - `messageCreate`
 - `messageUpdate`
 - `messageDelete`
+- `messageReactionAdd`
+- `messageReactionRemove`
 - `guildMemberAdd`
 - `guildMemberRemove`
 
@@ -128,6 +140,8 @@ Optional filters can narrow delivery by:
 - `kickMember`
 - `addMemberRole`
 - `removeMemberRole`
+- `addMessageReaction`
+- `removeOwnMessageReaction`
 
 Every action returns an `ActionResult<T>`:
 
@@ -193,6 +207,7 @@ Main exports:
 - Non-loopback app connections should use `wss://`
 - `discord.js` is used internally by the default runtime, but apps interact with Shardwire through Shardwire's own JSON payloads
 - Event availability depends on the intents you enable for the bot bridge
+- `messageReactionAdd` and `messageReactionRemove` require `GuildMessageReactions`
 
 ## Examples
 

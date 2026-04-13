@@ -117,6 +117,86 @@ describe("discord-first bridge validation", () => {
     await bot.close();
   });
 
+  it("keeps interactionCreate available without Guilds intent", async () => {
+    const port = await getFreePort();
+    const runtime = new FakeDiscordRuntime();
+    const bot = createBotBridgeWithRuntime(
+      {
+        token: "fake-token",
+        intents: ["GuildMessages"],
+        server: {
+          port,
+          secrets: [
+            {
+              id: "interactions",
+              value: "secret",
+              allow: {
+                events: ["interactionCreate"],
+                actions: [],
+              },
+            },
+          ],
+        },
+      },
+      runtime,
+    );
+
+    const app = connectBotBridge({
+      url: `ws://127.0.0.1:${port}/shardwire`,
+      secret: "secret",
+      secretId: "interactions",
+    });
+
+    await Promise.all([bot.ready(), app.ready()]);
+
+    expect(app.capabilities()).toEqual({
+      events: ["interactionCreate"],
+      actions: [],
+    });
+
+    await app.close();
+    await bot.close();
+  });
+
+  it("gates reaction events behind GuildMessageReactions intent", async () => {
+    const port = await getFreePort();
+    const runtime = new FakeDiscordRuntime();
+    const bot = createBotBridgeWithRuntime(
+      {
+        token: "fake-token",
+        intents: ["GuildMessages"],
+        server: {
+          port,
+          secrets: [
+            {
+              id: "reactions",
+              value: "secret",
+              allow: {
+                events: ["messageReactionAdd"],
+                actions: [],
+              },
+            },
+          ],
+        },
+      },
+      runtime,
+    );
+
+    const app = connectBotBridge({
+      url: `ws://127.0.0.1:${port}/shardwire`,
+      secret: "secret",
+      secretId: "reactions",
+    });
+
+    app.on("messageReactionAdd", () => undefined);
+
+    await bot.ready();
+    await expect(app.ready()).rejects.toBeInstanceOf(BridgeCapabilityError);
+
+    await app.close();
+    await bot.close();
+  });
+
   it("rejects unsupported event subscriptions predictably", async () => {
     const port = await getFreePort();
     const runtime = new FakeDiscordRuntime();

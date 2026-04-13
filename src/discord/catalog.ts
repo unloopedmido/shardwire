@@ -7,6 +7,8 @@ export const BOT_EVENT_NAMES = [
   "messageCreate",
   "messageUpdate",
   "messageDelete",
+  "messageReactionAdd",
+  "messageReactionRemove",
   "guildMemberAdd",
   "guildMemberRemove",
 ] as const satisfies readonly BotEventName[];
@@ -22,21 +24,26 @@ export const BOT_ACTION_NAMES = [
   "kickMember",
   "addMemberRole",
   "removeMemberRole",
+  "addMessageReaction",
+  "removeOwnMessageReaction",
 ] as const satisfies readonly BotActionName[];
 
-export const BOT_INTENT_BITS: Record<BotIntentName, number> = {
-  Guilds: GatewayIntentBits.Guilds,
-  GuildMembers: GatewayIntentBits.GuildMembers,
-  GuildMessages: GatewayIntentBits.GuildMessages,
-  MessageContent: GatewayIntentBits.MessageContent,
-};
+const DISCORD_GATEWAY_INTENT_ENTRIES = Object.entries(GatewayIntentBits).filter(
+  (entry): entry is [BotIntentName, number] => typeof entry[1] === "number",
+);
+
+export const BOT_INTENT_BITS: Record<BotIntentName, number> = Object.fromEntries(
+  DISCORD_GATEWAY_INTENT_ENTRIES,
+) as Record<BotIntentName, number>;
 
 const EVENT_REQUIRED_INTENTS: Record<BotEventName, readonly BotIntentName[]> = {
   ready: [],
-  interactionCreate: ["Guilds"],
+  interactionCreate: [],
   messageCreate: ["GuildMessages"],
   messageUpdate: ["GuildMessages"],
   messageDelete: ["GuildMessages"],
+  messageReactionAdd: ["GuildMessageReactions"],
+  messageReactionRemove: ["GuildMessageReactions"],
   guildMemberAdd: ["GuildMembers"],
   guildMemberRemove: ["GuildMembers"],
 };

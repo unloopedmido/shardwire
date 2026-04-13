@@ -9,7 +9,7 @@ import { createBotBridge } from "shardwire";
 
 const bridge = createBotBridge({
   token: process.env.DISCORD_TOKEN!,
-  intents: ["Guilds", "GuildMessages", "MessageContent", "GuildMembers"],
+  intents: ["Guilds", "GuildMessages", "GuildMessageReactions", "MessageContent", "GuildMembers"],
   server: {
     port: 3001,
     secrets: [process.env.SHARDWIRE_SECRET!],
@@ -80,6 +80,14 @@ app.on(
   },
   { commandName: "deploy" },
 );
+
+app.on(
+  "messageReactionAdd",
+  ({ reaction }) => {
+    console.log(reaction.messageId, reaction.emoji.name ?? reaction.emoji.id);
+  },
+  { channelId: "123456789012345678" },
+);
 ```
 
 ## Action calls
@@ -96,6 +104,12 @@ if (!result.ok) {
 }
 
 console.log(result.data.id);
+
+await app.actions.addMessageReaction({
+  channelId: "123456789012345678",
+  messageId: result.data.id,
+  emoji: "🔥",
+});
 ```
 
 For interaction workflows, use the built-in methods:
@@ -110,6 +124,11 @@ For moderation workflows, use:
 - `kickMember`
 - `addMemberRole`
 - `removeMemberRole`
+
+For reaction workflows, use:
+
+- `addMessageReaction`
+- `removeOwnMessageReaction`
 
 ## Troubleshooting rules
 

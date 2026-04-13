@@ -5,9 +5,12 @@ import type {
   GuildMember,
   Interaction,
   Message,
+  MessageReaction,
   ModalSubmitInteraction,
   PartialGuildMember,
   PartialMessage,
+  PartialMessageReaction,
+  PartialUser,
   User,
 } from "discord.js";
 import type {
@@ -15,6 +18,8 @@ import type {
   BridgeGuildMember,
   BridgeInteraction,
   BridgeMessage,
+  BridgeMessageReaction,
+  BridgeReactionEmoji,
   BridgeUser,
 } from "../types";
 
@@ -22,14 +27,14 @@ function serializeEmbeds(message: Message | PartialMessage): APIEmbed[] {
   return message.embeds.map((embed) => embed.toJSON());
 }
 
-export function serializeUser(user: User): BridgeUser {
+export function serializeUser(user: User | PartialUser): BridgeUser {
   return {
     id: user.id,
-    username: user.username,
-    discriminator: user.discriminator,
+    username: user.username ?? "unknown",
+    discriminator: user.discriminator ?? "0",
     ...(user.globalName !== undefined ? { globalName: user.globalName } : {}),
     avatarUrl: user.displayAvatarURL() || null,
-    bot: user.bot,
+    bot: user.bot ?? false,
     system: user.system ?? false,
   };
 }
@@ -92,6 +97,27 @@ export function serializeDeletedMessage(message: Message | PartialMessage): Brid
     channelId: message.channelId,
     ...(message.guildId ? { guildId: message.guildId } : {}),
     deletedAt: new Date().toISOString(),
+  };
+}
+
+function serializeReactionEmoji(reaction: MessageReaction | PartialMessageReaction): BridgeReactionEmoji {
+  return {
+    ...(reaction.emoji.id ? { id: reaction.emoji.id } : {}),
+    ...(reaction.emoji.name !== undefined ? { name: reaction.emoji.name } : {}),
+    ...(typeof reaction.emoji.animated === "boolean" ? { animated: reaction.emoji.animated } : {}),
+  };
+}
+
+export function serializeMessageReaction(
+  reaction: MessageReaction | PartialMessageReaction,
+  user?: User | PartialUser,
+): BridgeMessageReaction {
+  return {
+    messageId: reaction.message.id,
+    channelId: reaction.message.channelId,
+    ...(reaction.message.guildId ? { guildId: reaction.message.guildId } : {}),
+    ...(user ? { user: serializeUser(user) } : {}),
+    emoji: serializeReactionEmoji(reaction),
   };
 }
 

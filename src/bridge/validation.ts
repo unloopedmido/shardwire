@@ -191,17 +191,3 @@ export function resolveCapabilitiesForSecret(
     actions: [...actions],
   };
 }
-
-export function secretAllowsEvent(secret: NormalizedSecretConfig, eventName: BotEventName): boolean {
-  if (secret.scope.events === "*") {
-    return true;
-  }
-  return secret.scope.events.has(eventName);
-}
-
-export function secretAllowsAction(secret: NormalizedSecretConfig, actionName: BotActionName): boolean {
-  if (secret.scope.actions === "*") {
-    return true;
-  }
-  return secret.scope.actions.has(actionName);
-}

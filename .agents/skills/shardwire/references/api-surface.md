@@ -58,14 +58,17 @@ Use this file when you need the current public Shardwire contract.
 - `messageCreate`
 - `messageUpdate`
 - `messageDelete`
+- `messageReactionAdd`
+- `messageReactionRemove`
 - `guildMemberAdd`
 - `guildMemberRemove`
 
 Required intents:
 
 - `ready`: none
-- `interactionCreate`: `Guilds`
+- `interactionCreate`: none
 - `messageCreate`, `messageUpdate`, `messageDelete`: `GuildMessages`
+- `messageReactionAdd`, `messageReactionRemove`: `GuildMessageReactions`
 - `guildMemberAdd`, `guildMemberRemove`: `GuildMembers`
 
 Notes:
@@ -86,6 +89,8 @@ Notes:
 - `kickMember`
 - `addMemberRole`
 - `removeMemberRole`
+- `addMessageReaction`
+- `removeOwnMessageReaction`
 
 All actions return `Promise<ActionResult<T>>`, not thrown success values.
 

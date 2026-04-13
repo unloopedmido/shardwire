@@ -18,6 +18,10 @@ async function main(): Promise<void> {
     console.log("message:", message.channelId, message.content);
   });
 
+  app.on("messageReactionAdd", ({ reaction }) => {
+    console.log("reaction add:", reaction.channelId, reaction.messageId, reaction.emoji.name ?? reaction.emoji.id);
+  });
+
   await app.ready();
 
   console.log("Capabilities:", app.capabilities());
