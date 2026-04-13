@@ -15,6 +15,7 @@ import { createShardwire } from "shardwire";
 const wire = createShardwire({
   url: "ws://bot-host:3001/shardwire",
   secret: process.env.SHARDWIRE_SECRET!,
+  secretId: "s0",
   requestTimeoutMs: 10_000,
   reconnect: {
     enabled: true,
@@ -30,7 +31,7 @@ const wire = createShardwire({
 ```ts
 const result = await wire.send("ban-user", { userId: "123" });
 if (!result.ok) {
-  if (result.error.code === "AUTH_ERROR") {
+  if (result.error.code === "UNAUTHORIZED") {
     // likely secret mismatch
   } else if (result.error.code === "TIMEOUT") {
     // host unavailable or command timed out

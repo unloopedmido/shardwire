@@ -10,3 +10,7 @@ export function isSecretValid(provided: string, expected: string): boolean {
 
   return timingSafeEqual(providedBuffer, expectedBuffer);
 }
+
+export function getSecretId(secretIndex: number): string {
+  return `s${secretIndex}`;
+}

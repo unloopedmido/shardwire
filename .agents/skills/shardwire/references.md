@@ -18,7 +18,7 @@ Host (bot side):
 ```ts
 const wire = createShardwire<Commands, Events>({
   client: discordClient, // or token
-  server: { port: 3001, secret: "..." },
+  server: { port: 3001, secrets: ["..."], primarySecretId: "s0" },
 });
 ```
 
@@ -28,6 +28,7 @@ Consumer (dashboard/backend side):
 const wire = createShardwire<Commands, Events>({
   url: "ws://host:3001/shardwire",
   secret: "...",
+  secretId: "s0",
 });
 ```
 
@@ -35,8 +36,8 @@ const wire = createShardwire<Commands, Events>({
 
 | Topic | What to Provide |
 | --- | --- |
-| Host bootstrapping | `client` or `token`, `server.port`, `server.secret`, optional `path` |
-| Consumer connection | `url`, `secret`, optional `reconnect`, `requestTimeoutMs` |
+| Host bootstrapping | `client` or `token`, `server.port`, `server.secrets`, optional `path` |
+| Consumer connection | `url`, `secret`, optional `secretId`, `reconnect`, `requestTimeoutMs` |
 | Commands | command name list, payload schema, expected result schema |
 | Events | event name list, payload schema, where emitted and consumed |
 | Security | secret env var strategy, optional origin restrictions |
@@ -45,7 +46,7 @@ const wire = createShardwire<Commands, Events>({
 ## Recommended Integration Sequence
 
 1. Define `Commands` and `Events` TypeScript maps.
-2. Start host with `server.port` + shared `secret`.
+2. Start host with `server.port` + shared `secrets`.
 3. Register host command handlers with `onCommand`.
 4. Emit host events with `emitEvent`.
 5. Connect consumer with matching `url` + `secret`.
@@ -71,7 +72,7 @@ const wire = createShardwire<Commands, Events>({
 
 Common error codes:
 
-- `AUTH_ERROR` secret mismatch or handshake issue
+- `UNAUTHORIZED` secret mismatch or handshake issue
 - `TIMEOUT` host unavailable or command exceeded timeout
 - `COMMAND_NOT_FOUND` handler missing on host
 - `VALIDATION_ERROR` invalid envelope/name/payload
@@ -79,7 +80,7 @@ Common error codes:
 
 ## Common Pitfalls
 
-- Secret mismatch (`AUTH_ERROR`)
+- Secret mismatch (`UNAUTHORIZED`)
 - Wrong path/URL (default path is `/shardwire`)
 - Non-serializable payloads
 - Missing command handler (`COMMAND_NOT_FOUND`)

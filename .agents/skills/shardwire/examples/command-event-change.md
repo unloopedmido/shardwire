@@ -22,7 +22,7 @@ type Events = {
 
 const wire = createShardwire<Commands, Events>({
   client: discordClient,
-  server: { port: 3001, secret: process.env.SHARDWIRE_SECRET! },
+  server: { port: 3001, secrets: [process.env.SHARDWIRE_SECRET!], primarySecretId: "s0" },
 });
 
 wire.onCommand("ban-user", async ({ userId }) => {
@@ -49,6 +49,7 @@ type Events = {
 const wire = createShardwire<Commands, Events>({
   url: "ws://bot-host:3001/shardwire",
   secret: process.env.SHARDWIRE_SECRET!,
+  secretId: "s0",
 });
 
 const result = await wire.send("ban-user", { userId: "123" });

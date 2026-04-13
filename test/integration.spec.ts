@@ -32,7 +32,7 @@ describe("shardwire integration", () => {
 
     const port = await getFreePort();
     const host = createShardwire<Commands, {}>({
-      server: { port, secret: "test-secret" },
+      server: { port, secrets: ["test-secret"] },
       name: "test-host",
     });
 
@@ -41,6 +41,7 @@ describe("shardwire integration", () => {
     const consumer = createShardwire<Commands, {}>({
       url: `ws://127.0.0.1:${port}/shardwire`,
       secret: "test-secret",
+      secretId: "s0",
       requestTimeoutMs: 1500,
     });
 
@@ -61,7 +62,7 @@ describe("shardwire integration", () => {
 
     const port = await getFreePort();
     const host = createShardwire<{}, Events>({
-      server: { port, secret: "event-secret" },
+      server: { port, secrets: ["event-secret"] },
       name: "bot-host",
     });
 
@@ -96,7 +97,7 @@ describe("shardwire integration", () => {
 
     const port = await getFreePort();
     const host = createShardwire<Commands, {}>({
-      server: { port, secret: "valid-secret" },
+      server: { port, secrets: ["valid-secret"] },
     });
 
     const consumer = createShardwire<Commands, {}>({
@@ -108,7 +109,34 @@ describe("shardwire integration", () => {
     const result = await consumer.send("ping", { value: "x" });
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.error.code).toBe("AUTH_ERROR");
+      expect(result.error.code).toBe("UNAUTHORIZED");
+    }
+
+    await consumer.close();
+    await host.close();
+  });
+
+  it("returns unauthorized when secret id is unknown", async () => {
+    type Commands = {
+      ping: { value: string };
+    };
+
+    const port = await getFreePort();
+    const host = createShardwire<Commands, {}>({
+      server: { port, secrets: ["valid-secret"], primarySecretId: "s0" },
+    });
+
+    const consumer = createShardwire<Commands, {}>({
+      url: `ws://127.0.0.1:${port}/shardwire`,
+      secret: "valid-secret",
+      secretId: "s1",
+      requestTimeoutMs: 500,
+    });
+
+    const result = await consumer.send("ping", { value: "x" });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.code).toBe("UNAUTHORIZED");
     }
 
     await consumer.close();

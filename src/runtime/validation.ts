@@ -15,8 +15,19 @@ export function assertHostOptions(options: HostOptions<any, any>): void {
     throw new Error("Host mode requires a server configuration.");
   }
   assertPositiveNumber("server.port", options.server.port);
-  if (!isNonEmptyString(options.server.secret)) {
-    throw new Error("server.secret is required.");
+  if (!Array.isArray(options.server.secrets) || options.server.secrets.length === 0) {
+    throw new Error("server.secrets must contain at least one secret.");
+  }
+  for (const [index, secret] of options.server.secrets.entries()) {
+    if (!isNonEmptyString(secret)) {
+      throw new Error(`server.secrets[${index}] must be a non-empty string.`);
+    }
+  }
+  if (
+    options.server.primarySecretId !== undefined &&
+    !options.server.secrets.some((_, index) => options.server.primarySecretId === `s${index}`)
+  ) {
+    throw new Error("server.primarySecretId must reference an existing secret id.");
   }
   if (options.server.heartbeatMs !== undefined) {
     assertPositiveNumber("server.heartbeatMs", options.server.heartbeatMs);
@@ -35,6 +46,9 @@ export function assertConsumerOptions(options: ConsumerOptions<any, any>): void 
   }
   if (!isNonEmptyString(options.secret)) {
     throw new Error("Consumer mode requires `secret`.");
+  }
+  if (options.secretId !== undefined && !isNonEmptyString(options.secretId)) {
+    throw new Error("Consumer option `secretId` must be a non-empty string.");
   }
   if (options.requestTimeoutMs !== undefined) {
     assertPositiveNumber("requestTimeoutMs", options.requestTimeoutMs);

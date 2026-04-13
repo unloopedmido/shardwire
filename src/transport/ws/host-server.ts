@@ -13,7 +13,7 @@ import type { CommandFailure, CommandSuccess, HostOptions, ShardwireLogger } fro
 import { withLogger } from "../../utils/logger";
 import { createConnectionId } from "../../utils/id";
 import type { HostConnectionState } from "../../runtime/state";
-import { isSecretValid } from "../../runtime/security";
+import { getSecretId, isSecretValid } from "../../runtime/security";
 
 const CLOSE_AUTH_REQUIRED = 4001;
 const CLOSE_AUTH_FAILED = 4003;
@@ -154,13 +154,35 @@ export class HostWebSocketServer {
       }
 
       const payload = envelope.payload as AuthHelloPayload;
-      if (!payload?.secret || !isSecretValid(payload.secret, this.config.options.server.secret)) {
+      const providedSecret = payload?.secret;
+      const knownSecrets = this.config.options.server.secrets;
+      const secretId = payload?.secretId;
+      let authReason: "unknown_secret_id" | "invalid_secret" | null = null;
+
+      if (!providedSecret) {
+        authReason = "invalid_secret";
+      } else if (secretId) {
+        const secretIndex = knownSecrets.findIndex((_, index) => getSecretId(index) === secretId);
+        if (secretIndex < 0) {
+          authReason = "unknown_secret_id";
+        } else {
+          const expectedSecret = knownSecrets[secretIndex];
+          if (!expectedSecret || !isSecretValid(providedSecret, expectedSecret)) {
+            authReason = "invalid_secret";
+          }
+        }
+      } else if (!knownSecrets.some((secret) => isSecretValid(providedSecret, secret))) {
+        authReason = "invalid_secret";
+      }
+
+      if (authReason) {
         this.safeSend(
           state.socket,
           stringifyEnvelope(
             makeEnvelope("auth.error", {
-              code: "AUTH_ERROR",
-              message: "Invalid shared secret.",
+              code: "UNAUTHORIZED",
+              reason: authReason,
+              message: "Authentication failed.",
             }),
           ),
         );

@@ -145,7 +145,10 @@ export function createConsumerShardwire<C extends CommandMap, E extends EventMap
     socket.on("open", () => {
       reconnectAttempts = 0;
       isAuthed = false;
-      const hello = makeEnvelope("auth.hello", { secret: options.secret });
+      const hello = makeEnvelope("auth.hello", {
+        secret: options.secret,
+        secretId: options.secretId,
+      });
       socket?.send(stringifyEnvelope(hello));
       authTimeoutTimer = setTimeout(() => {
         if (!isAuthed) {
@@ -243,7 +246,7 @@ export function createConsumerShardwire<C extends CommandMap, E extends EventMap
             requestId: sendOptions?.requestId ?? "unknown",
             ts: Date.now(),
             error: {
-              code: "AUTH_ERROR",
+              code: "UNAUTHORIZED",
               message: error instanceof Error ? error.message : "Failed to authenticate.",
             },
           } satisfies CommandFailure;
