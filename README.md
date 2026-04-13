@@ -97,6 +97,12 @@ app.on(
 );
 ```
 
+## Startup lifecycle
+
+- **`createBotBridge(...)`** starts the WebSocket server immediately; `await bridge.ready()` resolves when the Discord client has finished its initial `ready` handshake (same timing you would expect from a normal bot login).
+- **Register `app.on(...)` handlers before `await app.ready()`** so subscriptions are known when the app authenticates. `ready()` connects, completes auth, negotiates capabilities from intents + secret scope, then throws `BridgeCapabilityError` if any registered handler targets an event the app is not allowed to receive.
+- **Sticky `ready`**: if the bot was already ready before the app connected, the bridge replays the latest `ready` payload to matching subscriptions after auth.
+
 ## Built-In Events
 
 Apps subscribe to events with `app.on(...)`. The bridge forwards only what each app subscribes to.
@@ -168,13 +174,28 @@ type ActionResult<T> =
 
 ### Idempotency for safe retries
 
-You can provide an `idempotencyKey` in action options to dedupe repeated requests on the same connection:
+You can provide an `idempotencyKey` in action options so repeated calls return the first result while the server-side entry is still valid (default TTL **120s**).
+
+- **Default scope (`connection`)**: dedupe is per WebSocket connection (a reconnect is a new connection and does not replay prior keys).
+- **Optional scope (`secret`)**: set `server.idempotencyScope: "secret"` on the bot bridge to dedupe by configured secret id across connections (useful when the app reconnects and retries the same logical operation).
 
 ```ts
 await app.actions.sendMessage(
   { channelId: "123456789012345678", content: "Hello once" },
   { idempotencyKey: "notify:order:123" },
 );
+```
+
+Tune limits on the bot bridge when needed:
+
+```ts
+server: {
+  port: 3001,
+  secrets: [process.env.SHARDWIRE_SECRET!],
+  maxPayloadBytes: 65536, // per-frame JSON limit (default 65536)
+  idempotencyScope: "secret",
+  idempotencyTtlMs: 120_000,
+},
 ```
 
 ### App-side action metrics
@@ -185,11 +206,20 @@ const app = connectBotBridge({
   secret: process.env.SHARDWIRE_SECRET!,
   metrics: {
     onActionComplete(meta) {
-      console.log(meta.name, meta.durationMs, meta.ok, meta.errorCode);
+      console.log(
+        meta.name,
+        meta.durationMs,
+        meta.ok,
+        meta.errorCode,
+        meta.discordStatus,
+        meta.retryAfterMs,
+      );
     },
   },
 });
 ```
+
+On Discord **429** responses, failed actions surface `SERVICE_UNAVAILABLE` with `details.retryAfterMs` (when Discord provides `retry_after`) and the metrics hook receives `retryAfterMs` / `discordStatus` for backoff and dashboards.
 
 ## Secret Scopes
 
@@ -268,6 +298,8 @@ Main exports include:
 - Event availability depends on enabled intents and secret scope.
 
 **Reporting vulnerabilities:** email [cored.developments@gmail.com](mailto:cored.developments@gmail.com) with enough detail to reproduce the issue (versions, config shape, and steps). Do not open a public issue for undisclosed security problems.
+
+**Rotating bridge secrets without downtime:** configure **two** entries in `server.secrets` (old + new values), roll the app env to the new secret, then remove the old entry on the next deploy. Scoped secrets should keep **distinct** `id` values so apps can pin `secretId` during rotation.
 
 ## Contributing
 

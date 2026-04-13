@@ -62,7 +62,10 @@ export interface DiscordEventPayload<TName extends keyof BotEventPayloadMap = ke
 export interface ActionRequestPayload {
   name: BotActionName;
   data: unknown;
-  /** When set, duplicate keys on the same connection within ~2 minutes return the first result (best-effort). */
+  /**
+   * When set, duplicate keys return the first result within the server TTL (best-effort).
+   * Scope defaults to the WebSocket connection; configure `server.idempotencyScope: "secret"` for cross-connection dedupe.
+   */
   idempotencyKey?: string;
 }
 

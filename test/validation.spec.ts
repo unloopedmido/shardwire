@@ -56,6 +56,32 @@ describe("discord-first bridge validation", () => {
     ).toThrow(/maxConnections/i);
   });
 
+  it("throws for invalid idempotency options", () => {
+    expect(() =>
+      createBotBridge({
+        token: "fake-token",
+        intents: ["Guilds"],
+        server: {
+          port: 3001,
+          secrets: ["secret"],
+          idempotencyScope: "invalid" as never,
+        },
+      }),
+    ).toThrow(/idempotencyScope/i);
+
+    expect(() =>
+      createBotBridge({
+        token: "fake-token",
+        intents: ["Guilds"],
+        server: {
+          port: 3001,
+          secrets: ["secret"],
+          idempotencyTtlMs: 0,
+        },
+      }),
+    ).toThrow(/idempotencyTtlMs/i);
+  });
+
   it("rejects duplicate secret values even when ids differ", () => {
     expect(() =>
       createBotBridge({
