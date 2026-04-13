@@ -2,6 +2,17 @@
 
 All notable changes to this project are documented in this file.
 
+## 1.0.0
+
+- Breaking: replaced the generic host/consumer websocket bridge API with a Discord-first public API centered on `createBotBridge(...)` and `connectBotBridge(...)`.
+- Breaking: removed the public generic command/event abstractions, schema adapter exports, and legacy host/consumer examples from the package surface.
+- Added built-in Discord event streaming for `ready`, `interactionCreate`, `messageCreate`, `messageUpdate`, `messageDelete`, `guildMemberAdd`, and `guildMemberRemove`.
+- Added built-in app action APIs for messaging, interaction replies/defer/follow-ups, moderation, and member role changes.
+- Added negotiated bridge capabilities based on bot intents and optional scoped secrets.
+- Added app-driven event subscriptions with optional `guildId`, `channelId`, `userId`, and `commandName` filters.
+- Added a token-first Discord runtime with normalized JSON payload types backed by internal `discord.js` integration.
+- Replaced the package examples, tests, and skill metadata to match the Discord-first product direction.
+
 ## 0.2.0
 
 - Breaking: consumer URL validation now rejects insecure `ws://` for non-loopback hosts by default; use `wss://` or explicitly set `allowInsecureWs: true`.
