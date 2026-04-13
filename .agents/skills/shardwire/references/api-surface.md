@@ -21,8 +21,14 @@ import { createBotBridge, connectBotBridge } from "shardwire";
 - `messageDelete`
 - `messageReactionAdd`
 - `messageReactionRemove`
+- `guildCreate`
+- `guildDelete`
 - `guildMemberAdd`
 - `guildMemberRemove`
+- `guildMemberUpdate`
+- `threadCreate`
+- `threadUpdate`
+- `threadDelete`
 
 ## Subscription filters
 
@@ -30,6 +36,8 @@ import { createBotBridge, connectBotBridge } from "shardwire";
 - `channelId`
 - `userId`
 - `commandName` (for `interactionCreate`)
+- `customId` (for `interactionCreate`)
+- `interactionKind` (for `interactionCreate`)
 
 ## Built-in actions (`app.actions.*`)
 
@@ -38,7 +46,14 @@ import { createBotBridge, connectBotBridge } from "shardwire";
 - `deleteMessage`
 - `replyToInteraction`
 - `deferInteraction`
+- `deferUpdateInteraction`
 - `followUpInteraction`
+- `editInteractionReply`
+- `deleteInteractionReply`
+- `updateInteraction`
+- `showModal`
+- `fetchMessage`
+- `fetchMember`
 - `banMember`
 - `kickMember`
 - `addMemberRole`

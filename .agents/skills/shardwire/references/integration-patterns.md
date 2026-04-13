@@ -13,6 +13,7 @@
 
 3. Action calls
    - Invoke `app.actions.*(...)`.
+   - Use action options (`timeoutMs`, `requestId`, `idempotencyKey`) when reliability/retry behavior matters.
    - Handle both success and failure `ActionResult`.
 
 ## Minimal bootstrap examples
@@ -73,7 +74,7 @@ Debug by comparing expected permissions with `app.capabilities()`.
 - Missing Discord intent on bot bridge.
 - Event not allowed by scoped secret.
 - Event name mismatch in `app.on(...)`.
-- Overly restrictive filter (wrong `guildId`/`channelId`/`userId`/`commandName`).
+- Overly restrictive filter (wrong `guildId`/`channelId`/`userId`/`commandName`/`customId`/`interactionKind`).
 
 ### Action always fails
 
