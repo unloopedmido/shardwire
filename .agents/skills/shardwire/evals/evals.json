@@ -1,23 +1,23 @@
 {
-  "skill_name": "shardwire",
-  "evals": [
-    {
-      "id": 1,
-      "prompt": "I'm splitting my Discord bot and dashboard into two services. Can you wire up a minimal Shardwire setup where the bot process streams message events and the app process listens and logs channel + content?",
-      "expected_output": "Provides two runnable snippets using createBotBridge and connectBotBridge, includes intents and ready flow, and explains required env vars.",
-      "files": []
-    },
-    {
-      "id": 2,
-      "prompt": "My app connects but messageReactionAdd never fires. We use scoped secrets. Give me a focused Shardwire debugging checklist and tell me what to print to verify capabilities.",
-      "expected_output": "Diagnoses reaction intent/scope/subscription pitfalls, includes app.capabilities() checks, and gives ordered troubleshooting steps.",
-      "files": []
-    },
-    {
-      "id": 3,
-      "prompt": "Need a moderation endpoint in my API service that kicks members via Shardwire. Show safe action-call handling so we surface structured errors instead of crashing.",
-      "expected_output": "Uses app.actions.kickMember with ActionResult ok/error branching, and includes practical error handling guidance.",
-      "files": []
-    }
-  ]
+	"skill_name": "shardwire",
+	"evals": [
+		{
+			"id": 1,
+			"prompt": "I'm splitting my Discord bot and dashboard into two services. Can you wire up a minimal Shardwire setup where the bot process streams message events and the app process listens and logs channel + content?",
+			"expected_output": "Provides two runnable snippets using createBotBridge and connectBotBridge, includes intents and ready flow, and explains required env vars.",
+			"files": []
+		},
+		{
+			"id": 2,
+			"prompt": "My app connects but messageReactionAdd never fires. We use scoped secrets. Give me a focused Shardwire debugging checklist and tell me what to print to verify capabilities.",
+			"expected_output": "Diagnoses reaction intent/scope/subscription pitfalls, includes app.capabilities() checks, and gives ordered troubleshooting steps.",
+			"files": []
+		},
+		{
+			"id": 3,
+			"prompt": "Need a moderation endpoint in my API service that kicks members via Shardwire. Show safe action-call handling so we surface structured errors instead of crashing.",
+			"expected_output": "Uses app.actions.kickMember with ActionResult ok/error branching, and includes practical error handling guidance.",
+			"files": []
+		}
+	]
 }

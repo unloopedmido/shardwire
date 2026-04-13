@@ -22,9 +22,9 @@ Bot side:
 
 ```ts
 const bridge = createBotBridge({
-  token: process.env.DISCORD_TOKEN!,
-  intents: ["Guilds", "GuildMessages", "GuildMessageReactions", "MessageContent", "GuildMembers"],
-  server: { port: 3001, secrets: [process.env.SHARDWIRE_SECRET!] },
+	token: process.env.DISCORD_TOKEN!,
+	intents: ['Guilds', 'GuildMessages', 'GuildMessageReactions', 'MessageContent', 'GuildMembers'],
+	server: { port: 3001, secrets: [process.env.SHARDWIRE_SECRET!] },
 });
 await bridge.ready();
 ```
@@ -33,12 +33,12 @@ App side:
 
 ```ts
 const app = connectBotBridge({
-  url: "ws://127.0.0.1:3001/shardwire",
-  secret: process.env.SHARDWIRE_SECRET!,
-  appName: "dashboard",
+	url: 'ws://127.0.0.1:3001/shardwire',
+	secret: process.env.SHARDWIRE_SECRET!,
+	appName: 'dashboard',
 });
 
-app.on("ready", ({ user }) => console.log(user.username));
+app.on('ready', ({ user }) => console.log(user.username));
 await app.ready();
 ```
 
@@ -48,14 +48,14 @@ Use scoped secrets when multiple clients need different permissions:
 
 ```ts
 secrets: [
-  {
-    id: "dashboard",
-    value: process.env.SHARDWIRE_SECRET!,
-    allow: {
-      events: ["ready", "messageCreate"],
-      actions: ["sendMessage", "replyToInteraction"],
-    },
-  },
+	{
+		id: 'dashboard',
+		value: process.env.SHARDWIRE_SECRET!,
+		allow: {
+			events: ['ready', 'messageCreate'],
+			actions: ['sendMessage', 'replyToInteraction'],
+		},
+	},
 ];
 ```
 
@@ -85,6 +85,7 @@ Debug by comparing expected permissions with `app.capabilities()`.
 ## Agent behavior guidance
 
 When helping users:
+
 - Prefer concrete "bot snippet + app snippet + run steps".
 - Ask for only missing, high-impact context.
 - Validate intents/scopes before proposing deeper refactors.

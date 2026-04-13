@@ -41,38 +41,38 @@ npm install shardwire
 ### 1) Start the bot bridge process
 
 ```ts
-import { createBotBridge } from "shardwire";
+import { createBotBridge } from 'shardwire';
 
 const bridge = createBotBridge({
-  token: process.env.DISCORD_TOKEN!,
-  intents: ["Guilds", "GuildMessages", "GuildMessageReactions", "MessageContent", "GuildMembers"],
-  server: {
-    port: 3001,
-    secrets: [process.env.SHARDWIRE_SECRET!],
-  },
+	token: process.env.DISCORD_TOKEN!,
+	intents: ['Guilds', 'GuildMessages', 'GuildMessageReactions', 'MessageContent', 'GuildMembers'],
+	server: {
+		port: 3001,
+		secrets: [process.env.SHARDWIRE_SECRET!],
+	},
 });
 
 await bridge.ready();
-console.log("Bot bridge listening on ws://127.0.0.1:3001/shardwire");
+console.log('Bot bridge listening on ws://127.0.0.1:3001/shardwire');
 ```
 
 ### 2) Connect from your app process
 
 ```ts
-import { connectBotBridge } from "shardwire";
+import { connectBotBridge } from 'shardwire';
 
 const app = connectBotBridge({
-  url: "ws://127.0.0.1:3001/shardwire",
-  secret: process.env.SHARDWIRE_SECRET!,
-  appName: "dashboard",
+	url: 'ws://127.0.0.1:3001/shardwire',
+	secret: process.env.SHARDWIRE_SECRET!,
+	appName: 'dashboard',
 });
 
-app.on("ready", ({ user }) => {
-  console.log("Bot ready as", user.username);
+app.on('ready', ({ user }) => {
+	console.log('Bot ready as', user.username);
 });
 
-app.on("messageCreate", ({ message }) => {
-  console.log(message.channelId, message.content);
+app.on('messageCreate', ({ message }) => {
+	console.log(message.channelId, message.content);
 });
 
 await app.ready();
@@ -82,12 +82,12 @@ await app.ready();
 
 ```ts
 const result = await app.actions.sendMessage({
-  channelId: "123456789012345678",
-  content: "Hello from app side",
+	channelId: '123456789012345678',
+	content: 'Hello from app side',
 });
 
 if (!result.ok) {
-  console.error(result.error.code, result.error.message);
+	console.error(result.error.code, result.error.message);
 }
 ```
 
@@ -95,11 +95,11 @@ if (!result.ok) {
 
 ```ts
 app.on(
-  "messageCreate",
-  ({ message }) => {
-    console.log("Only this channel:", message.content);
-  },
-  { channelId: "123456789012345678" },
+	'messageCreate',
+	({ message }) => {
+		console.log('Only this channel:', message.content);
+	},
+	{ channelId: '123456789012345678' },
 );
 ```
 
@@ -174,8 +174,8 @@ All actions return:
 
 ```ts
 type ActionResult<T> =
-  | { ok: true; requestId: string; ts: number; data: T }
-  | { ok: false; requestId: string; ts: number; error: { code: string; message: string; details?: unknown } };
+	| { ok: true; requestId: string; ts: number; data: T }
+	| { ok: false; requestId: string; ts: number; error: { code: string; message: string; details?: unknown } };
 ```
 
 ### Idempotency for safe retries
@@ -187,8 +187,8 @@ You can provide an `idempotencyKey` in action options so repeated calls return t
 
 ```ts
 await app.actions.sendMessage(
-  { channelId: "123456789012345678", content: "Hello once" },
-  { idempotencyKey: "notify:order:123" },
+	{ channelId: '123456789012345678', content: 'Hello once' },
+	{ idempotencyKey: 'notify:order:123' },
 );
 ```
 
@@ -208,20 +208,13 @@ server: {
 
 ```ts
 const app = connectBotBridge({
-  url: "ws://127.0.0.1:3001/shardwire",
-  secret: process.env.SHARDWIRE_SECRET!,
-  metrics: {
-    onActionComplete(meta) {
-      console.log(
-        meta.name,
-        meta.durationMs,
-        meta.ok,
-        meta.errorCode,
-        meta.discordStatus,
-        meta.retryAfterMs,
-      );
-    },
-  },
+	url: 'ws://127.0.0.1:3001/shardwire',
+	secret: process.env.SHARDWIRE_SECRET!,
+	metrics: {
+		onActionComplete(meta) {
+			console.log(meta.name, meta.durationMs, meta.ok, meta.errorCode, meta.discordStatus, meta.retryAfterMs);
+		},
+	},
 });
 ```
 
@@ -312,7 +305,7 @@ SHARDWIRE_SECRET_MODERATION=moderation-secret \
 ## Public API
 
 ```ts
-import { createBotBridge, connectBotBridge } from "shardwire";
+import { createBotBridge, connectBotBridge } from 'shardwire';
 ```
 
 Main exports include:

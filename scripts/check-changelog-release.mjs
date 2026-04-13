@@ -2,18 +2,18 @@
 /**
  * Ensures CHANGELOG.md documents package.json version as released (not "(unreleased)").
  */
-import { readFileSync } from "node:fs";
-import { createRequire } from "node:module";
+import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { version } = require("../package.json");
-const changelog = readFileSync(new URL("../CHANGELOG.md", import.meta.url), "utf8");
+const { version } = require('../package.json');
+const changelog = readFileSync(new URL('../CHANGELOG.md', import.meta.url), 'utf8');
 
 function escapeRegExp(s) {
-	return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+	return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-const unreleasedHeader = new RegExp(`^##\\s+${escapeRegExp(version)}\\s*\\(unreleased\\)`, "m");
+const unreleasedHeader = new RegExp(`^##\\s+${escapeRegExp(version)}\\s*\\(unreleased\\)`, 'm');
 if (unreleasedHeader.test(changelog)) {
 	console.error(
 		`CHANGELOG.md lists version ${version} as "(unreleased)" but package.json is also ${version}. ` +
@@ -22,7 +22,7 @@ if (unreleasedHeader.test(changelog)) {
 	process.exit(1);
 }
 
-const releasedHeader = new RegExp(`^##\\s+${escapeRegExp(version)}(?:\\s|$)`, "m");
+const releasedHeader = new RegExp(`^##\\s+${escapeRegExp(version)}(?:\\s|$)`, 'm');
 if (!releasedHeader.test(changelog)) {
 	console.error(`CHANGELOG.md must contain a section header "## ${version}" for the current package version.`);
 	process.exit(1);

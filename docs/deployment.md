@@ -37,12 +37,12 @@ Point the app at `wss://bridge.example.com/shardwire` (path must match `server.p
 
 Tune on the bot bridge `server` options as needed:
 
-| Option | Purpose |
-|--------|---------|
-| `maxPayloadBytes` | Cap per-frame JSON size (default `65536`). |
-| `maxConnections` | Cap concurrent authenticated apps. |
-| `maxConcurrentActions` / `actionQueueTimeoutMs` | Backpressure for Discord REST work. |
-| `idempotencyScope` / `idempotencyTtlMs` | Control dedupe across reconnects vs per-socket. |
+| Option                                          | Purpose                                         |
+| ----------------------------------------------- | ----------------------------------------------- |
+| `maxPayloadBytes`                               | Cap per-frame JSON size (default `65536`).      |
+| `maxConnections`                                | Cap concurrent authenticated apps.              |
+| `maxConcurrentActions` / `actionQueueTimeoutMs` | Backpressure for Discord REST work.             |
+| `idempotencyScope` / `idempotencyTtlMs`         | Control dedupe across reconnects vs per-socket. |
 
 ## Process layout
 
