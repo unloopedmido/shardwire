@@ -7,7 +7,11 @@ import type {
   BotIntentName,
   BridgeCapabilities,
 } from "../discord/types";
-import { BOT_ACTION_NAMES, BOT_EVENT_NAMES, getAvailableEvents } from "../discord/catalog";
+import {
+  BOT_ACTION_NAMES,
+  BOT_EVENT_NAMES,
+  getAvailableEvents,
+} from "../discord/catalog";
 
 interface NormalizedSecretScope {
   events: "*" | Set<BotEventName>;
@@ -56,7 +60,10 @@ function normalizeScopeList<T extends string>(
   return entries;
 }
 
-function normalizeSecretEntry(secret: BotBridgeSecret, index: number): NormalizedSecretConfig {
+function normalizeSecretEntry(
+  secret: BotBridgeSecret,
+  index: number,
+): NormalizedSecretConfig {
   const defaultId = `s${index}`;
   if (typeof secret === "string") {
     if (!isNonEmptyString(secret)) {
@@ -74,17 +81,25 @@ function normalizeSecretEntry(secret: BotBridgeSecret, index: number): Normalize
 
   const scoped = secret;
   if (!isNonEmptyString(scoped.value)) {
-    throw new Error(`server.secrets[${index}].value must be a non-empty string.`);
+    throw new Error(
+      `server.secrets[${index}].value must be a non-empty string.`,
+    );
   }
   if (scoped.id !== undefined && !isNonEmptyString(scoped.id)) {
-    throw new Error(`server.secrets[${index}].id must be a non-empty string when provided.`);
+    throw new Error(
+      `server.secrets[${index}].id must be a non-empty string when provided.`,
+    );
   }
 
   return {
     id: scoped.id ?? defaultId,
     value: scoped.value,
     scope: {
-      events: normalizeScopeList(scoped.allow?.events, BOT_EVENT_NAMES, `server.secrets[${index}].allow.events`),
+      events: normalizeScopeList(
+        scoped.allow?.events,
+        BOT_EVENT_NAMES,
+        `server.secrets[${index}].allow.events`,
+      ),
       actions: normalizeScopeList(
         scoped.allow?.actions,
         BOT_ACTION_NAMES,
@@ -106,26 +121,49 @@ export function assertBotBridgeOptions(options: BotBridgeOptions): void {
     assertPositiveNumber("server.heartbeatMs", options.server.heartbeatMs);
   }
   if (options.server.maxPayloadBytes !== undefined) {
-    assertPositiveNumber("server.maxPayloadBytes", options.server.maxPayloadBytes);
+    assertPositiveNumber(
+      "server.maxPayloadBytes",
+      options.server.maxPayloadBytes,
+    );
   }
   if (options.server.maxConnections !== undefined) {
-    assertPositiveNumber("server.maxConnections", options.server.maxConnections);
+    assertPositiveNumber(
+      "server.maxConnections",
+      options.server.maxConnections,
+    );
   }
   if (options.server.maxConcurrentActions !== undefined) {
-    assertPositiveNumber("server.maxConcurrentActions", options.server.maxConcurrentActions);
+    assertPositiveNumber(
+      "server.maxConcurrentActions",
+      options.server.maxConcurrentActions,
+    );
   }
   if (options.server.actionQueueTimeoutMs !== undefined) {
-    assertPositiveNumber("server.actionQueueTimeoutMs", options.server.actionQueueTimeoutMs);
+    assertPositiveNumber(
+      "server.actionQueueTimeoutMs",
+      options.server.actionQueueTimeoutMs,
+    );
   }
   if (options.server.idempotencyScope !== undefined) {
-    if (options.server.idempotencyScope !== "connection" && options.server.idempotencyScope !== "secret") {
-      throw new Error('server.idempotencyScope must be "connection" or "secret".');
+    if (
+      options.server.idempotencyScope !== "connection" &&
+      options.server.idempotencyScope !== "secret"
+    ) {
+      throw new Error(
+        'server.idempotencyScope must be "connection" or "secret".',
+      );
     }
   }
   if (options.server.idempotencyTtlMs !== undefined) {
-    assertPositiveNumber("server.idempotencyTtlMs", options.server.idempotencyTtlMs);
+    assertPositiveNumber(
+      "server.idempotencyTtlMs",
+      options.server.idempotencyTtlMs,
+    );
   }
-  if (!Array.isArray(options.server.secrets) || options.server.secrets.length === 0) {
+  if (
+    !Array.isArray(options.server.secrets) ||
+    options.server.secrets.length === 0
+  ) {
     throw new Error("server.secrets must contain at least one secret.");
   }
   const ids = new Set<string>();
@@ -133,18 +171,26 @@ export function assertBotBridgeOptions(options: BotBridgeOptions): void {
   options.server.secrets.forEach((secret: BotBridgeSecret, index) => {
     const normalized = normalizeSecretEntry(secret, index);
     if (ids.has(normalized.id)) {
-      throw new Error(`server.secrets contains duplicate secret id "${normalized.id}".`);
+      throw new Error(
+        `server.secrets contains duplicate secret id "${normalized.id}".`,
+      );
     }
     if (values.has(normalized.value)) {
-      throw new Error(`server.secrets contains duplicate secret value at index ${index}.`);
+      throw new Error(
+        `server.secrets contains duplicate secret value at index ${index}.`,
+      );
     }
     ids.add(normalized.id);
     values.add(normalized.value);
   });
 }
 
-export function normalizeSecrets(options: BotBridgeOptions): NormalizedSecretConfig[] {
-  return options.server.secrets.map((secret, index) => normalizeSecretEntry(secret, index));
+export function normalizeSecrets(
+  options: BotBridgeOptions,
+): NormalizedSecretConfig[] {
+  return options.server.secrets.map((secret, index) =>
+    normalizeSecretEntry(secret, index),
+  );
 }
 
 export function assertAppBridgeOptions(options: AppBridgeOptions): void {
@@ -161,7 +207,9 @@ export function assertAppBridgeOptions(options: AppBridgeOptions): void {
     throw new Error("App bridge option `url` must use `ws://` or `wss://`.");
   }
   const isLoopbackHost =
-    parsedUrl.hostname === "localhost" || parsedUrl.hostname === "127.0.0.1" || parsedUrl.hostname === "::1";
+    parsedUrl.hostname === "localhost" ||
+    parsedUrl.hostname === "127.0.0.1" ||
+    parsedUrl.hostname === "::1";
   if (parsedUrl.protocol === "ws:" && !isLoopbackHost) {
     throw new Error("Non-loopback app bridge URLs must use `wss://`.");
   }
@@ -178,7 +226,10 @@ export function assertAppBridgeOptions(options: AppBridgeOptions): void {
     assertPositiveNumber("requestTimeoutMs", options.requestTimeoutMs);
   }
   if (options.reconnect?.initialDelayMs !== undefined) {
-    assertPositiveNumber("reconnect.initialDelayMs", options.reconnect.initialDelayMs);
+    assertPositiveNumber(
+      "reconnect.initialDelayMs",
+      options.reconnect.initialDelayMs,
+    );
   }
   if (options.reconnect?.maxDelayMs !== undefined) {
     assertPositiveNumber("reconnect.maxDelayMs", options.reconnect.maxDelayMs);
@@ -194,13 +245,17 @@ export function resolveCapabilitiesForSecret(
     secret.scope.events === "*"
       ? [...availableEvents]
       : availableEvents.filter((eventName) => {
-          return secret.scope.events !== "*" && secret.scope.events.has(eventName);
+          return (
+            secret.scope.events !== "*" && secret.scope.events.has(eventName)
+          );
         });
   const actions =
     secret.scope.actions === "*"
       ? [...BOT_ACTION_NAMES]
       : BOT_ACTION_NAMES.filter((action) => {
-          return secret.scope.actions !== "*" && secret.scope.actions.has(action);
+          return (
+            secret.scope.actions !== "*" && secret.scope.actions.has(action)
+          );
         });
 
   return {
