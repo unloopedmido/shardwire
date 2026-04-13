@@ -76,7 +76,8 @@ export class BridgeTransportServer {
   private readonly stickyEvents = new Map<BotEventName, BotEventPayloadMap[BotEventName]>();
   private readonly actionSemaphore: AsyncSemaphore;
   private readonly idempotencyCache = new Map<string, { result: ActionResult<unknown>; expires: number }>();
-  private readonly idempotencyTtlMs = 120_000;
+  private readonly idempotencyTtlMs: number;
+  private readonly idempotencyScope: "connection" | "secret";
   private readonly authBuckets = new Map<string, { count: number; resetAt: number }>();
 
   constructor(private readonly config: BridgeTransportServerConfig) {
@@ -85,6 +86,8 @@ export class BridgeTransportServer {
     const maxConcurrent = config.options.server.maxConcurrentActions ?? 32;
     const queueTimeout = config.options.server.actionQueueTimeoutMs ?? 5000;
     this.actionSemaphore = new AsyncSemaphore(maxConcurrent, queueTimeout);
+    this.idempotencyTtlMs = config.options.server.idempotencyTtlMs ?? 120_000;
+    this.idempotencyScope = config.options.server.idempotencyScope ?? "connection";
 
     this.wss = new WebSocketServer({
       host: config.options.server.host,
@@ -349,7 +352,11 @@ export class BridgeTransportServer {
           typeof idempotencyRaw === "string" && idempotencyRaw.length > 0 && idempotencyRaw.length <= 256
             ? idempotencyRaw
             : undefined;
-        const idempotencyCacheKey = idempotencyKey ? `${state.id}:${idempotencyKey}` : undefined;
+        const idempotencyCacheKey = idempotencyKey
+          ? this.idempotencyScope === "secret" && activeSecret
+            ? `secret:${activeSecret.id}:${idempotencyKey}`
+            : `conn:${state.id}:${idempotencyKey}`
+          : undefined;
         if (idempotencyCacheKey) {
           this.pruneIdempotencyCache(Date.now());
           const cached = this.idempotencyCache.get(idempotencyCacheKey);

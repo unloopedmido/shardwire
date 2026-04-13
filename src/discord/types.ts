@@ -463,6 +463,8 @@ export interface ActionErrorDetails {
   discordCode?: number;
   /** When true, callers may retry with backoff (e.g. rate limits). */
   retryable?: boolean;
+  /** Suggested wait derived from Discord `retry_after` (milliseconds), when available. */
+  retryAfterMs?: number;
   [key: string]: unknown;
 }
 
@@ -482,6 +484,14 @@ export interface BotBridgeOptions {
     maxConcurrentActions?: number;
     /** When the queue is full, fail fast with `SERVICE_UNAVAILABLE` (default: 5000). */
     actionQueueTimeoutMs?: number;
+    /**
+     * Where `idempotencyKey` deduplication is scoped (default: `connection`).
+     * - `connection`: same WebSocket connection only (reconnect uses a new scope).
+     * - `secret`: same configured secret id across connections (useful for retries after reconnect).
+     */
+    idempotencyScope?: "connection" | "secret";
+    /** TTL for idempotency cache entries in ms (default: 120000). */
+    idempotencyTtlMs?: number;
   };
   logger?: ShardwireLogger;
 }
@@ -493,6 +503,10 @@ export interface AppBridgeMetricsHooks {
     durationMs: number;
     ok: boolean;
     errorCode?: string;
+    /** Present when Discord returned HTTP 429 or similar retryable signals. */
+    retryAfterMs?: number;
+    discordStatus?: number;
+    discordCode?: number;
   }) => void;
 }
 

@@ -117,6 +117,14 @@ export function assertBotBridgeOptions(options: BotBridgeOptions): void {
   if (options.server.actionQueueTimeoutMs !== undefined) {
     assertPositiveNumber("server.actionQueueTimeoutMs", options.server.actionQueueTimeoutMs);
   }
+  if (options.server.idempotencyScope !== undefined) {
+    if (options.server.idempotencyScope !== "connection" && options.server.idempotencyScope !== "secret") {
+      throw new Error('server.idempotencyScope must be "connection" or "secret".');
+    }
+  }
+  if (options.server.idempotencyTtlMs !== undefined) {
+    assertPositiveNumber("server.idempotencyTtlMs", options.server.idempotencyTtlMs);
+  }
   if (!Array.isArray(options.server.secrets) || options.server.secrets.length === 0) {
     throw new Error("server.secrets must contain at least one secret.");
   }

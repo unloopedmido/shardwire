@@ -137,10 +137,19 @@ export function mapDiscordErrorToActionExecutionError(error: unknown): ActionExe
     return new ActionExecutionError("INVALID_REQUEST", message, detailPayload);
   }
   if (details.status === 429) {
+    let retryAfterMs: number | undefined;
+    if (error instanceof DiscordAPIError) {
+      const raw = error.rawError as { retry_after?: unknown } | undefined;
+      const retryAfter = raw?.retry_after;
+      if (typeof retryAfter === "number" && Number.isFinite(retryAfter)) {
+        retryAfterMs = Math.max(0, Math.ceil(retryAfter * 1000));
+      }
+    }
     return new ActionExecutionError("SERVICE_UNAVAILABLE", message, {
       discordStatus: 429,
       retryable: true,
       ...(details.code !== undefined ? { discordCode: details.code } : {}),
+      ...(retryAfterMs !== undefined ? { retryAfterMs } : {}),
     });
   }
   return null;

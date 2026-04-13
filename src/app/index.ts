@@ -1,4 +1,5 @@
 import type {
+  ActionError,
   ActionFailure,
   ActionResult,
   AppBridge,
@@ -53,6 +54,29 @@ interface HandlerSubscriptionEntry {
 }
 
 const DEFAULT_REQUEST_TIMEOUT_MS = 10000;
+
+function metricsExtrasFromActionError(error: ActionError): {
+  retryAfterMs?: number;
+  discordStatus?: number;
+  discordCode?: number;
+} {
+  const details = error.details;
+  if (!details || typeof details !== "object" || Array.isArray(details)) {
+    return {};
+  }
+  const obj = details as Record<string, unknown>;
+  const extras: { retryAfterMs?: number; discordStatus?: number; discordCode?: number } = {};
+  if (typeof obj.retryAfterMs === "number" && Number.isFinite(obj.retryAfterMs)) {
+    extras.retryAfterMs = obj.retryAfterMs;
+  }
+  if (typeof obj.discordStatus === "number" && Number.isFinite(obj.discordStatus)) {
+    extras.discordStatus = obj.discordStatus;
+  }
+  if (typeof obj.discordCode === "number" && Number.isFinite(obj.discordCode)) {
+    extras.discordCode = obj.discordCode;
+  }
+  return extras;
+}
 
 export function connectBotBridge(options: AppBridgeOptions): AppBridge {
   assertAppBridgeOptions(options);
@@ -409,7 +433,7 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
         requestId,
         durationMs: Date.now() - started,
         ok: result.ok,
-        ...(!result.ok ? { errorCode: result.error.code } : {}),
+        ...(!result.ok ? { errorCode: result.error.code, ...metricsExtrasFromActionError(result.error) } : {}),
       });
       return result;
     } catch (error) {
