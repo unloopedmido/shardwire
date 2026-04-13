@@ -13,6 +13,8 @@ Use this skill when the user asks about:
 
 - Setting up `createShardwire(...)` on bot host or consumer apps
 - Designing command/event payload schemas
+- Runtime schema validation with `validation.commands/events`
+- Using `fromZodSchema(...)` or custom safe-parse adapters
 - Shared secret setup, path/URL wiring, or connection lifecycle
 - Reconnect behavior and timeout tuning
 - Error handling for `CommandResult` (`UNAUTHORIZED`, `TIMEOUT`, etc.)
@@ -53,6 +55,7 @@ Do not use this skill for:
   - host: `createShardwire({ server, client|token })`
   - consumer: `createShardwire({ url, secret })`
 - Prefer typed examples with `createShardwire<Commands, Events>()`.
+- When validating payloads, show `validation` config and include `VALIDATION_ERROR.details` handling.
 - Keep payloads JSON-serializable and command/event names stable.
 - Always include `CommandResult` error-branch handling in consumer examples.
 

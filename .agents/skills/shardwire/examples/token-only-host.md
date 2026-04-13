@@ -8,7 +8,10 @@ Use this when the developer does not already have an instantiated `discord.js` c
 import { createShardwire } from "shardwire";
 
 type Commands = {
-  "ban-user": { userId: string };
+  "ban-user": {
+    request: { userId: string };
+    response: { banned: true; userId: string };
+  };
 };
 
 type Events = {

@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.1.0
+
+- Added optional runtime schema validation for host command request/response and emitted event payloads.
+- Added schema adapter helpers (`fromSafeParseSchema`) and a first-party Zod adapter (`fromZodSchema`).
+- Added structured `VALIDATION_ERROR` details (`name`, `stage`, optional `issues`) for schema failures.
+- Added schema-focused examples and scripts for host and consumer usage.
+- Expanded README and integration tests to cover schema validation behavior.
+
 ## 0.0.3
 
 - Adjusted package.json to include more keywords and metadata.

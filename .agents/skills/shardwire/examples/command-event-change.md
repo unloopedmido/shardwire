@@ -13,7 +13,10 @@ Use this when a developer wants a web/dashboard action to trigger bot behavior a
 import { createShardwire } from "shardwire";
 
 type Commands = {
-  "ban-user": { userId: string };
+  "ban-user": {
+    request: { userId: string };
+    response: { banned: true; userId: string };
+  };
 };
 
 type Events = {
@@ -27,7 +30,7 @@ const wire = createShardwire<Commands, Events>({
 
 wire.onCommand("ban-user", async ({ userId }) => {
   await guild.members.ban(userId);
-  return { banned: true };
+  return { banned: true, userId };
 });
 
 wire.emitEvent("member-joined", { userId: "123", guildId: "456" });
@@ -39,7 +42,10 @@ wire.emitEvent("member-joined", { userId: "123", guildId: "456" });
 import { createShardwire } from "shardwire";
 
 type Commands = {
-  "ban-user": { userId: string };
+  "ban-user": {
+    request: { userId: string };
+    response: { banned: true; userId: string };
+  };
 };
 
 type Events = {

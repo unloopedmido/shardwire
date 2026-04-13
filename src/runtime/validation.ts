@@ -1,4 +1,18 @@
-import type { ConsumerOptions, HostOptions } from "../core/types";
+import type { ConsumerOptions, HostOptions, RuntimeSchema, SchemaValidationIssue } from "../core/types";
+
+export class PayloadValidationError extends Error {
+  constructor(
+    message: string,
+    public readonly details: {
+      name: string;
+      stage: "command.request" | "command.response" | "event.emit";
+      issues?: SchemaValidationIssue[];
+    },
+  ) {
+    super(message);
+    this.name = "PayloadValidationError";
+  }
+}
 
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0;
@@ -50,6 +64,9 @@ export function assertConsumerOptions(options: ConsumerOptions<any, any>): void 
   if (options.secretId !== undefined && !isNonEmptyString(options.secretId)) {
     throw new Error("Consumer option `secretId` must be a non-empty string.");
   }
+  if (options.clientName !== undefined && !isNonEmptyString(options.clientName)) {
+    throw new Error("Consumer option `clientName` must be a non-empty string.");
+  }
   if (options.requestTimeoutMs !== undefined) {
     assertPositiveNumber("requestTimeoutMs", options.requestTimeoutMs);
   }
@@ -72,5 +89,62 @@ export function assertJsonPayload(kind: "command" | "event", name: string, paylo
     JSON.stringify(payload);
   } catch {
     throw new Error(`${kind} "${name}" payload must be JSON-serializable.`);
+  }
+}
+
+function normalizeSchemaIssues(error: unknown): SchemaValidationIssue[] | undefined {
+  if (!error || typeof error !== "object") {
+    return undefined;
+  }
+  const issues = (error as { issues?: unknown }).issues;
+  if (!Array.isArray(issues)) {
+    return undefined;
+  }
+  const normalized = issues
+    .map((issue) => {
+      if (!issue || typeof issue !== "object") {
+        return null;
+      }
+      const message = (issue as { message?: unknown }).message;
+      const rawPath = (issue as { path?: unknown }).path;
+      if (typeof message !== "string") {
+        return null;
+      }
+      const path =
+        Array.isArray(rawPath) && rawPath.length > 0
+          ? rawPath
+              .map((segment) => (typeof segment === "string" || typeof segment === "number" ? String(segment) : ""))
+              .filter(Boolean)
+              .join(".")
+          : "";
+      return { path, message } satisfies SchemaValidationIssue;
+    })
+    .filter((issue): issue is SchemaValidationIssue => Boolean(issue));
+  return normalized.length > 0 ? normalized : undefined;
+}
+
+export function parsePayloadWithSchema<T>(
+  schema: RuntimeSchema<T> | undefined,
+  payload: unknown,
+  context: {
+    name: string;
+    stage: "command.request" | "command.response" | "event.emit";
+  },
+): T | unknown {
+  if (!schema) {
+    return payload;
+  }
+  try {
+    return schema.parse(payload);
+  } catch (error) {
+    const message =
+      error instanceof Error && error.message.trim().length > 0
+        ? error.message
+        : `Payload validation failed for ${context.stage} "${context.name}".`;
+    const issues = normalizeSchemaIssues(error);
+    throw new PayloadValidationError(message, {
+      ...context,
+      ...(issues ? { issues } : {}),
+    });
   }
 }

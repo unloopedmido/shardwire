@@ -1,6 +1,7 @@
 import { createServer } from "node:net";
 import { describe, expect, it } from "vitest";
-import { createShardwire } from "../src";
+import { z } from "zod";
+import { createShardwire, fromZodSchema } from "../src";
 
 async function getFreePort(): Promise<number> {
   return new Promise((resolve, reject) => {
@@ -27,7 +28,10 @@ async function getFreePort(): Promise<number> {
 describe("shardwire integration", () => {
   it("executes commands end-to-end", async () => {
     type Commands = {
-      ping: { value: string };
+      ping: {
+        request: { value: string };
+        response: { echoed: string };
+      };
     };
 
     const port = await getFreePort();
@@ -42,8 +46,13 @@ describe("shardwire integration", () => {
       url: `ws://127.0.0.1:${port}/shardwire`,
       secret: "test-secret",
       secretId: "s0",
+      clientName: "test-consumer",
       requestTimeoutMs: 1500,
     });
+
+    await consumer.ready();
+    expect(consumer.connected()).toBe(true);
+    expect(consumer.connectionId()).toBeTruthy();
 
     const result = await consumer.send("ping", { value: "ok" });
     expect(result.ok).toBe(true);
@@ -92,7 +101,10 @@ describe("shardwire integration", () => {
 
   it("returns auth error when shared secret is invalid", async () => {
     type Commands = {
-      ping: { value: string };
+      ping: {
+        request: { value: string };
+        response: { echoed: string };
+      };
     };
 
     const port = await getFreePort();
@@ -118,7 +130,10 @@ describe("shardwire integration", () => {
 
   it("returns unauthorized when secret id is unknown", async () => {
     type Commands = {
-      ping: { value: string };
+      ping: {
+        request: { value: string };
+        response: { echoed: string };
+      };
     };
 
     const port = await getFreePort();
@@ -137,6 +152,97 @@ describe("shardwire integration", () => {
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.error.code).toBe("UNAUTHORIZED");
+    }
+
+    await consumer.close();
+    await host.close();
+  });
+
+  it("fails in-flight commands when transport closes", async () => {
+    type Commands = {
+      slow: {
+        request: { value: string };
+        response: { echoed: string };
+      };
+    };
+
+    const port = await getFreePort();
+    const host = createShardwire<Commands, {}>({
+      server: { port, secrets: ["close-secret"] },
+    });
+
+    host.onCommand("slow", async ({ value }) => {
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      return { echoed: value };
+    });
+
+    const consumer = createShardwire<Commands, {}>({
+      url: `ws://127.0.0.1:${port}/shardwire`,
+      secret: "close-secret",
+      requestTimeoutMs: 10000,
+    });
+
+    await consumer.ready();
+    const pending = consumer.send("slow", { value: "x" });
+    await consumer.close();
+
+    const result = await pending;
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.code).toBe("DISCONNECTED");
+    }
+
+    await host.close();
+  });
+
+  it("returns validation error details for invalid command payload", async () => {
+    type Commands = {
+      "ban-user": {
+        request: { userId: string };
+        response: { banned: true; userId: string };
+      };
+    };
+
+    const port = await getFreePort();
+    const host = createShardwire<Commands, {}>({
+      server: { port, secrets: ["schema-secret"] },
+      validation: {
+        commands: {
+          "ban-user": {
+            request: fromZodSchema(
+              z.object({
+                userId: z.string().min(3),
+              }),
+            ),
+          },
+        },
+      },
+    });
+
+    host.onCommand("ban-user", ({ userId }) => ({ banned: true, userId }));
+
+    const consumer = createShardwire<Commands, {}>({
+      url: `ws://127.0.0.1:${port}/shardwire`,
+      secret: "schema-secret",
+      secretId: "s0",
+      requestTimeoutMs: 1000,
+    });
+
+    const result = await consumer.send("ban-user", { userId: "x" });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.code).toBe("VALIDATION_ERROR");
+      expect(result.error.details).toEqual(
+        expect.objectContaining({
+          name: "ban-user",
+          stage: "command.request",
+          issues: expect.arrayContaining([
+            expect.objectContaining({
+              message: expect.any(String),
+            }),
+          ]),
+        }),
+      );
     }
 
     await consumer.close();
