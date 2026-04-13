@@ -68,10 +68,6 @@ jobs:
         if: steps.meta.outputs.publish == 'true'
         run: npm run verify
 
-      - name: Check changelog release notes
-        if: steps.meta.outputs.publish == 'true'
-        run: node scripts/check-changelog-release.mjs
-
       - name: Push version tag
         if: steps.meta.outputs.publish == 'true'
         run: |

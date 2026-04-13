@@ -27,6 +27,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "example:bot": "tsx examples/bot-basic.ts",
@@ -35,7 +36,7 @@
     "example:app:moderation": "tsx examples/app-moderation.ts",
     "example:app:interaction": "tsx examples/app-interaction.ts",
     "check:changelog": "node scripts/check-changelog-release.mjs",
-    "verify": "npm run check:changelog && npm run lint && npm run test:coverage && npm run typecheck && npm run build",
+    "verify": "npm run check:changelog && npm run lint && npm run format && npm run test:coverage && npm run typecheck && npm run build",
     "prepublishOnly": "npm run verify"
   },
   "keywords": [
