@@ -1,5 +1,8 @@
 # Shardwire Integration Patterns
 
+Primary docs: `https://unloopedmido.github.io/shardwire/`
+Troubleshooting anchors: `https://unloopedmido.github.io/shardwire/errors/`
+
 ## Canonical two-process setup
 
 1. Bot process
@@ -68,6 +71,7 @@ Debug by comparing expected permissions with `app.capabilities()`.
 - URL missing `/shardwire` suffix.
 - Using non-loopback `ws://` instead of `wss://`.
 - Wrong secret value or mismatched secret id/value pair.
+- If message includes `See: .../errors/#...`, use that exact anchor as source of truth.
 
 ### Event handler never fires
 
@@ -75,12 +79,14 @@ Debug by comparing expected permissions with `app.capabilities()`.
 - Event not allowed by scoped secret.
 - Event name mismatch in `app.on(...)`.
 - Overly restrictive filter (wrong `guildId`/`channelId`/`userId`/`commandName`/`customId`/`interactionKind`).
+- Use diagnostics APIs (`app.preflight`, `app.explainCapability`, `diagnoseShardwireApp`) before ad-hoc speculation.
 
 ### Action always fails
 
 - Scoped secret blocks requested action.
 - Target ID invalid or not accessible by bot permissions.
 - Interaction action used with stale/invalid interaction context.
+- Surface `error.code`, `error.message`, and direct docs anchor when present.
 
 ## Agent behavior guidance
 
@@ -90,3 +96,4 @@ When helping users:
 - Ask for only missing, high-impact context.
 - Validate intents/scopes before proposing deeper refactors.
 - Keep advice centered on built-in events/actions unless requirements clearly exceed current surface.
+- Always include relevant website docs URLs in user-facing answers.

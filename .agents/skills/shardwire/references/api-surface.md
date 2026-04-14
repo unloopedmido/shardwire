@@ -1,5 +1,8 @@
 # Shardwire API Surface (Current)
 
+Website reference: `https://unloopedmido.github.io/shardwire/`
+Error reference: `https://unloopedmido.github.io/shardwire/errors/`
+
 ## Public entry points
 
 ```ts
@@ -14,6 +17,8 @@ import {
 	getShardwireCatalog,
 } from 'shardwire';
 ```
+
+If user-facing guidance is needed, link directly to website pages instead of repo-local markdown.
 
 ## Primary APIs
 
@@ -128,3 +133,11 @@ Use this during startup and troubleshooting.
 - `app.catalog()` — same surface as `getShardwireCatalog()`.
 - `app.explainCapability({ kind: 'event' | 'action', name })` — built-in vs negotiated allow/deny.
 - `app.preflight(desired?)` — diagnostics (`issues[]`); call before `app.on(...)` to validate planned `events` / `actions` only.
+
+## Error links convention
+
+Many runtime/config errors include:
+
+`See: https://unloopedmido.github.io/shardwire/errors/#<anchor>`
+
+When this appears, route users to the exact anchor and provide concise remediation.

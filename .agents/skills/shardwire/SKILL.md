@@ -1,101 +1,167 @@
 ---
 name: shardwire
-description: Use this skill whenever a user mentions Shardwire, Discord bot/app bridging, `createBotBridge`, `connectBotBridge`, Discord event streaming to another process, app-side bot actions, secret scopes, or intent/capability issues. Apply it even if the user does not explicitly say "Shardwire" but describes a split-process Discord architecture with WebSocket bridge behavior.
+description: Use this skill whenever a user mentions Shardwire, Discord bot/app bridging, `createBotBridge`, `connectBotBridge`, secret scopes, capabilities, strict startup, diagnostics, troubleshooting, or split-process Discord architectures. Always use it for Shardwire docs/tasks, and prioritize the live website docs URL for guidance, links, and user-facing references.
 ---
 
 # Shardwire Skill
 
-Guide agents to build, modify, and debug integrations with the `shardwire` package.
+Guide agents to build, modify, document, and debug integrations with the `shardwire` package.
 
-Shardwire connects two processes:
+Shardwire is a Discord-first split-process bridge:
 
 - Bot process: runs Discord gateway/runtime and exposes bridge server.
 - App process: connects over WebSocket, subscribes to normalized events, and invokes built-in actions.
 
-Use this skill to keep implementations aligned with current Shardwire API and constraints.
+## Canonical docs source
 
-## What to optimize for
+Primary docs URL (always prefer this in user-facing outputs):
 
-- Fast path to a working two-process setup.
+- `https://unloopedmido.github.io/shardwire/`
+
+If you need to cite a specific guide, use direct page links:
+
+- Getting started: `https://unloopedmido.github.io/shardwire/getting-started/`
+- Bot setup: `https://unloopedmido.github.io/shardwire/bot-setup/`
+- App setup: `https://unloopedmido.github.io/shardwire/app-setup/`
+- Manifests: `https://unloopedmido.github.io/shardwire/manifests/`
+- Strict startup: `https://unloopedmido.github.io/shardwire/strict-startup/`
+- Diagnostics: `https://unloopedmido.github.io/shardwire/diagnostics/`
+- Scoped secrets: `https://unloopedmido.github.io/shardwire/scoped-secrets/`
+- Deployment: `https://unloopedmido.github.io/shardwire/deployment/`
+- Troubleshooting: `https://unloopedmido.github.io/shardwire/troubleshooting/`
+- Errors: `https://unloopedmido.github.io/shardwire/errors/`
+- Examples: `https://unloopedmido.github.io/shardwire/examples/`
+- Release notes: `https://unloopedmido.github.io/shardwire/release-notes/`
+
+## Optimize for
+
+- Fast path to a working bot+app integration.
 - Correct intent + capability + scope alignment.
 - Correct use of built-in events/actions before proposing custom plumbing.
-- Actionable troubleshooting with concrete checks.
+- Immediate troubleshooting with concrete remediation and docs links.
+- User-facing references should point to the website, not old repo docs.
+
+## Mandatory operating rules
+
+1. **Website-first guidance**
+   - Prefer `https://unloopedmido.github.io/shardwire/` links whenever giving docs/troubleshooting help.
+   - Do not direct users to removed legacy docs paths.
+
+2. **Error-link aware troubleshooting**
+   - If an error message includes `See: https://unloopedmido.github.io/shardwire/errors/#...`, route user directly to that anchor.
+   - Explain root cause + fix, then include the same direct URL in your response.
+
+3. **Stay inside built-in API first**
+   - Use `createBotBridge(...)` on bot side.
+   - Use `connectBotBridge(...)` on app side.
+   - Use `app.on(...)` and `app.actions.*`.
+   - Use `defineShardwireApp(...)`, `generateSecretScope(...)`, `diagnoseShardwireApp(...)`, `app.preflight(...)`, `app.explainCapability(...)` before custom systems.
+
+4. **Preserve Discord-first framing**
+   - Shardwire is not a generic websocket bus.
+   - Recommendations must reflect Discord intents, scoped secrets, and normalized payloads.
 
 ## Workflow
 
-Follow this sequence unless the user asks for a narrower task.
+Follow this sequence unless user scope is narrower:
 
-1. Identify request type
-   - `new integration` (bootstrapping bot + app)
-   - `feature addition` (new event subscription/action flow)
-   - `bugfix` (connection/auth/capability/action failures)
-   - `hardening` (scoped secrets, permission boundaries, deployment transport)
+1. Identify request type:
+   - new integration
+   - feature addition
+   - bugfix
+   - hardening
+   - docs/content request
 
-2. Gather minimum context
-   - Runtime: Node version (`>=18.18`)
-   - Process topology: same host vs remote
-   - Env vars present: `DISCORD_TOKEN`, `SHARDWIRE_SECRET`
-   - Intended events/actions
-   - Whether secret is full-access string or scoped config object
+2. Gather minimum context:
+   - Node runtime (`>=18.18`)
+   - topology (loopback vs remote)
+   - env vars (`DISCORD_TOKEN`, secrets)
+   - intended events/actions
+   - scoped vs full secret model
+   - strict startup/manifest usage
 
-3. Build from first-party API
-   - Use `createBotBridge(...)` in bot process.
-   - Use `connectBotBridge(...)` in app process.
-   - Prefer `app.on(...)` for events and `app.actions.*` for side effects.
-   - Do not invent generic command buses or bypass built-in action API unless user explicitly needs custom behavior.
+3. Build with first-party API:
+   - bot snippet (`createBotBridge`)
+   - app snippet (`connectBotBridge`, subscriptions, actions)
+   - branch on `result.ok` for every action
+   - include verification steps
 
-4. Validate capability path end-to-end
-   - Intents allow event production in bot process.
-   - Secret scope allows event/action consumption.
-   - App subscription (`app.on`) matches available event names and filters.
-   - If unsure, inspect `app.capabilities()` and adapt code accordingly.
+4. Validate capabilities end-to-end:
+   - intents enable events
+   - secret scope allows events/actions
+   - subscriptions and filters are valid
+   - confirm with `app.capabilities()` and diagnostics APIs
 
-5. Return practical output
-   - Working code snippets for both processes when relevant.
-   - Explicit env var and run instructions.
-   - Short verification steps.
+5. Close with docs routing:
+   - include relevant website page URL(s)
+   - include error anchor URL when applicable
 
 ## Constraints to enforce
 
-- `ws://` is only for loopback (`127.0.0.1`, `localhost`, `::1`); use `wss://` for non-loopback deployments.
-- Event availability depends on both intents and secret permissions.
-- Actions return `ActionResult` and must be checked via `result.ok`.
-- Prefer normalized payload fields from bridge types, not live `discord.js` objects.
+- `ws://` is loopback-only (`127.0.0.1`, `localhost`, `::1`).
+- Non-loopback must use `wss://`.
+- Event availability depends on intents + secret permissions.
+- Actions return `ActionResult`; always check `result.ok`.
+- Prefer normalized payload fields over live `discord.js` objects.
+- Register handlers before `await app.ready()` for strict startup consistency.
 
 ## Event and action guardrails
 
-When wiring logic, stick to built-in names:
+Built-in events:
 
-- Events: `ready`, `interactionCreate`, `messageCreate`, `messageUpdate`, `messageDelete`, `messageBulkDelete`, `messageReactionAdd`, `messageReactionRemove`, `guildCreate`, `guildDelete`, `guildMemberAdd`, `guildMemberRemove`, `guildMemberUpdate`, `threadCreate`, `threadUpdate`, `threadDelete`, `channelCreate`, `channelUpdate`, `channelDelete`
-- Actions: `sendMessage`, `editMessage`, `deleteMessage`, `replyToInteraction`, `deferInteraction`, `followUpInteraction`, `banMember`, `kickMember`, `addMemberRole`, `removeMemberRole`, `addMessageReaction`, `removeOwnMessageReaction`, `timeoutMember`, `removeMemberTimeout`, `createChannel`, `editChannel`, `deleteChannel`, `createThread`, `archiveThread`
+- `ready`
+- `interactionCreate`
+- `messageCreate`
+- `messageUpdate`
+- `messageDelete`
+- `messageBulkDelete`
+- `messageReactionAdd`
+- `messageReactionRemove`
+- `guildCreate`
+- `guildDelete`
+- `guildMemberAdd`
+- `guildMemberRemove`
+- `guildMemberUpdate`
+- `threadCreate`
+- `threadUpdate`
+- `threadDelete`
+- `channelCreate`
+- `channelUpdate`
+- `channelDelete`
+
+Built-in actions:
+
+- `sendMessage`
+- `editMessage`
+- `deleteMessage`
+- `replyToInteraction`
+- `deferInteraction`
+- `deferUpdateInteraction`
+- `followUpInteraction`
+- `editInteractionReply`
+- `deleteInteractionReply`
+- `updateInteraction`
+- `showModal`
+- `fetchMessage`
+- `fetchMember`
+- `banMember`
+- `kickMember`
+- `addMemberRole`
+- `removeMemberRole`
+- `addMessageReaction`
+- `removeOwnMessageReaction`
+- `timeoutMember`
+- `removeMemberTimeout`
+- `createChannel`
+- `editChannel`
+- `deleteChannel`
+- `createThread`
+- `archiveThread`
 
 If user asks for behavior outside this surface:
 
-- First map the request to the closest built-in action/event combo.
-- Only propose extension patterns when built-ins clearly cannot satisfy the requirement.
-
-## Troubleshooting playbook
-
-Use this order when debugging:
-
-1. Connection/auth
-   - Verify URL path ends with `/shardwire`
-   - Confirm app secret matches a configured bot server secret
-   - Confirm transport rule (`ws://` loopback-only)
-
-2. Missing events
-   - Check required Discord intents are enabled in bot bridge options
-   - Check scoped secret includes event in `allow.events`
-   - Check app is subscribed with correct event name and filter shape
-
-3. Action failures
-   - Confirm action is allowed in scoped secret (`allow.actions`)
-   - Check `result.ok`; on failure surface `error.code` and `error.message`
-   - Validate target IDs (`channelId`, `guildId`, `userId`, etc.) are correct for the action
-
-4. Capability confusion
-   - Print `app.capabilities()` at startup
-   - Reconcile expected vs negotiated events/actions before writing more logic
+- map to closest built-in event/action combination first
+- only propose extension patterns if built-ins cannot satisfy requirement
 
 ## Response template
 
@@ -104,8 +170,45 @@ When giving implementation help, prefer this structure:
 1. Brief diagnosis or plan (1-3 bullets)
 2. Bot process snippet (`createBotBridge`)
 3. App process snippet (`connectBotBridge`, subscriptions/actions)
-4. Env + run commands
-5. Verification checklist
+4. Validation (`capabilities`, `preflight`, `diagnose`)
+5. Direct docs links (page + error anchor when applicable)
+6. Verification checklist
+
+## Error-link playbook
+
+If error includes `See: https://unloopedmido.github.io/shardwire/errors/#<anchor>`:
+
+1. quote the canonical error message
+2. extract and return the exact anchor URL
+3. provide root cause in one sentence
+4. provide minimum change to fix
+5. provide a quick re-test command/check
+
+Common anchors to know:
+
+- `app-url-required`
+- `app-url-invalid`
+- `app-url-protocol`
+- `app-wss-required`
+- `app-secret-required`
+- `duplicate-secret-id`
+- `duplicate-secret-value`
+- `manifest-unknown-event`
+- `manifest-unknown-action`
+- `strict-manifest-required`
+- `strict-startup-failed`
+- `capability-not-available`
+- `action-execution-errors`
+
+## Website-content requests
+
+When user asks to edit/add docs:
+
+- update pages under `apps/website/src/content/docs`
+- keep URLs stable and linkable
+- ensure troubleshooting content has anchorable sections for common failures
+- keep examples Discord-first and production-aware
+- avoid stale references to removed local `docs/` or `examples/` directories
 
 ## References
 
