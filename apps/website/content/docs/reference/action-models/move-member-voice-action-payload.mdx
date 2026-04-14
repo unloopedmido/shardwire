@@ -1,0 +1,30 @@
+---
+title: "MoveMemberVoiceActionPayload"
+description: "Reference for `MoveMemberVoiceActionPayload`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `MoveMemberVoiceActionPayload`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface MoveMemberVoiceActionPayload {
+	guildId: Snowflake;
+	userId: Snowflake;
+	channelId?: Snowflake | null;
+	reason?: string;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="MoveMemberVoiceActionPayload" />
+
+## Related Guides
+
+- [Capabilities & Scoped Secrets](/docs/concepts/capabilities-and-scopes)
+- [App Bridge](/docs/guides/app-bridge)

@@ -1,7 +1,7 @@
 # Shardwire Integration Patterns
 
 Primary docs: `https://unloopedmido.github.io/shardwire/`
-Troubleshooting anchors: `https://unloopedmido.github.io/shardwire/errors/`
+Troubleshooting anchors: `https://unloopedmido.github.io/shardwire/docs/operations/troubleshooting/`
 
 ## Canonical two-process setup
 
@@ -26,7 +26,7 @@ Bot side:
 ```ts
 const bridge = createBotBridge({
 	token: process.env.DISCORD_TOKEN!,
-	intents: ['Guilds', 'GuildMessages', 'GuildMessageReactions', 'MessageContent', 'GuildMembers'],
+	intents: ['Guilds', 'GuildMessages', 'GuildMessageReactions', 'MessageContent', 'GuildMembers', 'GuildVoiceStates'],
 	server: { port: 3001, secrets: [process.env.SHARDWIRE_SECRET!] },
 });
 await bridge.ready();
@@ -78,7 +78,7 @@ Debug by comparing expected permissions with `app.capabilities()`.
 - Missing Discord intent on bot bridge.
 - Event not allowed by scoped secret.
 - Event name mismatch in `app.on(...)`.
-- Overly restrictive filter (wrong `guildId`/`channelId`/`userId`/`commandName`/`customId`/`interactionKind`).
+- Overly restrictive filter (wrong `guildId`/`channelId`/`userId`/`commandName`/`customId`/`interactionKind`/`voiceChannelId`).
 - Use diagnostics APIs (`app.preflight`, `app.explainCapability`, `diagnoseShardwireApp`) before ad-hoc speculation.
 
 ### Action always fails

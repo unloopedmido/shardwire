@@ -525,6 +525,10 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
 		deleteChannel: (payload, sendOptions) => invokeAction('deleteChannel', payload, sendOptions),
 		createThread: (payload, sendOptions) => invokeAction('createThread', payload, sendOptions),
 		archiveThread: (payload, sendOptions) => invokeAction('archiveThread', payload, sendOptions),
+		moveMemberVoice: (payload, sendOptions) => invokeAction('moveMemberVoice', payload, sendOptions),
+		setMemberMute: (payload, sendOptions) => invokeAction('setMemberMute', payload, sendOptions),
+		setMemberDeaf: (payload, sendOptions) => invokeAction('setMemberDeaf', payload, sendOptions),
+		setMemberSuppressed: (payload, sendOptions) => invokeAction('setMemberSuppressed', payload, sendOptions),
 	};
 
 	return {
