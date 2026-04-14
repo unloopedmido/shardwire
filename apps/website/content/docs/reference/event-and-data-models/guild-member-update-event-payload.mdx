@@ -1,0 +1,28 @@
+---
+title: "GuildMemberUpdateEventPayload"
+description: "Reference for `GuildMemberUpdateEventPayload`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `GuildMemberUpdateEventPayload`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface GuildMemberUpdateEventPayload extends EventEnvelopeBase {
+	oldMember?: BridgeGuildMember;
+	member: BridgeGuildMember;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="GuildMemberUpdateEventPayload" />
+
+## Related Guides
+
+- [Bridge Architecture](/docs/concepts/bridge-architecture)
+- [Runtime Model](/docs/concepts/runtime-model)

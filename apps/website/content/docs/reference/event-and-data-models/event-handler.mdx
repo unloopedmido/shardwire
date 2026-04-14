@@ -1,0 +1,21 @@
+---
+title: "EventHandler"
+description: "Reference for `EventHandler`, exported as part of the public Shardwire surface."
+---
+
+`type` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `EventHandler`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export type EventHandler<K extends BotEventName> = (payload: BotEventPayloadMap[K]) => void;
+```
+
+## Related Guides
+
+- [Bridge Architecture](/docs/concepts/bridge-architecture)
+- [Runtime Model](/docs/concepts/runtime-model)

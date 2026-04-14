@@ -1,0 +1,28 @@
+---
+title: "defineShardwireApp"
+description: "Declares a minimal app contract: required **`events`** / **`actions`**, optional **`filters`** per event, optional **`name`**. Do not use this for transport, secrets, intents, or startup policy — keep those elsewhere."
+---
+
+`function` exported from `src/dx/app-manifest.ts`.
+
+## Summary
+
+Declares a minimal app contract: required **`events`** / **`actions`**, optional **`filters`** per event, optional **`name`**. Do not use this for transport, secrets, intents, or startup policy — keep those elsewhere.
+
+## Signature
+
+```ts
+/**
+ * Declares a minimal app contract: required **`events`** / **`actions`**, optional **`filters`** per event, optional **`name`**.
+ * Do not use this for transport, secrets, intents, or startup policy — keep those elsewhere.
+ *
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/contracts-and-diagnostics/define-shardwire-app/
+ */
+export function defineShardwireApp(definition: ShardwireAppManifestDefinition): ShardwireAppManifest;
+```
+
+## Related Guides
+
+- [Manifests](/docs/guides/manifests)
+- [Strict Startup](/docs/guides/strict-startup)
+- [Diagnostics](/docs/operations/diagnostics)

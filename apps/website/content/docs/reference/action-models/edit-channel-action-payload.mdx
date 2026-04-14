@@ -1,0 +1,31 @@
+---
+title: "EditChannelActionPayload"
+description: "Reference for `EditChannelActionPayload`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `EditChannelActionPayload`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface EditChannelActionPayload {
+	channelId: Snowflake;
+	name?: string | null;
+	parentId?: Snowflake | null;
+	topic?: string | null;
+	reason?: string;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="EditChannelActionPayload" />
+
+## Related Guides
+
+- [Capabilities & Scoped Secrets](/docs/concepts/capabilities-and-scopes)
+- [App Bridge](/docs/guides/app-bridge)

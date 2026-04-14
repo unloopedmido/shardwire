@@ -1,0 +1,39 @@
+---
+title: "ShardwireAppManifestDefinition"
+description: "Input to defineShardwireApp. **Keep this surface small** — only what the app needs from the bridge and which subscription filter keys it may use. Put transport, secrets, bot intents, strict startup, and other policy in `connectBotBridge` / `createBotBridge` / `app.ready` / env instead of growing the manifest into a config object."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Input to defineShardwireApp. **Keep this surface small** — only what the app needs from the bridge and which subscription filter keys it may use. Put transport, secrets, bot intents, strict startup, and other policy in `connectBotBridge` / `createBotBridge` / `app.ready` / env instead of growing the manifest into a config object.
+
+## Signature
+
+```ts
+export interface ShardwireAppManifestDefinition {
+	/** Optional label (e.g. logging). Defaults to `'shardwire-app'` when omitted or blank. */
+	name?: string;
+	/** Events this app requires; each must appear in negotiated capabilities for the contract to hold. */
+	events: readonly BotEventName[];
+	/** Actions this app requires; each must appear in negotiated capabilities for the contract to hold. */
+	actions: readonly BotActionName[];
+	/**
+	 * Per-event subscription filter keys this app may use on `app.on(name, handler, filter)`.
+	 * Diagnosis validates each key against the catalog and against **whether the bridge ever supplies that key on
+	 * subscription matching metadata for this event** (structural impossibility only — not “suspicious” or low-traffic filters).
+	 */
+	filters?: Partial<Record<BotEventName, readonly ShardwireSubscriptionFilterKey[]>>;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="ShardwireAppManifestDefinition" />
+
+## Related Guides
+
+- [Manifests](/docs/guides/manifests)
+- [Strict Startup](/docs/guides/strict-startup)
+- [Diagnostics](/docs/operations/diagnostics)

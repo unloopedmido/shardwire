@@ -1,0 +1,30 @@
+---
+title: "BanMemberActionPayload"
+description: "Reference for `BanMemberActionPayload`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `BanMemberActionPayload`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface BanMemberActionPayload {
+	guildId: Snowflake;
+	userId: Snowflake;
+	reason?: string;
+	deleteMessageSeconds?: number;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="BanMemberActionPayload" />
+
+## Related Guides
+
+- [Capabilities & Scoped Secrets](/docs/concepts/capabilities-and-scopes)
+- [App Bridge](/docs/guides/app-bridge)

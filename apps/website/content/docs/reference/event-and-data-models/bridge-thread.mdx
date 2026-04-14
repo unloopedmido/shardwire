@@ -1,0 +1,33 @@
+---
+title: "BridgeThread"
+description: "Normalized thread channel snapshot for thread lifecycle events. *"
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Normalized thread channel snapshot for thread lifecycle events. *
+
+## Signature
+
+```ts
+export interface BridgeThread {
+	id: Snowflake;
+	guildId: Snowflake;
+	parentId: Snowflake | null;
+	name: string;
+	type: number;
+	archived?: boolean;
+	locked?: boolean;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="BridgeThread" />
+
+## Related Guides
+
+- [Bridge Architecture](/docs/concepts/bridge-architecture)
+- [Runtime Model](/docs/concepts/runtime-model)

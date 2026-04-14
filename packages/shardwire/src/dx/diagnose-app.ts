@@ -136,6 +136,8 @@ function negotiatedSubsetOfExpected(
  * **Manifest filter keys:** `unsupported_filter_key` means not in the Shardwire catalog. `filter_key_absent_from_event_metadata`
  * means the key is catalog-valid but **never** appears on matching metadata for that event (structurally impossible), not
  * “might rarely match” or other traffic heuristics.
+ *
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/contracts-and-diagnostics/diagnose-shardwire-app/
  */
 export function diagnoseShardwireApp(
 	manifest: ShardwireAppManifest,

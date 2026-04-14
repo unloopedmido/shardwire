@@ -89,6 +89,11 @@ function metricsExtrasFromActionError(error: ActionError): {
 	return extras;
 }
 
+/**
+ * Connect the app process to a running bot bridge over WebSocket, then use {@link AppBridge.actions}, {@link AppBridge.on}, and helpers.
+ *
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/bridge-apis/connect-bot-bridge/
+ */
 export function connectBotBridge(options: AppBridgeOptions): AppBridge {
 	assertAppBridgeOptions(options);
 

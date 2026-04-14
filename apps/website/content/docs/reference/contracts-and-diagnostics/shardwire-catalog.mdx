@@ -1,0 +1,30 @@
+---
+title: "ShardwireCatalog"
+description: "Static discovery surface for built-in events, actions, and subscription filters. *"
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Static discovery surface for built-in events, actions, and subscription filters. *
+
+## Signature
+
+```ts
+export interface ShardwireCatalog {
+	events: readonly ShardwireCatalogEvent[];
+	actions: readonly BotActionName[];
+	subscriptionFilters: readonly ShardwireSubscriptionFilterKey[];
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="ShardwireCatalog" />
+
+## Related Guides
+
+- [Manifests](/docs/guides/manifests)
+- [Strict Startup](/docs/guides/strict-startup)
+- [Diagnostics](/docs/operations/diagnostics)

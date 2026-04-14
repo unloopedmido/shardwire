@@ -1,0 +1,37 @@
+---
+title: "ActionError"
+description: "Reference for `ActionError`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `ActionError`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface ActionError {
+	code:
+		| 'UNAUTHORIZED'
+		| 'TIMEOUT'
+		| 'DISCONNECTED'
+		| 'FORBIDDEN'
+		| 'NOT_FOUND'
+		| 'INVALID_REQUEST'
+		| 'INTERNAL_ERROR'
+		| 'SERVICE_UNAVAILABLE';
+	message: string;
+	details?: ActionErrorDetails | unknown;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="ActionError" />
+
+## Related Guides
+
+- [Diagnostics](/docs/operations/diagnostics)
+- [Troubleshooting](/docs/operations/troubleshooting)

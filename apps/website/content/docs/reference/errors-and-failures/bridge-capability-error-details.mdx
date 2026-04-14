@@ -1,0 +1,31 @@
+---
+title: "BridgeCapabilityErrorDetails"
+description: "Structured context on `BridgeCapabilityError` and capability-related action failures. *"
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Structured context on `BridgeCapabilityError` and capability-related action failures. *
+
+## Signature
+
+```ts
+export interface BridgeCapabilityErrorDetails {
+	reasonCode: 'not_in_capabilities' | 'unknown_event' | 'unknown_action';
+	kind?: 'event' | 'action';
+	name?: string;
+	remediation: string;
+	requiredIntents?: readonly BotIntentName[];
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="BridgeCapabilityErrorDetails" />
+
+## Related Guides
+
+- [Diagnostics](/docs/operations/diagnostics)
+- [Troubleshooting](/docs/operations/troubleshooting)

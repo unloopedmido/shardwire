@@ -1,0 +1,28 @@
+---
+title: "ChannelUpdateEventPayload"
+description: "Reference for `ChannelUpdateEventPayload`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `ChannelUpdateEventPayload`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface ChannelUpdateEventPayload extends EventEnvelopeBase {
+	oldChannel?: BridgeChannel;
+	channel: BridgeChannel;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="ChannelUpdateEventPayload" />
+
+## Related Guides
+
+- [Bridge Architecture](/docs/concepts/bridge-architecture)
+- [Runtime Model](/docs/concepts/runtime-model)

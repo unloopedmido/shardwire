@@ -1,0 +1,33 @@
+---
+title: "CreateThreadActionPayload"
+description: "`autoArchiveDuration` is in minutes (Discord-supported values). *"
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+`autoArchiveDuration` is in minutes (Discord-supported values). *
+
+## Signature
+
+```ts
+export interface CreateThreadActionPayload {
+	parentChannelId: Snowflake;
+	name: string;
+	/** When set, starts a thread on this message (requires a text-based parent). */
+	messageId?: Snowflake;
+	type?: 'public' | 'private';
+	autoArchiveDuration?: 60 | 1440 | 4320 | 10080;
+	reason?: string;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="CreateThreadActionPayload" />
+
+## Related Guides
+
+- [Capabilities & Scoped Secrets](/docs/concepts/capabilities-and-scopes)
+- [App Bridge](/docs/guides/app-bridge)

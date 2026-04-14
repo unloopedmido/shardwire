@@ -1,0 +1,33 @@
+---
+title: "MessageBulkDeleteEventPayload"
+description: "Reference for `MessageBulkDeleteEventPayload`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `MessageBulkDeleteEventPayload`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface MessageBulkDeleteEventPayload extends EventEnvelopeBase {
+	channelId: Snowflake;
+	guildId: Snowflake;
+	messageIds: Snowflake[];
+	/** Discord `ChannelType` for `channelId` when known. */
+	channelType?: number;
+	/** Parent category or forum/text parent when the channel reports one. */
+	parentChannelId?: Snowflake;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="MessageBulkDeleteEventPayload" />
+
+## Related Guides
+
+- [Bridge Architecture](/docs/concepts/bridge-architecture)
+- [Runtime Model](/docs/concepts/runtime-model)

@@ -1,0 +1,43 @@
+---
+title: "BridgeInteraction"
+description: "Reference for `BridgeInteraction`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `BridgeInteraction`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface BridgeInteraction {
+	id: Snowflake;
+	applicationId: Snowflake;
+	kind: BridgeInteractionKind;
+	guildId?: Snowflake;
+	channelId?: Snowflake;
+	/** Discord `ChannelType` for `channelId` when the runtime resolved the channel. */
+	channelType?: number;
+	/** Parent category or parent text/forum for thread channels, when known. */
+	parentChannelId?: Snowflake;
+	user: BridgeUser;
+	member?: BridgeGuildMember;
+	commandName?: string;
+	customId?: string;
+	options?: Record<string, unknown>;
+	values?: string[];
+	fields?: Record<string, string>;
+	message?: BridgeMessage;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="BridgeInteraction" />
+
+## Related Guides
+
+- [Bridge Architecture](/docs/concepts/bridge-architecture)
+- [Runtime Model](/docs/concepts/runtime-model)

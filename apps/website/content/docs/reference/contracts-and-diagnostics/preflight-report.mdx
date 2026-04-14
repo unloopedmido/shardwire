@@ -1,0 +1,31 @@
+---
+title: "PreflightReport"
+description: "Reference for `PreflightReport`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `PreflightReport`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface PreflightReport {
+	ok: boolean;
+	connected: boolean;
+	capabilities: BridgeCapabilities | null;
+	issues: PreflightIssue[];
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="PreflightReport" />
+
+## Related Guides
+
+- [Manifests](/docs/guides/manifests)
+- [Strict Startup](/docs/guides/strict-startup)
+- [Diagnostics](/docs/operations/diagnostics)

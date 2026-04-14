@@ -1,0 +1,35 @@
+---
+title: "ShardwireAppDiagnosisIssueCode"
+description: "Machine-readable issue codes from diagnoseShardwireApp. **Filter semantics (no “suspicious” heuristics):** - **`unsupported_filter_key`** — not a built-in key from `app.catalog().subscriptionFilters`. - **`filter_key_absent_from_event_metadata`** — key is built-in, but the bridge’s subscription matcher never supplies it for this event name, so a filter on it **cannot** match any payload (structural impossibility). Narrow filters that merely match rarely (e.g. a specific `guildId`) are **not** flagged."
+---
+
+`type` exported from `src/discord/types.ts`.
+
+## Summary
+
+Machine-readable issue codes from diagnoseShardwireApp. **Filter semantics (no “suspicious” heuristics):** - **`unsupported_filter_key`** — not a built-in key from `app.catalog().subscriptionFilters`. - **`filter_key_absent_from_event_metadata`** — key is built-in, but the bridge’s subscription matcher never supplies it for this event name, so a filter on it **cannot** match any payload (structural impossibility). Narrow filters that merely match rarely (e.g. a specific `guildId`) are **not** flagged.
+
+## Signature
+
+```ts
+export type ShardwireAppDiagnosisIssueCode =
+	| 'missing_intent'
+	| 'missing_event_capability'
+	| 'missing_action_capability'
+	| 'unused_negotiated_event'
+	| 'unused_negotiated_action'
+	| 'unsupported_filter_key'
+	| 'filter_key_absent_from_event_metadata'
+	| 'subscription_event_not_in_manifest'
+	| 'manifest_filters_required_for_subscription'
+	| 'subscription_filter_key_not_declared_in_manifest'
+	| 'scope_broader_than_expected'
+	| 'strict_requires_bot_intents'
+	| 'bot_intents_unknown';
+```
+
+## Related Guides
+
+- [Manifests](/docs/guides/manifests)
+- [Strict Startup](/docs/guides/strict-startup)
+- [Diagnostics](/docs/operations/diagnostics)

@@ -1,0 +1,9 @@
+{
+  "title": "Workflow Helpers",
+  "pages": [
+    "index",
+    "create-thread-then-send-message",
+    "defer-then-edit-interaction-reply",
+    "defer-update-then-edit-interaction-reply"
+  ]
+}

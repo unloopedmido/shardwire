@@ -1,0 +1,37 @@
+---
+title: "CapabilityExplanation"
+description: "Result of `app.explainCapability(...)`. *"
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Result of `app.explainCapability(...)`. *
+
+## Signature
+
+```ts
+export interface CapabilityExplanation {
+	kind: CapabilityExplanationKind;
+	name: string;
+	/** Whether this name is a built-in Shardwire event or action. */
+	known: boolean;
+	/** Required gateway intents when `kind` is `event` and `known`. */
+	requiredIntents?: readonly BotIntentName[];
+	/** After authentication, whether the bridge allows this capability. */
+	allowedByBridge?: boolean;
+	reasonCode: CapabilityExplanationReasonCode;
+	remediation?: string;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="CapabilityExplanation" />
+
+## Related Guides
+
+- [Manifests](/docs/guides/manifests)
+- [Strict Startup](/docs/guides/strict-startup)
+- [Diagnostics](/docs/operations/diagnostics)

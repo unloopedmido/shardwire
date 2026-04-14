@@ -1,0 +1,33 @@
+---
+title: "CreateChannelActionPayload"
+description: "Reference for `CreateChannelActionPayload`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `CreateChannelActionPayload`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface CreateChannelActionPayload {
+	guildId: Snowflake;
+	name: string;
+	/** Discord `ChannelType` (default: `0` guild text). */
+	type?: number;
+	parentId?: Snowflake;
+	topic?: string;
+	reason?: string;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="CreateChannelActionPayload" />
+
+## Related Guides
+
+- [Capabilities & Scoped Secrets](/docs/concepts/capabilities-and-scopes)
+- [App Bridge](/docs/guides/app-bridge)

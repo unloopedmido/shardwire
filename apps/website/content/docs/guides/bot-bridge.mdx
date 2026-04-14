@@ -1,0 +1,37 @@
+---
+title: "Bot Bridge"
+description: "Configure the bot-side bridge, choose intents carefully, and keep the exposed transport surface deliberate."
+---
+
+The bot bridge is where Discord runtime concerns live.
+
+## Minimum configuration
+
+```ts
+import { createBotBridge } from 'shardwire';
+
+const bridge = createBotBridge({
+  token: process.env.DISCORD_TOKEN!,
+  intents: ['Guilds', 'GuildMessages', 'GuildMembers'],
+  server: {
+    port: 3001,
+    path: '/shardwire',
+    secrets: [process.env.SHARDWIRE_SECRET!],
+  },
+});
+```
+
+## What to tune on the server block
+
+- `host` when binding a specific interface
+- `path` when the bridge should not live at the default path
+- `heartbeatMs` for transport liveness behavior
+- `maxConnections` if you need to cap connected apps
+- `maxConcurrentActions` and `actionQueueTimeoutMs` when action execution pressure matters
+- `idempotencyScope` and `idempotencyTtlMs` when retries matter
+
+## Intent discipline
+
+Only declare the intents you actually need. Missing intents silently shrink what events the bridge can ever negotiate, so they directly affect downstream app behavior.
+
+Use diagnostics and strict startup to catch that mismatch early instead of discovering it from “missing events” in production.

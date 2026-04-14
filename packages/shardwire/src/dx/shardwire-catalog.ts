@@ -6,7 +6,11 @@ import {
 } from '../discord/catalog';
 import type { ShardwireCatalog, ShardwireSubscriptionFilterKey } from '../discord/types';
 
-/** Returns the full static Shardwire catalog (not negotiated per-connection). */
+/**
+ * Returns the full static Shardwire catalog (not negotiated per-connection).
+ *
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/contracts-and-diagnostics/get-shardwire-catalog/
+ */
 export function getShardwireCatalog(): ShardwireCatalog {
 	return {
 		events: BOT_EVENT_NAMES.map((name) => ({

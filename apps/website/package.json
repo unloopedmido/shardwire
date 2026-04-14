@@ -1,24 +1,41 @@
 {
   "name": "website",
-  "type": "module",
-  "version": "0.0.1",
+  "private": true,
   "scripts": {
-    "dev": "astro dev",
-    "start": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro"
+    "reference:build": "node ./scripts/reference/generate.mjs && node ./scripts/reference/attach-reference-see.mjs",
+    "predev": "npm run reference:build",
+    "dev": "next dev --webpack",
+    "dev:turbo": "next dev",
+    "start": "next dev",
+    "prebuild": "npm run reference:build",
+    "build": "next build --webpack",
+    "preview": "serve out",
+    "test": "node --test tests/**/*.test.mjs"
   },
   "dependencies": {
-    "@astrojs/react": "^4.4.0",
-    "@astrojs/starlight": "^0.38.3",
-    "@astrojs/starlight-tailwind": "^5.0.0",
-    "@tailwindcss/vite": "^4.1.18",
-    "astro": "^6.0.1",
-    "framer-motion": "^12.23.24",
+    "@orama/orama": "^3.1.16",
+    "@types/mdx": "^2.0.13",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.38.0",
+    "fumadocs-core": "^16.7.14",
+    "fumadocs-mdx": "^14.2.13",
+    "fumadocs-typescript": "^5.2.4",
+    "fumadocs-ui": "^16.7.14",
+    "lucide-react": "^1.8.0",
+    "next": "^16.2.3",
+    "prism-react-renderer": "^2.4.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "sharp": "^0.34.2",
-    "tailwindcss": "^4.1.18"
+    "tailwind-merge": "^3.5.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "postcss": "^8.5.6",
+    "serve": "^14.2.4",
+    "tailwindcss": "^4.1.18",
+    "typescript": "^6.0.2"
   }
 }

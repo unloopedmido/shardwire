@@ -1,0 +1,31 @@
+---
+title: "BridgeMessageReaction"
+description: "Reference for `BridgeMessageReaction`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `BridgeMessageReaction`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface BridgeMessageReaction {
+	messageId: Snowflake;
+	channelId: Snowflake;
+	guildId?: Snowflake;
+	user?: BridgeUser;
+	emoji: BridgeReactionEmoji;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="BridgeMessageReaction" />
+
+## Related Guides
+
+- [Bridge Architecture](/docs/concepts/bridge-architecture)
+- [Runtime Model](/docs/concepts/runtime-model)

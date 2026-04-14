@@ -1,0 +1,37 @@
+---
+title: "BridgeCapabilityError"
+description: "Reference for `BridgeCapabilityError`, exported as part of the public Shardwire surface."
+---
+
+`class` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `BridgeCapabilityError`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export class BridgeCapabilityError extends Error {
+	constructor(
+		public readonly kind: 'event' | 'action',
+		public readonly name: string,
+		message?: string,
+		public readonly details?: BridgeCapabilityErrorDetails,
+	) {
+		super(
+			withErrorDocsLink(message ?? `Capability "${name}" is not available for ${kind}.`, 'capability-not-available'),
+		);
+		this.name = 'BridgeCapabilityError';
+	}
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="BridgeCapabilityError" />
+
+## Related Guides
+
+- [Diagnostics](/docs/operations/diagnostics)
+- [Troubleshooting](/docs/operations/troubleshooting)

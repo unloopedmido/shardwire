@@ -31,6 +31,8 @@ const DEFAULT_MANIFEST_NAME = 'shardwire-app';
 /**
  * Declares a minimal app contract: required **`events`** / **`actions`**, optional **`filters`** per event, optional **`name`**.
  * Do not use this for transport, secrets, intents, or startup policy — keep those elsewhere.
+ *
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/contracts-and-diagnostics/define-shardwire-app/
  */
 export function defineShardwireApp(definition: ShardwireAppManifestDefinition): ShardwireAppManifest {
 	const trimmed = definition.name?.trim() ?? '';
@@ -111,6 +113,8 @@ export function defineShardwireApp(definition: ShardwireAppManifestDefinition): 
 /**
  * Minimum `SecretPermissions` implied by a manifest (required events and actions).
  * Use inside `server.secrets[].allow` when authoring scoped secrets.
+ *
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/contracts-and-diagnostics/generate-secret-scope/
  */
 export function generateSecretScope(manifest: ShardwireAppManifest): SecretPermissions {
 	return {

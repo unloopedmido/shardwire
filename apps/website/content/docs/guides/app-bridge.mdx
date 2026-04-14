@@ -1,0 +1,56 @@
+---
+title: "App Bridge"
+description: "Connect the app-side client, subscribe to events, invoke built-in actions, and branch on typed results."
+---
+
+The app bridge is the consumer side of the system.
+
+## Base connection
+
+```ts
+import { connectBotBridge } from 'shardwire';
+
+const app = connectBotBridge({
+  url: 'ws://127.0.0.1:3001/shardwire',
+  secret: process.env.SHARDWIRE_SECRET!,
+  appName: 'moderation-worker',
+});
+```
+
+## Event subscriptions
+
+```ts
+app.on('messageCreate', ({ message }) => {
+  if (!message.content?.includes('!ping')) return;
+  void app.actions.sendMessage({
+    channelId: message.channelId,
+    content: 'pong',
+  });
+});
+```
+
+## Action calls
+
+Always treat actions as typed request/response calls with explicit failure handling.
+
+```ts
+const result = await app.actions.timeoutMember({
+  guildId,
+  userId,
+  durationMs: 60_000,
+});
+
+if (!result.ok) {
+  console.error(result.error.code, result.error.details);
+}
+```
+
+## What belongs here
+
+- subscriptions
+- product workflows
+- dashboards and admin tooling
+- moderation policies
+- metrics/reporting hooks
+
+What does **not** belong here is raw Discord runtime ownership. That stays on the bot side.

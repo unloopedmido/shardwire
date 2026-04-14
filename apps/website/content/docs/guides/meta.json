@@ -1,0 +1,11 @@
+{
+  "title": "Guides",
+  "defaultOpen": true,
+  "pages": [
+    "bot-bridge",
+    "app-bridge",
+    "manifests",
+    "strict-startup",
+    "workflows"
+  ]
+}

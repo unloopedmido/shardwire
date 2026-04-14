@@ -1,0 +1,31 @@
+---
+title: "PreflightIssue"
+description: "Reference for `PreflightIssue`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `PreflightIssue`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface PreflightIssue {
+	severity: PreflightIssueSeverity;
+	code: string;
+	message: string;
+	remediation?: string;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="PreflightIssue" />
+
+## Related Guides
+
+- [Manifests](/docs/guides/manifests)
+- [Strict Startup](/docs/guides/strict-startup)
+- [Diagnostics](/docs/operations/diagnostics)

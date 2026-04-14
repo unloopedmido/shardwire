@@ -1,0 +1,76 @@
+---
+title: "Getting Started"
+description: "Install Shardwire, boot the bot bridge, connect an app process, and verify the first end-to-end event flow."
+---
+
+Shardwire’s first successful setup is intentionally small:
+
+1. Start a bot bridge.
+2. Connect an app bridge.
+3. Subscribe to a typed event.
+4. Check that the negotiated capability surface matches what you expect.
+
+## Prerequisites
+
+- Node.js `>=18.18` for the package runtime.
+- A Discord bot token in `DISCORD_TOKEN`.
+- A shared secret in `SHARDWIRE_SECRET`.
+- A local loopback URL such as `ws://127.0.0.1:3001/shardwire`.
+
+> `ws://` is for loopback only. Use `wss://` for remote deployments.
+
+## Install
+
+```bash
+npm install shardwire
+```
+
+## Bot process
+
+```ts
+import { createBotBridge } from 'shardwire';
+
+const bridge = createBotBridge({
+  token: process.env.DISCORD_TOKEN!,
+  intents: ['Guilds', 'GuildMessages', 'GuildMembers', 'MessageContent'],
+  server: {
+    port: 3001,
+    secrets: [process.env.SHARDWIRE_SECRET!],
+  },
+});
+
+await bridge.ready();
+console.log('bot bridge ready');
+```
+
+## App process
+
+```ts
+import { connectBotBridge } from 'shardwire';
+
+const app = connectBotBridge({
+  url: 'ws://127.0.0.1:3001/shardwire',
+  secret: process.env.SHARDWIRE_SECRET!,
+  appName: 'dashboard',
+});
+
+app.on('messageCreate', ({ message }) => {
+  console.log('message', message.channelId, message.content);
+});
+
+await app.ready();
+console.log(app.capabilities());
+```
+
+## What to verify immediately
+
+- `bridge.ready()` completes without secret or transport validation errors.
+- `app.ready()` authenticates and returns negotiated capabilities.
+- The event you subscribed to appears in `app.capabilities().events`.
+- Your bot intents cover the events you expect to produce.
+
+## Where to go next
+
+- Read [Bridge Architecture](/docs/concepts/bridge-architecture) for the runtime split.
+- Read [Capabilities & Scoped Secrets](/docs/concepts/capabilities-and-scopes) before adding more app consumers.
+- Read [Diagnostics](/docs/operations/diagnostics) before you deploy.

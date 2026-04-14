@@ -1,0 +1,30 @@
+---
+title: "BotBridge"
+description: "Reference for `BotBridge`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `BotBridge`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface BotBridge {
+	ready(): Promise<void>;
+	close(): Promise<void>;
+	status(): { ready: boolean; connectionCount: number };
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="BotBridge" />
+
+## Related Guides
+
+- [Getting Started](/docs/getting-started)
+- [Bot Bridge](/docs/guides/bot-bridge)
+- [App Bridge](/docs/guides/app-bridge)

@@ -1,0 +1,52 @@
+---
+title: "BotBridgeOptions"
+description: "Reference for `BotBridgeOptions`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `BotBridgeOptions`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface BotBridgeOptions {
+	token: string;
+	intents: readonly BotIntentName[];
+	server: {
+		port: number;
+		host?: string;
+		path?: string;
+		heartbeatMs?: number;
+		maxPayloadBytes?: number;
+		secrets: readonly BotBridgeSecret[];
+		/** Reject new TCP connections when authenticated client count reaches this cap (default: unlimited). */
+		maxConnections?: number;
+		/** Max concurrent action executions per bot process (default: 32). */
+		maxConcurrentActions?: number;
+		/** When the queue is full, fail fast with `SERVICE_UNAVAILABLE` (default: 5000). */
+		actionQueueTimeoutMs?: number;
+		/**
+		 * Where `idempotencyKey` deduplication is scoped (default: `connection`).
+		 * - `connection`: same WebSocket connection only (reconnect uses a new scope).
+		 * - `secret`: same configured secret id across connections (useful for retries after reconnect).
+		 */
+		idempotencyScope?: 'connection' | 'secret';
+		/** TTL for idempotency cache entries in ms (default: 120000). */
+		idempotencyTtlMs?: number;
+	};
+	logger?: ShardwireLogger;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="BotBridgeOptions" />
+
+## Related Guides
+
+- [Getting Started](/docs/getting-started)
+- [Bot Bridge](/docs/guides/bot-bridge)
+- [App Bridge](/docs/guides/app-bridge)

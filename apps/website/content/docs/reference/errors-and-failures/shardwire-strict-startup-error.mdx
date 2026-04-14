@@ -1,0 +1,33 @@
+---
+title: "ShardwireStrictStartupError"
+description: "Reference for `ShardwireStrictStartupError`, exported as part of the public Shardwire surface."
+---
+
+`class` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `ShardwireStrictStartupError`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export class ShardwireStrictStartupError extends Error {
+	constructor(
+		message: string,
+		public readonly report: ShardwireAppDiagnosisReport,
+	) {
+		super(withErrorDocsLink(message, 'strict-startup-failed'));
+		this.name = 'ShardwireStrictStartupError';
+	}
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="ShardwireStrictStartupError" />
+
+## Related Guides
+
+- [Diagnostics](/docs/operations/diagnostics)
+- [Troubleshooting](/docs/operations/troubleshooting)

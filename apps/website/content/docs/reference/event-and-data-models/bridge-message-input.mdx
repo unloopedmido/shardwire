@@ -1,0 +1,33 @@
+---
+title: "BridgeMessageInput"
+description: "Reference for `BridgeMessageInput`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `BridgeMessageInput`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface BridgeMessageInput {
+	content?: string;
+	embeds?: APIEmbed[];
+	allowedMentions?: APIAllowedMentions;
+	components?: APIActionRowComponent<APIComponentInMessageActionRow>[];
+	/** Bitfield compatible with `MessageFlags` from discord.js / Discord API. */
+	flags?: number;
+	stickerIds?: Snowflake[];
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="BridgeMessageInput" />
+
+## Related Guides
+
+- [Bridge Architecture](/docs/concepts/bridge-architecture)
+- [Runtime Model](/docs/concepts/runtime-model)

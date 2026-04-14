@@ -1,0 +1,36 @@
+---
+title: "BridgeGuildMember"
+description: "Reference for `BridgeGuildMember`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `BridgeGuildMember`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface BridgeGuildMember {
+	id: Snowflake;
+	guildId: Snowflake;
+	user?: BridgeUser;
+	displayName?: string;
+	nickname?: string | null;
+	roles: Snowflake[];
+	joinedAt?: string | null;
+	premiumSince?: string | null;
+	pending?: boolean;
+	communicationDisabledUntil?: string | null;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="BridgeGuildMember" />
+
+## Related Guides
+
+- [Bridge Architecture](/docs/concepts/bridge-architecture)
+- [Runtime Model](/docs/concepts/runtime-model)
