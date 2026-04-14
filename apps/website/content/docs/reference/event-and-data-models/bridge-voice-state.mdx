@@ -17,13 +17,13 @@ export interface BridgeVoiceState {
 	userId: Snowflake;
 	channelId?: Snowflake | null;
 	sessionId?: string | null;
-	selfMute: boolean | null;
-	selfDeaf: boolean | null;
-	selfVideo: boolean | null;
-	selfStream: boolean | null;
-	serverMute: boolean | null;
-	serverDeaf: boolean | null;
-	suppress: boolean | null;
+	selfMute: boolean;
+	selfDeaf: boolean;
+	selfVideo: boolean;
+	selfStream: boolean;
+	serverMute: boolean;
+	serverDeaf: boolean;
+	suppress: boolean;
 	requestToSpeakTimestamp?: string | null;
 }
 ```
