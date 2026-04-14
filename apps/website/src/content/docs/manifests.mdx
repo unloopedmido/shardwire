@@ -1,0 +1,45 @@
+---
+title: Manifests
+description: Define explicit app contracts and derive minimum secret scopes.
+---
+
+Manifests keep your app contract small and explicit. They are designed for strict startup checks and scoped secret generation.
+
+## Define an app contract
+
+```ts
+import { defineShardwireApp } from 'shardwire';
+
+const manifest = defineShardwireApp({
+	name: 'moderation',
+	events: ['ready', 'messageCreate', 'interactionCreate'],
+	actions: ['deleteMessage', 'banMember', 'deferInteraction', 'editInteractionReply'],
+	filters: {
+		interactionCreate: ['customId', 'interactionKind'],
+		messageCreate: ['channelId'],
+	},
+});
+```
+
+## Filter declaration rule
+
+- If handler is `app.on(event, fn)` with no filter object, `manifest.filters[event]` is not required.
+- If handler uses a non-empty filter object, every runtime filter key must be declared in `manifest.filters[event]`.
+
+## Generate minimum scope
+
+```ts
+import { generateSecretScope } from 'shardwire';
+
+const allow = generateSecretScope(manifest);
+```
+
+Use this output directly in bot-side scoped secret entries.
+
+## Why this matters
+
+The manifest gives you a concrete boundary for:
+
+- strict startup contract checks
+- scoped secrets with least privilege
+- diagnosable drift between expected and negotiated capabilities

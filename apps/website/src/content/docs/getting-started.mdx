@@ -1,0 +1,65 @@
+---
+title: Getting Started
+description: Install Shardwire and connect your first bot and app processes.
+---
+
+## Requirements
+
+- Node.js `>=18.18`
+- Discord bot token in `DISCORD_TOKEN`
+- Shared bridge secret in `SHARDWIRE_SECRET`
+- Gateway intents that match events you plan to consume
+
+## Install
+
+```bash
+npm install shardwire
+```
+
+## Mental model
+
+Shardwire runs in two processes:
+
+1. **Bot process** with `createBotBridge(...)`
+2. **App process** with `connectBotBridge(...)`
+
+The app receives normalized Discord payloads and calls strongly-typed actions over a single websocket connection.
+
+## Minimal boot sequence
+
+### Bot process
+
+```ts
+import { createBotBridge } from 'shardwire';
+
+const bridge = createBotBridge({
+	token: process.env.DISCORD_TOKEN!,
+	intents: ['Guilds', 'GuildMessages', 'GuildMembers', 'MessageContent'],
+	server: {
+		port: 3001,
+		secrets: [process.env.SHARDWIRE_SECRET!],
+	},
+});
+
+await bridge.ready();
+```
+
+### App process
+
+```ts
+import { connectBotBridge } from 'shardwire';
+
+const app = connectBotBridge({
+	url: 'ws://127.0.0.1:3001/shardwire',
+	secret: process.env.SHARDWIRE_SECRET!,
+	appName: 'dashboard',
+});
+
+app.on('messageCreate', ({ message }) => {
+	console.log(message.channelId, message.content);
+});
+
+await app.ready();
+```
+
+Continue with [Bot Side Setup](./bot-setup/) and [App Side Setup](./app-setup/).

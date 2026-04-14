@@ -6,7 +6,7 @@ on:
       - main
       - master
     paths:
-      - package.json
+      - packages/shardwire/package.json
 
 concurrency:
   group: npm-publish-package-json
@@ -30,13 +30,18 @@ jobs:
         id: meta
         run: |
           set -euo pipefail
-          NEW=$(node -p "require('./package.json').version")
+          NEW=$(node -p "require('./packages/shardwire/package.json').version")
           if ! git rev-parse HEAD~1 >/dev/null 2>&1; then
             echo "publish=false" >> "$GITHUB_OUTPUT"
             echo "No parent commit; skipping."
             exit 0
           fi
-          OLD=$(git show HEAD~1:package.json | node -p "JSON.parse(require('fs').readFileSync(0,'utf8')).version")
+          if ! git cat-file -e HEAD~1:packages/shardwire/package.json 2>/dev/null; then
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            echo "Parent commit has no packages/shardwire/package.json (migration boundary); skipping."
+            exit 0
+          fi
+          OLD=$(git show HEAD~1:packages/shardwire/package.json | node -p "JSON.parse(require('fs').readFileSync(0,'utf8')).version")
           if [ "$OLD" = "$NEW" ]; then
             echo "publish=false" >> "$GITHUB_OUTPUT"
             echo "package.json version unchanged ($NEW); skipping."
@@ -66,7 +71,7 @@ jobs:
 
       - name: Run verification
         if: steps.meta.outputs.publish == 'true'
-        run: npm run verify
+        run: npm run pkg:verify
 
       - name: Push version tag
         if: steps.meta.outputs.publish == 'true'
@@ -78,4 +83,4 @@ jobs:
 
       - name: Publish to npm
         if: steps.meta.outputs.publish == 'true'
-        run: npm publish --provenance --access public
+        run: npm publish -w shardwire --provenance --access public

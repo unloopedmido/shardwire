@@ -1,0 +1,171 @@
+@layer base, starlight, theme, components, utilities;
+
+@import '@astrojs/starlight-tailwind';
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+@theme {
+	--font-sans: 'Sora Variable', 'Manrope Variable', ui-sans-serif, system-ui, sans-serif;
+	--font-mono: 'JetBrains Mono Variable', 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+	--color-accent-50: oklch(0.96 0.02 235);
+	--color-accent-100: oklch(0.92 0.03 235);
+	--color-accent-200: oklch(0.85 0.06 238);
+	--color-accent-300: oklch(0.76 0.1 241);
+	--color-accent-400: oklch(0.68 0.13 244);
+	--color-accent-500: oklch(0.59 0.16 246);
+	--color-accent-600: oklch(0.53 0.15 248);
+	--color-accent-700: oklch(0.45 0.13 248);
+	--color-accent-800: oklch(0.38 0.1 248);
+	--color-accent-900: oklch(0.3 0.08 248);
+	--color-accent-950: oklch(0.23 0.06 248);
+	--color-gray-50: oklch(0.97 0.004 264);
+	--color-gray-100: oklch(0.94 0.004 264);
+	--color-gray-200: oklch(0.88 0.005 264);
+	--color-gray-300: oklch(0.78 0.006 264);
+	--color-gray-400: oklch(0.67 0.007 264);
+	--color-gray-500: oklch(0.57 0.008 264);
+	--color-gray-600: oklch(0.47 0.009 264);
+	--color-gray-700: oklch(0.36 0.01 264);
+	--color-gray-800: oklch(0.27 0.012 264);
+	--color-gray-900: oklch(0.2 0.012 264);
+	--color-gray-950: oklch(0.14 0.01 264);
+}
+
+:root {
+	color-scheme: dark;
+	--sl-content-width: 54rem;
+	--sl-text-5xl: 3.4rem;
+	--sl-text-h1: 3rem;
+	--sl-text-h2: 2rem;
+	--sl-text-h3: 1.45rem;
+	--ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+	--ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html,
+body {
+	background:
+		radial-gradient(1200px 600px at 80% -10%, rgb(32 56 108 / 36%), transparent 60%),
+		radial-gradient(900px 500px at 10% -20%, rgb(38 66 96 / 22%), transparent 58%),
+		linear-gradient(180deg, rgb(9 12 18), rgb(9 12 18));
+}
+
+body {
+	text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3 {
+	text-wrap: balance;
+	letter-spacing: -0.02em;
+}
+
+code,
+pre code {
+	font-variant-numeric: tabular-nums;
+}
+
+:where(a, button, [role='button'], input, textarea, select):focus-visible {
+	outline: none;
+	box-shadow:
+		0 0 0 2px rgb(11 15 22),
+		0 0 0 4px color-mix(in srgb, var(--sl-color-accent-high) 70%, white 0%);
+}
+
+.hero-shell {
+	position: relative;
+	border: 1px solid rgb(148 163 184 / 24%);
+	border-radius: 1.15rem;
+	background: linear-gradient(180deg, rgb(18 23 34 / 82%), rgb(10 14 22 / 90%));
+	box-shadow:
+		0 22px 70px rgb(3 8 20 / 55%),
+		inset 0 1px 0 rgb(148 163 184 / 16%);
+	padding: clamp(1.2rem, 2.4vw, 2rem);
+	overflow: hidden;
+}
+
+.hero-shell::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	background:
+		linear-gradient(125deg, rgb(125 211 252 / 6%), transparent 45%),
+		linear-gradient(-125deg, rgb(129 140 248 / 8%), transparent 42%);
+}
+
+.metric-grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 0.85rem;
+	margin-top: 1rem;
+}
+
+.metric-item {
+	border: 1px solid rgb(148 163 184 / 20%);
+	border-radius: 0.9rem;
+	padding: 0.8rem;
+	background: rgb(2 6 23 / 30%);
+}
+
+.metric-label {
+	font-size: 0.73rem;
+	color: rgb(148 163 184 / 85%);
+	text-transform: uppercase;
+	letter-spacing: 0.09em;
+}
+
+.metric-value {
+	font-size: 1.1rem;
+	font-weight: 640;
+	line-height: 1.35;
+}
+
+.feature-card {
+	border: 1px solid rgb(148 163 184 / 22%);
+	border-radius: 0.9rem;
+	background: linear-gradient(180deg, rgb(16 21 32 / 82%), rgb(8 12 20 / 88%));
+	padding: 1rem;
+	transition:
+		transform 220ms var(--ease-out-quart),
+		border-color 220ms var(--ease-out-quart),
+		box-shadow 260ms var(--ease-out-expo);
+}
+
+.feature-card:hover {
+	transform: translateY(-2px);
+	border-color: rgb(96 165 250 / 55%);
+	box-shadow:
+		0 16px 30px rgb(2 6 23 / 42%),
+		inset 0 1px 0 rgb(148 163 184 / 22%);
+}
+
+.feature-card h3 {
+	margin: 0;
+	font-size: 1rem;
+}
+
+.feature-card p {
+	margin-top: 0.5rem;
+	font-size: 0.94rem;
+	line-height: 1.55;
+	color: rgb(203 213 225 / 90%);
+}
+
+@media (max-width: 920px) {
+	.metric-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}

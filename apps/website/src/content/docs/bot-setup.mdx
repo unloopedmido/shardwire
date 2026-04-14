@@ -1,0 +1,46 @@
+---
+title: Bot Side Setup
+description: Configure createBotBridge for capabilities, secrets, and production controls.
+---
+
+`createBotBridge(...)` owns Discord gateway connectivity and hosts the websocket endpoint for app clients.
+
+## Core options
+
+```ts
+import { createBotBridge } from 'shardwire';
+
+const bridge = createBotBridge({
+	token: process.env.DISCORD_TOKEN!,
+	intents: ['Guilds', 'GuildMessages', 'GuildMembers', 'MessageContent'],
+	server: {
+		port: 3001,
+		path: '/shardwire',
+		secrets: [process.env.SHARDWIRE_SECRET!],
+		maxPayloadBytes: 65536,
+		maxConnections: 50,
+		maxConcurrentActions: 16,
+		actionQueueTimeoutMs: 15000,
+		idempotencyScope: 'secret',
+		idempotencyTtlMs: 120000,
+	},
+});
+```
+
+## Lifecycle
+
+- `await bridge.ready()` resolves when Discord `ready` handshake is complete.
+- `await bridge.close()` shuts down websocket server and Discord runtime.
+- Close connected apps first when graceful draining matters.
+
+## Intent discipline
+
+Intents define which events can be produced. If an app requests `messageCreate`, `GuildMessages` must be present. Combine this with secret scopes for least privilege.
+
+## Security baseline
+
+- use `wss://` for non-loopback deployments
+- keep shared secrets in secure secret storage
+- prefer scoped secrets for multi-app environments
+
+Next: [Scoped Secrets](./scoped-secrets/) and [Deployment](./deployment/).
