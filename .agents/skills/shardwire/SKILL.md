@@ -50,7 +50,7 @@ The reference is **generated** from `packages/shardwire/src/index.ts` (`npm run 
 
 ### Runtime error links (`See: …`)
 
-The npm package may still append **`https://unloopedmido.github.io/shardwire/errors/#…`** to some errors (`withErrorDocsLink` / `docsErrorLink`). Prefer routing users to the **anchor** on that URL when present; if that path is missing from the static site, use **Troubleshooting** and **Diagnostics** pages above and the **Errors & failures** reference section for equivalent context.
+Some errors append **`https://unloopedmido.github.io/shardwire/docs/operations/troubleshooting/#…`** (`withErrorDocsLink` / `docsErrorLink`; fragment ids are stable in the message even when the page has no matching heading anchor). Prefer that URL when helping users parse a pasted message; cross-link **Diagnostics** and **Reference → Errors & failures** when the issue is typed results or error classes rather than transport setup.
 
 ## Optimize for
 
@@ -67,7 +67,7 @@ The npm package may still append **`https://unloopedmido.github.io/shardwire/err
    - Do not use legacy patterns like `…/shardwire/getting-started/` (missing `/docs/`) or `apps/website/src/content/docs` (old layout).
 
 2. **Error-link aware troubleshooting**
-   - If an error message includes `See: https://unloopedmido.github.io/shardwire/errors/#...`, use that URL for the anchor; cross-link **Operations → Troubleshooting** and **Reference → Errors & failures** when helpful.
+   - If an error message includes `See: https://unloopedmido.github.io/shardwire/docs/operations/troubleshooting/#...`, use that URL (and fragment) when helpful; cross-link **Operations → Diagnostics** and **Reference → Errors & failures** for capability and result-type context.
    - Explain root cause + fix, then include the same or an equivalent direct URL in your response.
 
 3. **Stay inside built-in API first**
@@ -242,5 +242,5 @@ Read these files when you need precise details:
 
 - `.agents/skills/shardwire/references/api-surface.md` — exports, event/action names, intent mapping.
 - `.agents/skills/shardwire/references/integration-patterns.md` — setup and debugging patterns.
-- `packages/shardwire/src/utils/docs-links.ts` — `SHARDWIRE_DOCS` / error URL helpers (note: some keys may still use pre-`/docs/` paths; prefer **`/docs/...`** in new prose until package map is fully aligned).
+- `packages/shardwire/src/utils/docs-links.ts` — `SHARDWIRE_DOCS` / `docsErrorLink` / `withErrorDocsLink` (paths under **`/docs/…`** on the published site).
 - `packages/shardwire/src/utils/reference-doc-url.ts` — must match `apps/website/scripts/reference/routing.mjs` for reference URL slugs.
