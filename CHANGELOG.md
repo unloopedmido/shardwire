@@ -2,6 +2,17 @@
 
 All notable changes to this project are documented in this file.
 
+## 1.5.0
+
+- Added `**defineShardwireApp(...)**` for a small app manifest: required `**events**` / `**actions**`, optional per-event `**filters**`, optional `**name**` (defaults to `shardwire-app`). Intentionally not a general config object — keep transport, secrets, intents, and startup policy out of the manifest.
+- Added `**generateSecretScope(manifest)**` to derive minimum `SecretPermissions` (`events` / `actions` lists) for scoped bot secrets.
+- Added **`diagnoseShardwireApp(manifest, negotiated, options?)`** for structured reports: manifest-required events/actions vs negotiation, manifest-declared filter keys, runtime subscriptions vs `manifest.events` / `manifest.filters`, optional **`botIntents`**, optional **`unused_negotiated_*`** warnings (extra granted events/actions), and optional **`expectedScope`** (emits **`severity: 'error'`** only when negotiation is broader than that explicit maximum). **`report.ok`** is **`false`** only when at least one issue has **`severity: 'error'`**; warnings never set **`report.ok`** to **`false`** (same rule as strict startup).
+- Added **strict startup**: `await app.ready({ strict: true, manifest, botIntents?, expectedScope? })` runs diagnosis after auth and throws **`ShardwireStrictStartupError`** on **`severity: 'error'`** issues only (not on **`unused_negotiated_*`** warnings); `botIntents` is required in strict mode when manifest events require gateway intents.
+- Exported **`ShardwireStrictStartupError`** alongside existing bridge errors.
+- Updated **`examples/`** to use manifests, **`generateSecretScope`** (scoped bot `allow` in `bot-production`), **`app.ready({ strict: true, botIntents })`**, and **`app.explainCapability`** / **`app.preflight`** where relevant.
+- **Diagnosis contract rules**: runtime `subscriptions` must target `manifest.events`, and any subscription `filter` keys must be declared under **`manifest.filters`** for that event. Filter viability checks apply only to manifest-declared keys. Surplus negotiation is **`unused_negotiated_*`** warnings only; **`expectedScope`** is the explicit opt-in for hard failures on “too broad.”
+- **Filter diagnosis semantics**: `filter_key_never_populated` renamed to `**filter_key_absent_from_event_metadata`** — only when a catalog key is **never** supplied on the bridge’s subscription matching metadata for that event (structurally impossible to match). Narrow filters that merely match infrequently are out of scope. `**EVENT_SUBSCRIPTION_METADATA_KEYS`** replaces `**SUBSCRIPTION_FILTER_KEYS_POPULATED_BY_EVENT**` (old name kept as deprecated alias).
+
 ## 1.4.5
 
 - Added `app.catalog()` for static discovery of built-in events (with intent hints), actions, and subscription filter keys.
@@ -22,7 +33,7 @@ All notable changes to this project are documented in this file.
 - Added `check:changelog` script and wired it into `verify` and publish workflow so the current package version cannot remain marked `(unreleased)` in `CHANGELOG.md`.
 - Replaced broken `SECURITY.md` README link with in-README vulnerability reporting and secret rotation guidance.
 - Added **startup lifecycle** documentation and expanded transport/idempotency/metrics notes in the README.
-- Added optional bridge `server.idempotencyScope` (`connection` \| `secret`) and `server.idempotencyTtlMs` for cross-connection idempotent retries.
+- Added optional bridge `server.idempotencyScope` (`connection` `secret`) and `server.idempotencyTtlMs` for cross-connection idempotent retries.
 - Surfaced Discord rate-limit `retry_after` as `details.retryAfterMs` on `SERVICE_UNAVAILABLE` failures and forwarded `discordStatus` / `discordCode` / `retryAfterMs` to `metrics.onActionComplete` when present.
 - Added integration coverage for secret-scoped idempotency, action queue timeouts, interaction/read actions, `maxPayloadBytes` enforcement, and `DiscordAPIError` 429 mapping.
 - Added operational docs (`docs/deployment.md`, `docs/troubleshooting.md`, `docs/patterns.md`) and production-style examples (`examples/bot-production.ts`, `examples/app-moderation.ts`, `examples/app-interaction.ts`) with matching npm scripts.

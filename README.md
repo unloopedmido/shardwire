@@ -103,10 +103,23 @@ app.on(
 );
 ```
 
+### App manifest (`defineShardwireApp`) and optional `filters`
+
+Use **`defineShardwireApp({ events, actions, filters?, name? })`** for **`app.ready({ strict: true, manifest, ... })`** and for tooling like **`generateSecretScope(manifest)`**. Keep it small: list the **events** and **actions** you depend on; add **`filters` only when it earns its place**.
+
+**When `filters` is required (strict mode only checks what you actually subscribe with):**
+
+- If a handler is registered as **`app.on(event, fn)`** or **`app.on(event, fn, undefined)`**, you do **not** need a **`manifest.filters[event]`** entry for that event. There is nothing to validate against the manifest, so do not add filter declarations “just in case.”
+- If a handler uses a **non-empty** third argument, e.g. **`app.on('messageCreate', fn, { channelId: '…' })`**, then **every key** on that object must be listed under **`manifest.filters.messageCreate`** (for that event name). Declare **only** those keys—accuracy over defensive boilerplate. Extra keys in the manifest that you never pass at runtime are ignored for matching but add noise; keys you pass at runtime that you **omit** from the manifest are **`severity: 'error'`** issues from **`diagnoseShardwireApp`**.
+
+**If runtime uses undeclared filter keys**, strict startup fails with **`ShardwireStrictStartupError`**; the diagnosis includes codes such as **`manifest_filters_required_for_subscription`** (filter object present but **`manifest.filters[event]`** missing or empty) or **`subscription_filter_key_not_declared_in_manifest`** (object includes a key not listed for that event). Messages spell out what you subscribed with, what the manifest allows, and how to fix it (add the key to **`manifest.filters`** or stop passing it).
+
+See **[`examples/app-basic.ts`](./examples/app-basic.ts)** (minimal manifest, no **`filters`**) and **[`examples/app-interaction.ts`](./examples/app-interaction.ts)** / **[`examples/app-moderation.ts`](./examples/app-moderation.ts)** ( **`filters`** only where the handler passes a filter).
+
 ## Startup lifecycle
 
 - **`createBotBridge(...)`** starts the WebSocket server immediately; `await bridge.ready()` resolves when the Discord client has finished its initial `ready` handshake (same timing you would expect from a normal bot login).
-- **Register `app.on(...)` handlers before `await app.ready()`** so subscriptions are known when the app authenticates. `ready()` connects, completes auth, negotiates capabilities from intents + secret scope, then throws `BridgeCapabilityError` if any registered handler targets an event the app is not allowed to receive. To probe connectivity and negotiated caps first (and validate a planned surface with `desired`), use **`await app.preflight(desired)`** before registering handlers.
+- **Register `app.on(...)` handlers before `await app.ready()`** so subscriptions are known when the app authenticates. `ready()` connects, completes auth, negotiates capabilities from intents + secret scope, then throws `BridgeCapabilityError` if any registered handler targets an event the app is not allowed to receive. Optionally use **`await app.ready({ strict: true, manifest, botIntents, expectedScope? })`** to fail fast on **errors** from the manifest vs negotiation (intents, subscriptions, optional **`expectedScope`**). **`unused_negotiated_*` diagnostics are warnings** and do not block strict startup. To probe connectivity and negotiated caps first (and validate a planned surface with `desired`), use **`await app.preflight(desired)`** before registering handlers.
 - **Sticky `ready`**: if the bot was already ready before the app connected, the bridge replays the latest `ready` payload to matching subscriptions after auth.
 
 ## Built-In Events
@@ -276,6 +289,8 @@ console.log(capabilities.events, capabilities.actions);
 - **`getShardwireCatalog()`** — same data without an `AppBridge` instance.
 - **`app.explainCapability({ kind: 'event' | 'action', name })`** — whether a name is built-in and, after connect, whether the negotiated bridge allows it.
 - **`app.preflight(desired?)`** — awaits auth, returns `issues[]` (errors/warnings) for transport hints, `desired` vs negotiated caps, and subscription/capability mismatches. Prefer calling **before** `app.on(...)` if you want to validate `desired.events` / `desired.actions` without registering handlers yet.
+- **App manifest** — `defineShardwireApp({ events, actions, filters?, name? })` is intentionally small. Optional **`filters`** applies only to handlers that pass a **non-empty** subscription filter object; omit it when you only use unfiltered `app.on` handlers. Optional **`name`** defaults to `shardwire-app`. Put transport, secrets, intents, and strict startup in bridge / `app.ready` options — not in the manifest. Use **`generateSecretScope(manifest)`** when authoring scoped secrets (`allow: generateSecretScope(manifest)`).
+- **Diagnostics** — `diagnoseShardwireApp(manifest, app.capabilities(), { botIntents, subscriptions?, expectedScope? })` returns structured `issues`: manifest-required events/actions vs negotiation, manifest-declared filter keys ( **`unsupported_filter_key`** if not in the catalog; **`filter_key_absent_from_event_metadata`** only when the bridge **never** supplies that key on matching metadata for the event — structurally impossible, not “suspicious” or low-match), subscriptions vs `manifest.events` / `manifest.filters`, optional **`botIntents`**, **`unused_negotiated_*` warnings** when negotiation grants events/actions not on the manifest (common with wide secrets — **warnings only**, they do not set `report.ok` to false), and optional **`expectedScope`** (the **only** built-in way to turn “negotiation broader than I allow” into **`severity: 'error'`**). **`app.ready({ strict: true, ... })`** throws only on **errors**, not on those warnings.
 - **Workflows** — `deferThenEditInteractionReply`, `deferUpdateThenEditInteractionReply`, `createThreadThenSendMessage` chain common action sequences.
 
 `FORBIDDEN` results for actions outside negotiated capabilities include `error.details.reasonCode === 'action_not_in_capabilities'`. `BridgeCapabilityError` from `ready()` / `on()` may include `details.requiredIntents` for disallowed event subscriptions.
@@ -296,6 +311,8 @@ SHARDWIRE_SECRET=dev-secret npm run example:app
 
 - Bot bridge: [`examples/bot-basic.ts`](./examples/bot-basic.ts)
 - App client: [`examples/app-basic.ts`](./examples/app-basic.ts)
+
+The app sample uses a **minimal** **`defineShardwireApp`** ( **`events`** / **`actions`** only — no **`filters`** because handlers do not pass a filter object), logs **`generateSecretScope`**, **`app.preflight`**, **`app.ready({ strict: true, manifest, botIntents })`** (must match bot intents), and **`app.explainCapability`** after connect.
 
 ### Production-style (scoped secrets + moderation + interactions)
 
@@ -322,7 +339,7 @@ SHARDWIRE_SECRET_MODERATION=moderation-secret \
   npm run example:app:interaction
 ```
 
-- [`examples/bot-production.ts`](./examples/bot-production.ts)
+- [`examples/bot-production.ts`](./examples/bot-production.ts) — scoped `allow` is built with **`generateSecretScope`** from manifests that mirror each app worker.
 - [`examples/app-moderation.ts`](./examples/app-moderation.ts)
 - [`examples/app-interaction.ts`](./examples/app-interaction.ts)
 

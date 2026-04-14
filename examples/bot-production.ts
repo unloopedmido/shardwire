@@ -7,7 +7,21 @@
  *   SHARDWIRE_SECRET_DASHBOARD — full string for dashboard app (read-mostly)
  *   SHARDWIRE_SECRET_MODERATION — different string for moderation worker (must differ from dashboard)
  */
-import { createBotBridge } from '../src';
+import { createBotBridge, defineShardwireApp, generateSecretScope } from '../src';
+
+/** Keep in sync with `examples/app-moderation.ts` / dashboard-style apps. */
+const dashboardManifest = defineShardwireApp({
+	name: 'dashboard',
+	events: ['ready', 'messageCreate', 'guildMemberAdd'],
+	actions: ['sendMessage', 'fetchMember'],
+});
+
+/** Keep in sync with `examples/app-moderation.ts` and `examples/app-interaction.ts`. */
+const moderationManifest = defineShardwireApp({
+	name: 'moderation',
+	events: ['ready', 'messageCreate', 'interactionCreate'],
+	actions: ['deleteMessage', 'banMember', 'deferInteraction', 'editInteractionReply', 'fetchMessage'],
+});
 
 const port = Number(process.env.SHARDWIRE_PORT ?? 3001);
 const dashboardSecret = process.env.SHARDWIRE_SECRET_DASHBOARD;
@@ -33,18 +47,12 @@ async function main(): Promise<void> {
 				{
 					id: 'dashboard',
 					value: dashboardSecret,
-					allow: {
-						events: ['ready', 'messageCreate', 'guildMemberAdd'],
-						actions: ['sendMessage', 'fetchMember'],
-					},
+					allow: generateSecretScope(dashboardManifest),
 				},
 				{
 					id: 'moderation',
 					value: moderationSecret,
-					allow: {
-						events: ['ready', 'messageCreate', 'interactionCreate'],
-						actions: ['deleteMessage', 'banMember', 'deferInteraction', 'editInteractionReply', 'fetchMessage'],
-					},
+					allow: generateSecretScope(moderationManifest),
 				},
 			],
 		},

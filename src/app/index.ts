@@ -6,6 +6,7 @@ import type {
 	AppBridgeActions,
 	AppBridgeActionInvokeOptions,
 	AppBridgeOptions,
+	AppBridgeReadyOptions,
 	BotActionName,
 	BotActionPayloadMap,
 	BotActionResultDataMap,
@@ -17,7 +18,7 @@ import type {
 	PreflightDesired,
 	PreflightReport,
 } from '../discord/types';
-import { BridgeCapabilityError } from '../discord/types';
+import { BridgeCapabilityError, ShardwireStrictStartupError } from '../discord/types';
 import { matchesEventSubscription, serializeEventSubscription } from '../bridge/subscriptions';
 import { createNodeWebSocket, type WebSocketLike } from '../bridge/transport/socket';
 import {
@@ -34,6 +35,7 @@ import {
 	explainCapability as explainShardwireCapability,
 } from '../dx/explain-capability';
 import { buildPreflightReport } from '../dx/preflight';
+import { diagnoseShardwireApp } from '../dx/diagnose-app';
 import { getShardwireCatalog } from '../dx/shardwire-catalog';
 import { createRequestId } from '../utils/id';
 import { getBackoffDelay } from '../utils/backoff';
@@ -202,6 +204,16 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
 			}
 		}
 		return desiredSubscriptions;
+	}
+
+	function collectEventSubscriptions(): EventSubscription[] {
+		const out: EventSubscription[] = [];
+		for (const handlers of eventHandlers.values()) {
+			for (const entry of handlers) {
+				out.push(entry.subscription);
+			}
+		}
+		return out;
 	}
 
 	function syncSubscriptions(): void {
@@ -505,10 +517,38 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
 
 	return {
 		actions,
-		async ready() {
+		async ready(readyOptions?: AppBridgeReadyOptions) {
 			await connect();
 			if (capabilityError) {
 				throw capabilityError;
+			}
+			if (readyOptions?.strict) {
+				if (!readyOptions.manifest) {
+					throw new TypeError('connectBotBridge: `ready({ strict: true })` requires `manifest`.');
+				}
+				const report = diagnoseShardwireApp(
+					readyOptions.manifest,
+					{
+						events: [...currentCapabilities.events],
+						actions: [...currentCapabilities.actions],
+					},
+					{
+						strictIntentCheck: true,
+						subscriptions: collectEventSubscriptions(),
+						...(readyOptions.botIntents !== undefined ? { botIntents: readyOptions.botIntents } : {}),
+						...(readyOptions.expectedScope !== undefined ? { expectedScope: readyOptions.expectedScope } : {}),
+					},
+				);
+				if (!report.ok) {
+					const summary = report.issues
+						.filter((i) => i.severity === 'error')
+						.map((i) => i.message)
+						.join(' ');
+					throw new ShardwireStrictStartupError(
+						summary ? `Shardwire strict startup failed: ${summary}` : 'Shardwire strict startup failed.',
+						report,
+					);
+				}
 			}
 		},
 		async close() {

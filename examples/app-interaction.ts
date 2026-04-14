@@ -5,7 +5,7 @@
  *   SHARDWIRE_PORT (optional)
  *   SHARDWIRE_SECRET_MODERATION — must allow interactionCreate + defer + editInteractionReply
  */
-import { connectBotBridge } from '../src';
+import { connectBotBridge, defineShardwireApp, generateSecretScope } from '../src';
 
 const port = Number(process.env.SHARDWIRE_PORT ?? 3001);
 const secret = process.env.SHARDWIRE_SECRET_MODERATION;
@@ -14,6 +14,17 @@ if (!secret) {
 	throw new Error('SHARDWIRE_SECRET_MODERATION is required.');
 }
 
+const BOT_INTENTS = ['Guilds', 'GuildMessages', 'GuildMembers', 'MessageContent'] as const;
+
+// `filters.interactionCreate` lists only keys the handler passes below — not the whole catalog.
+const manifest = defineShardwireApp({
+	events: ['ready', 'interactionCreate'],
+	actions: ['deferInteraction', 'editInteractionReply'],
+	filters: {
+		interactionCreate: ['customId', 'interactionKind'],
+	},
+});
+
 async function main(): Promise<void> {
 	const app = connectBotBridge({
 		url: `ws://127.0.0.1:${port}/shardwire`,
@@ -21,6 +32,8 @@ async function main(): Promise<void> {
 		secretId: 'moderation',
 		appName: 'interaction-worker',
 	});
+
+	console.log('This worker’s minimum allow slice:', generateSecretScope(manifest));
 
 	app.on('ready', ({ user }) => {
 		console.log('Bot ready as:', user.username);
@@ -45,8 +58,9 @@ async function main(): Promise<void> {
 		{ customId: 'shardwire.demo.btn', interactionKind: 'button' },
 	);
 
-	await app.ready();
+	await app.ready({ strict: true, manifest, botIntents: [...BOT_INTENTS] });
 	console.log('Capabilities:', app.capabilities());
+	console.log('deferInteraction:', app.explainCapability({ kind: 'action', name: 'deferInteraction' }));
 	console.log('Post a message with a button whose customId is "shardwire.demo.btn" to exercise this handler.');
 
 	process.on('SIGINT', async () => {

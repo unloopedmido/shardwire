@@ -1,3 +1,6 @@
+/**
+ * Minimal bot bridge (one full-access secret). For scoped secrets built from a manifest, see `bot-production.ts`.
+ */
 import { createBotBridge } from '../src';
 
 const port = Number(process.env.SHARDWIRE_PORT ?? 3001);
