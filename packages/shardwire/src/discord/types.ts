@@ -78,6 +78,24 @@ export interface BridgeGuildMember {
 	communicationDisabledUntil?: string | null;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/bridge-voice-state/
+ */
+export interface BridgeVoiceState {
+	guildId: Snowflake;
+	userId: Snowflake;
+	channelId?: Snowflake | null;
+	sessionId?: string | null;
+	selfMute: boolean;
+	selfDeaf: boolean;
+	selfVideo: boolean;
+	selfStream: boolean;
+	serverMute: boolean;
+	serverDeaf: boolean;
+	suppress: boolean;
+	requestToSpeakTimestamp?: string | null;
+}
+
 /** Normalized guild snapshot for `guildCreate` / `guildDelete` events.  * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/bridge-guild/
  */
 export interface BridgeGuild {
@@ -355,6 +373,14 @@ export interface MessageBulkDeleteEventPayload extends EventEnvelopeBase {
 }
 
 /**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/voice-state-update-event-payload/
+ */
+export interface VoiceStateUpdateEventPayload extends EventEnvelopeBase {
+	oldState?: BridgeVoiceState;
+	state: BridgeVoiceState;
+}
+
+/**
  * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/bot-event-payload-map/
  */
 export interface BotEventPayloadMap {
@@ -377,6 +403,7 @@ export interface BotEventPayloadMap {
 	channelCreate: ChannelCreateEventPayload;
 	channelUpdate: ChannelUpdateEventPayload;
 	channelDelete: ChannelDeleteEventPayload;
+	voiceStateUpdate: VoiceStateUpdateEventPayload;
 }
 
 /**
@@ -629,6 +656,46 @@ export interface ArchiveThreadActionPayload {
 }
 
 /**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/move-member-voice-action-payload/
+ */
+export interface MoveMemberVoiceActionPayload {
+	guildId: Snowflake;
+	userId: Snowflake;
+	channelId?: Snowflake | null;
+	reason?: string;
+}
+
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/set-member-mute-action-payload/
+ */
+export interface SetMemberMuteActionPayload {
+	guildId: Snowflake;
+	userId: Snowflake;
+	mute: boolean;
+	reason?: string;
+}
+
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/set-member-deaf-action-payload/
+ */
+export interface SetMemberDeafActionPayload {
+	guildId: Snowflake;
+	userId: Snowflake;
+	deaf: boolean;
+	reason?: string;
+}
+
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/set-member-suppressed-action-payload/
+ */
+export interface SetMemberSuppressedActionPayload {
+	guildId: Snowflake;
+	userId: Snowflake;
+	suppressed: boolean;
+	reason?: string;
+}
+
+/**
  * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/bot-action-payload-map/
  */
 export interface BotActionPayloadMap {
@@ -658,6 +725,10 @@ export interface BotActionPayloadMap {
 	deleteChannel: DeleteChannelActionPayload;
 	createThread: CreateThreadActionPayload;
 	archiveThread: ArchiveThreadActionPayload;
+	moveMemberVoice: MoveMemberVoiceActionPayload;
+	setMemberMute: SetMemberMuteActionPayload;
+	setMemberDeaf: SetMemberDeafActionPayload;
+	setMemberSuppressed: SetMemberSuppressedActionPayload;
 }
 
 /**
@@ -756,6 +827,10 @@ export interface BotActionResultDataMap {
 	deleteChannel: DeleteChannelActionResult;
 	createThread: BridgeThread;
 	archiveThread: BridgeThread;
+	moveMemberVoice: BridgeVoiceState;
+	setMemberMute: BridgeVoiceState;
+	setMemberDeaf: BridgeVoiceState;
+	setMemberSuppressed: BridgeVoiceState;
 }
 
 /**
@@ -789,6 +864,8 @@ export interface EventSubscriptionFilter {
 	parentChannelId?: Snowflake | readonly Snowflake[];
 	/** Matches guild thread channels only: same as message `channelId` when `channelType` is a guild thread. */
 	threadId?: Snowflake | readonly Snowflake[];
+	/** Matches the active voice channel id for `voiceStateUpdate` payloads when present. */
+	voiceChannelId?: Snowflake | readonly Snowflake[];
 }
 
 /** Keys supported on `EventSubscriptionFilter` for `app.on(..., filter)`.  * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/shardwire-subscription-filter-key/

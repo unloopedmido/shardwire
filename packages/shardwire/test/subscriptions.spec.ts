@@ -21,17 +21,19 @@ function msgPayload(
 }
 
 describe('event subscription filters', () => {
-	it('normalizes channelType, parentChannelId, and threadId lists', () => {
+	it('normalizes channelType, parentChannelId, threadId, and voiceChannelId lists', () => {
 		expect(
 			normalizeEventSubscriptionFilter({
 				channelType: [11, 0],
 				parentChannelId: ['a', 'b'],
 				threadId: ['thread-1'],
+				voiceChannelId: ['voice-1'],
 			}),
 		).toEqual({
 			channelType: [0, 11],
 			parentChannelId: ['a', 'b'],
 			threadId: ['thread-1'],
+			voiceChannelId: ['voice-1'],
 		});
 	});
 
@@ -134,5 +136,34 @@ describe('event subscription filters', () => {
 			},
 		};
 		expect(matchesEventSubscription(sub, payload)).toBe(true);
+	});
+
+	it('matches voiceStateUpdate using voiceChannelId', () => {
+		const sub: EventSubscription<'voiceStateUpdate'> = {
+			name: 'voiceStateUpdate',
+			filter: { voiceChannelId: 'vc-1', userId: 'u1' },
+		};
+		const payload: BotEventPayloadMap['voiceStateUpdate'] = {
+			receivedAt: 1,
+			state: {
+				guildId: 'g1',
+				userId: 'u1',
+				channelId: 'vc-1',
+				selfMute: false,
+				selfDeaf: false,
+				selfVideo: false,
+				selfStream: false,
+				serverMute: false,
+				serverDeaf: false,
+				suppress: false,
+			},
+		};
+		expect(matchesEventSubscription(sub, payload)).toBe(true);
+		expect(
+			matchesEventSubscription(sub, {
+				...payload,
+				state: { ...payload.state, channelId: 'vc-2' },
+			}),
+		).toBe(false);
 	});
 });

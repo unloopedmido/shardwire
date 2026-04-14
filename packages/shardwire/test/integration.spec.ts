@@ -806,7 +806,7 @@ describe('discord-first bridge integration', () => {
 		await bot.close();
 	});
 
-	it('round-trips channel, thread, and timeout actions', async () => {
+	it('round-trips channel, thread, timeout, and voice actions', async () => {
 		const port = await getFreePort();
 		const runtime = new FakeDiscordRuntime();
 		const bot = createBotBridgeWithRuntime(
@@ -860,6 +860,54 @@ describe('discord-first bridge integration', () => {
 			type: 11,
 			archived: true,
 		}));
+		runtime.setActionHandler('moveMemberVoice', async ({ guildId, userId, channelId }) => ({
+			guildId,
+			userId,
+			channelId: channelId ?? null,
+			selfMute: false,
+			selfDeaf: false,
+			selfVideo: false,
+			selfStream: false,
+			serverMute: false,
+			serverDeaf: false,
+			suppress: false,
+		}));
+		runtime.setActionHandler('setMemberMute', async ({ guildId, userId, mute }) => ({
+			guildId,
+			userId,
+			channelId: 'voice-1',
+			selfMute: false,
+			selfDeaf: false,
+			selfVideo: false,
+			selfStream: false,
+			serverMute: mute,
+			serverDeaf: false,
+			suppress: false,
+		}));
+		runtime.setActionHandler('setMemberDeaf', async ({ guildId, userId, deaf }) => ({
+			guildId,
+			userId,
+			channelId: 'voice-1',
+			selfMute: false,
+			selfDeaf: false,
+			selfVideo: false,
+			selfStream: false,
+			serverMute: false,
+			serverDeaf: deaf,
+			suppress: false,
+		}));
+		runtime.setActionHandler('setMemberSuppressed', async ({ guildId, userId, suppressed }) => ({
+			guildId,
+			userId,
+			channelId: 'stage-1',
+			selfMute: false,
+			selfDeaf: false,
+			selfVideo: false,
+			selfStream: false,
+			serverMute: false,
+			serverDeaf: false,
+			suppress: suppressed,
+		}));
 
 		const app = connectBotBridge({
 			url: `ws://127.0.0.1:${port}/shardwire`,
@@ -879,6 +927,26 @@ describe('discord-first bridge integration', () => {
 		const delCh = await app.actions.deleteChannel({ channelId: 'ch-1' });
 		const createTh = await app.actions.createThread({ parentChannelId: 'ch-parent', name: 'case-1' });
 		const archTh = await app.actions.archiveThread({ threadId: 'th-1' });
+		const moveVoice = await app.actions.moveMemberVoice({
+			guildId: 'guild-1',
+			userId: 'user-1',
+			channelId: 'voice-1',
+		});
+		const muteVoice = await app.actions.setMemberMute({
+			guildId: 'guild-1',
+			userId: 'user-1',
+			mute: true,
+		});
+		const deafVoice = await app.actions.setMemberDeaf({
+			guildId: 'guild-1',
+			userId: 'user-1',
+			deaf: true,
+		});
+		const suppressVoice = await app.actions.setMemberSuppressed({
+			guildId: 'guild-1',
+			userId: 'user-1',
+			suppressed: true,
+		});
 
 		expect(timeoutRes.ok).toBe(true);
 		expect(clearTimeoutRes.ok).toBe(true);
@@ -887,11 +955,24 @@ describe('discord-first bridge integration', () => {
 		expect(delCh.ok).toBe(true);
 		expect(createTh.ok).toBe(true);
 		expect(archTh.ok).toBe(true);
+		expect(moveVoice.ok).toBe(true);
+		expect(muteVoice.ok).toBe(true);
+		expect(deafVoice.ok).toBe(true);
+		expect(suppressVoice.ok).toBe(true);
 		if (delCh.ok) {
 			expect(delCh.data).toEqual({ deleted: true, channelId: 'ch-1' });
 		}
 		if (createTh.ok) {
 			expect(createTh.data.id).toBe('th-1');
+		}
+		if (muteVoice.ok) {
+			expect(muteVoice.data.serverMute).toBe(true);
+		}
+		if (deafVoice.ok) {
+			expect(deafVoice.data.serverDeaf).toBe(true);
+		}
+		if (suppressVoice.ok) {
+			expect(suppressVoice.data.suppress).toBe(true);
 		}
 
 		await app.close();
