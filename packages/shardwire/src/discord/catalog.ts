@@ -21,6 +21,7 @@ export const BOT_EVENT_NAMES = [
 	'channelCreate',
 	'channelUpdate',
 	'channelDelete',
+	'voiceStateUpdate',
 ] as const satisfies readonly BotEventName[];
 
 export const BOT_ACTION_NAMES = [
@@ -50,6 +51,10 @@ export const BOT_ACTION_NAMES = [
 	'deleteChannel',
 	'createThread',
 	'archiveThread',
+	'moveMemberVoice',
+	'setMemberMute',
+	'setMemberDeaf',
+	'setMemberSuppressed',
 ] as const satisfies readonly BotActionName[];
 
 const DISCORD_GATEWAY_INTENT_ENTRIES = Object.entries(GatewayIntentBits).filter(
@@ -81,6 +86,7 @@ export const EVENT_REQUIRED_INTENTS: Record<BotEventName, readonly BotIntentName
 	channelCreate: ['Guilds'],
 	channelUpdate: ['Guilds'],
 	channelDelete: ['Guilds'],
+	voiceStateUpdate: ['GuildVoiceStates'],
 };
 
 /** Keys supported on `EventSubscriptionFilter` for `app.on(..., filter)`. */
@@ -94,6 +100,7 @@ export const SUBSCRIPTION_FILTER_KEYS = [
 	'channelType',
 	'parentChannelId',
 	'threadId',
+	'voiceChannelId',
 ] as const;
 
 export type SubscriptionFilterKey = (typeof SUBSCRIPTION_FILTER_KEYS)[number];
