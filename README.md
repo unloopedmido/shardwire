@@ -35,6 +35,7 @@ npm install shardwire
 - [Deployment (TLS, nginx, limits, shutdown)](./docs/deployment.md)
 - [Troubleshooting (auth, capabilities, action errors)](./docs/troubleshooting.md)
 - [Patterns (moderation, interactions, multi-secret)](./docs/patterns.md)
+- [Community pain points research (web app ↔ Discord bot bridging)](./docs/community-pain-points.md)
 
 ## Quick Start
 
