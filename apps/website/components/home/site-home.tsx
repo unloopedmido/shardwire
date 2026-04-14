@@ -113,9 +113,9 @@ export function SiteHome() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-[color:var(--site-line)] border border-[color:var(--site-line)] rounded-sm overflow-hidden mb-12">
           {/* Quick Start pane */}
           <div className="bg-[color:var(--site-background)] p-6 sm:p-8 flex flex-col">
-            <h3 className="text-sm font-mono text-[color:var(--site-foreground)] mb-4 flex items-center gap-2">
+            <h2 className="text-sm font-mono text-[color:var(--site-foreground)] mb-4 flex items-center gap-2">
               <span className="text-[color:var(--color-fd-muted-foreground)]">01.</span> Install
-            </h3>
+            </h2>
             <TerminalWindow>
               <div className="p-4 font-mono text-sm text-[color:var(--site-foreground)] overflow-x-auto">
                 <span className="text-[color:var(--color-fd-muted-foreground)] select-none mr-3">$</span>
@@ -138,9 +138,9 @@ export function SiteHome() {
           
           {/* View Docs pane */}
           <div className="bg-[color:var(--site-background)] p-6 sm:p-8 flex flex-col">
-            <h3 className="text-sm font-mono text-[color:var(--site-foreground)] mb-4 flex items-center gap-2">
+            <h2 className="text-sm font-mono text-[color:var(--site-foreground)] mb-4 flex items-center gap-2">
               <span className="text-[color:var(--color-fd-muted-foreground)]">02.</span> Reference
-            </h3>
+            </h2>
             <p className="text-sm text-[color:var(--color-fd-muted-foreground)] mb-6">
               Full API surfaces generated directly from TypeScript source code. Browse the bridge architecture, transports, and strictly-typed events.
             </p>
@@ -170,25 +170,31 @@ export function SiteHome() {
       </section>
 
       {/* Feature list minimal */}
-      <section className="px-6 py-24 border-t border-[color:var(--site-line)] bg-[color:var(--site-background-elevated)]">
+      <section
+        aria-labelledby="home-features-heading"
+        className="px-6 py-24 border-t border-[color:var(--site-line)] bg-[color:var(--site-background-elevated)]"
+      >
+        <h2 id="home-features-heading" className="sr-only">
+          Product focus
+        </h2>
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row gap-12 border-x border-[color:var(--site-line)] px-6">
           <div className="flex-1">
              <div className="font-mono text-[10px] text-[color:var(--color-fd-muted-foreground)] uppercase tracking-widest mb-3">Architecture</div>
-             <h4 className="text-[color:var(--site-foreground)] font-medium mb-2">Bridge-first Design</h4>
+             <h3 className="text-[color:var(--site-foreground)] font-medium mb-2">Bridge-first Design</h3>
              <p className="text-sm text-[color:var(--color-fd-muted-foreground)] leading-relaxed">
                The docs start with the runtime split itself: what moves to the bot process, what stays in your app process, and where capabilities are negotiated.
              </p>
           </div>
           <div className="flex-1">
              <div className="font-mono text-[10px] text-[color:var(--color-fd-muted-foreground)] uppercase tracking-widest mb-3">Operations</div>
-             <h4 className="text-[color:var(--site-foreground)] font-medium mb-2">Built for Production</h4>
+             <h3 className="text-[color:var(--site-foreground)] font-medium mb-2">Built for Production</h3>
              <p className="text-sm text-[color:var(--color-fd-muted-foreground)] leading-relaxed">
                Deployment, diagnostics, scoped-secret safety, and troubleshooting live alongside API docs instead of as an afterthought.
              </p>
           </div>
           <div className="flex-1">
              <div className="font-mono text-[10px] text-[color:var(--color-fd-muted-foreground)] uppercase tracking-widest mb-3">Guarantees</div>
-             <h4 className="text-[color:var(--site-foreground)] font-medium mb-2">Strict Startup</h4>
+             <h3 className="text-[color:var(--site-foreground)] font-medium mb-2">Strict Startup</h3>
              <p className="text-sm text-[color:var(--color-fd-muted-foreground)] leading-relaxed">
                Strict startup turns mismatches into startup failures instead of silent drift. Mismatched intents break instantly, not at runtime.
              </p>

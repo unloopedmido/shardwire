@@ -9,8 +9,9 @@ import {
   ViewOptionsPopover,
 } from 'fumadocs-ui/layouts/docs/page';
 
+import { DocsJsonLd } from '@/components/docs-json-ld';
 import { getMDXComponents } from '@/components/mdx';
-import { docsRepositoryUrl } from '@/lib/site';
+import { absoluteUrlFromPathname, defaultOgImage, docsRepositoryUrl } from '@/lib/site';
 import { source } from '@/lib/source';
 
 type DocsPageProps = {
@@ -29,6 +30,7 @@ export default async function Page({ params }: DocsPageProps) {
 
   return (
     <DocsPage toc={page.data.toc} full={page.data.full}>
+      <DocsJsonLd page={page} />
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
       <ViewOptionsPopover githubUrl={docsRepositoryUrl(page.path)} />
@@ -55,8 +57,25 @@ export async function generateMetadata({ params }: DocsPageProps): Promise<Metad
     notFound();
   }
 
+  const canonical = absoluteUrlFromPathname(page.url);
+
   return {
     title: page.data.title,
     description: page.data.description,
+    alternates: { canonical },
+    openGraph: {
+      title: page.data.title,
+      description: page.data.description,
+      url: canonical,
+      siteName: 'Shardwire',
+      type: 'article',
+      images: [defaultOgImage],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: page.data.title,
+      description: page.data.description,
+      images: [defaultOgImage.url],
+    },
   };
 }

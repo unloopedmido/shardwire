@@ -5,7 +5,7 @@ import { IBM_Plex_Mono, IBM_Plex_Sans, Newsreader } from 'next/font/google';
 import type { ReactNode } from 'react';
 
 import { Provider } from '@/app/provider';
-import { siteConfig, withBasePath } from '@/lib/site';
+import { defaultOgImage, siteConfig, withBasePath } from '@/lib/site';
 
 const sans = IBM_Plex_Sans({
   subsets: ['latin'],
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   /** Project site: https://unloopedmido.github.io/shardwire/ (Next `basePath` is `/shardwire` in production). */
   metadataBase: new URL(siteConfig.docsUrl),
   title: {
-    default: 'Shardwire',
+    default: 'Shardwire — Discord split-process bridge',
     template: '%s | Shardwire',
   },
   description: siteConfig.description,
@@ -39,16 +39,18 @@ export const metadata: Metadata = {
     apple: [{ url: withBasePath('/icon.png'), type: 'image/png' }],
   },
   openGraph: {
-    title: 'Shardwire',
+    title: 'Shardwire — Discord split-process bridge',
     description: siteConfig.description,
     url: siteConfig.docsUrl,
     siteName: 'Shardwire',
     type: 'website',
+    images: [defaultOgImage],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Shardwire',
+    title: 'Shardwire — Discord split-process bridge',
     description: siteConfig.description,
+    images: [defaultOgImage.url],
   },
 };
 
