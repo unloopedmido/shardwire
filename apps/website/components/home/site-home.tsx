@@ -5,37 +5,34 @@ import { Highlight, themes } from 'prism-react-renderer';
 
 const installCommand = "npm install shardwire";
 
-const botCode = `import { createBotBridge } from 'shardwire/bot';
-import { Client, GatewayIntentBits } from 'discord.js';
+const botCode = `import { createBotBridge } from 'shardwire';
 
-// 1. Initialize stable bot process
-const client = new Client({
-  intents: [GatewayIntentBits.Guilds],
-});
-
-const bridge = createBotBridge(client, {
-  port: 8080,
-  secret: process.env.BRIDGE_SECRET,
-});
-
-await bridge.start();
-client.login(process.env.DISCORD_TOKEN);`;
-
-const appCode = `import { connectBotBridge } from 'shardwire/app';
-
-// 2. Initialize decoupled app process
-const appNode = await connectBotBridge({
-  url: 'ws://localhost:8080',
-  secret: process.env.BRIDGE_SECRET,
-  capabilities: {
-    intents: ['Guilds'],
+// 1. Bot process: gateway + bridge server
+const bridge = createBotBridge({
+  token: process.env.DISCORD_TOKEN!,
+  intents: ['Guilds', 'GuildMessages', 'GuildMembers', 'MessageContent'],
+  server: {
+    port: 3001,
+    secrets: [process.env.SHARDWIRE_SECRET!],
   },
 });
 
-// Restart without dropping Discord UI state
-appNode.on('interactionCreate', (interaction) => {
-  // Handle interaction...
-});`;
+await bridge.ready();`;
+
+const appCode = `import { connectBotBridge } from 'shardwire';
+
+// 2. App process: WebSocket client + typed subscriptions
+const app = connectBotBridge({
+  url: 'ws://127.0.0.1:3001/shardwire',
+  secret: process.env.SHARDWIRE_SECRET!,
+  appName: 'dashboard',
+});
+
+app.on('messageCreate', ({ message }) => {
+  console.log('message', message.channelId, message.content);
+});
+
+await app.ready();`;
 
 type TerminalWindowProps = {
   children: React.ReactNode;
