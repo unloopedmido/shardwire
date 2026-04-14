@@ -1,0 +1,36 @@
+---
+title: Strict Startup
+description: Fail fast when manifests, subscriptions, and capabilities drift.
+---
+
+Strict startup lets your app crash early with structured diagnostics instead of running with hidden capability mismatches.
+
+## Enable strict mode
+
+```ts
+await app.ready({
+	strict: true,
+	manifest,
+	botIntents: ['Guilds', 'GuildMessages', 'GuildMembers', 'MessageContent'],
+});
+```
+
+## What strict mode validates
+
+- manifest events/actions vs negotiated capabilities
+- runtime subscriptions vs manifest declarations
+- required filter keys for filtered handlers
+- optional expected scope ceiling
+- optional intent alignment via `botIntents`
+
+## Error behavior
+
+`app.ready({ strict: true })` throws `ShardwireStrictStartupError` when any issue has `severity: 'error'`.
+
+Warnings such as `unused_negotiated_*` do not fail startup.
+
+## Expected scope enforcement
+
+When you want startup to fail if an app receives broader permissions than intended, pass `expectedScope` to diagnosis paths.
+
+See [Diagnostics Toolkit](./diagnostics/) for issue code interpretation.

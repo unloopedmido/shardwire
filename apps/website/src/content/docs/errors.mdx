@@ -1,0 +1,107 @@
+---
+title: Errors
+description: Error references and troubleshooting steps for Shardwire runtime and configuration issues.
+---
+
+Use this page for direct `See:` links emitted by Shardwire errors.
+
+<h2 id="connection-and-auth-errors">Connection &amp; auth errors</h2>
+
+<h3 id="app-url-required">App bridge URL required</h3>
+Set `connectBotBridge({ url })` to a non-empty websocket URL.
+
+<h3 id="app-url-invalid">App bridge URL invalid</h3>
+Use a fully valid URL string such as `wss://bridge.example.com/shardwire`.
+
+<h3 id="app-url-protocol">App bridge URL protocol</h3>
+Only `ws://` and `wss://` are accepted.
+
+<h3 id="app-wss-required">App bridge wss required</h3>
+For non-loopback hosts, switch from `ws://` to `wss://`.
+
+<h3 id="app-secret-required">App secret required</h3>
+Provide `connectBotBridge({ secret })`.
+
+<h3 id="app-secretid-invalid">App secretId invalid</h3>
+When set, `secretId` must be a non-empty string.
+
+<h3 id="app-name-invalid">App name invalid</h3>
+When set, `appName` must be a non-empty string.
+
+<h3 id="app-bridge-not-connected">App bridge not connected</h3>
+Connect and authenticate before invoking actions or syncing subscriptions.
+
+<h3 id="action-request-errors">Action request errors</h3>
+Check bridge reachability, auth, and timeouts (`requestTimeoutMs`).
+
+<h2 id="bot-config-validation">Bot config validation</h2>
+
+<h3 id="bot-token-required">Bot token required</h3>
+Set `createBotBridge({ token })` with a valid Discord bot token.
+
+<h3 id="bot-intents-required">Bot intents required</h3>
+Provide at least one gateway intent in `createBotBridge({ intents })`.
+
+<h3 id="positive-number-required">Positive number required</h3>
+Numeric configuration values must be positive (`> 0`).
+
+<h3 id="idempotency-scope-invalid">Idempotency scope invalid</h3>
+Use only `"connection"` or `"secret"` for `server.idempotencyScope`.
+
+<h3 id="secrets-required">Secrets required</h3>
+`server.secrets` must include at least one secret.
+
+<h3 id="secret-non-empty-required">Secret non-empty required</h3>
+String secret entries must be non-empty values.
+
+<h3 id="secret-value-required">Secret value required</h3>
+Scoped secret objects must include non-empty `value`.
+
+<h3 id="secret-id-required">Secret id required</h3>
+Scoped secret `id`, if set, must be a non-empty string.
+
+<h3 id="duplicate-secret-id">Duplicate secret id</h3>
+Use unique `id` values across scoped secret entries.
+
+<h3 id="duplicate-secret-value">Duplicate secret value</h3>
+Use distinct secret values across entries.
+
+<h3 id="scope-array-or-star">Scope array or star</h3>
+`allow.events` / `allow.actions` must be `"*"` or an array.
+
+<h3 id="scope-non-string-value">Scope non-string value</h3>
+Each allow-list item must be a string.
+
+<h3 id="scope-unsupported-value">Scope unsupported value</h3>
+Use only built-in event/action names from the catalog.
+
+<h2 id="manifest-and-strict-startup">Manifest and strict startup</h2>
+
+<h3 id="manifest-unknown-event">Manifest unknown event</h3>
+Declare only known built-in event names.
+
+<h3 id="manifest-unknown-action">Manifest unknown action</h3>
+Declare only known built-in action names.
+
+<h3 id="manifest-filter-unknown-event">Manifest filter unknown event</h3>
+`filters` keys must be valid built-in event names.
+
+<h3 id="manifest-filter-event-not-listed">Manifest filter event not listed</h3>
+Any event in `filters` must also exist in `events`.
+
+<h3 id="manifest-filter-key-unsupported">Manifest filter key unsupported</h3>
+Use only keys listed in `app.catalog().subscriptionFilters`.
+
+<h3 id="strict-manifest-required">Strict manifest required</h3>
+`app.ready({ strict: true })` requires `manifest`.
+
+<h3 id="strict-startup-failed">Strict startup failed</h3>
+Inspect `ShardwireStrictStartupError.report.issues` for specific failing diagnostics and remediation.
+
+<h3 id="capability-not-available">Capability not available</h3>
+The event or action is not in current negotiated capabilities; verify intents and secret scope.
+
+<h2 id="action-execution-errors">Action execution errors</h2>
+
+Action-level failures include `FORBIDDEN`, `NOT_FOUND`, `INVALID_REQUEST`, `INTERNAL_ERROR`, and `SERVICE_UNAVAILABLE`.
+Validate payloads, permissions, target IDs, and retry behavior.

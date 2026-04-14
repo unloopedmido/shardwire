@@ -1,0 +1,48 @@
+---
+title: Troubleshooting
+description: Diagnose connection, capability, and action failures with clear checks.
+---
+
+## Connection/auth failures
+
+- `Non-loopback app bridge URLs must use wss://`: switch to TLS endpoint
+- auth failures: verify `secret`, `secretId`, and path alignment
+- `ambiguous_secret`: use distinct secret values or pass explicit `secretId`
+
+## Missing events
+
+Check in order:
+
+1. bot intents include required gateway intents
+2. secret scope allows the event
+3. handler is registered before `app.ready()`
+4. `app.capabilities()` includes the event after connect
+
+Then run:
+
+- `app.preflight(...)`
+- `app.explainCapability(...)`
+- `diagnoseShardwireApp(...)`
+
+## Action failures
+
+Always check `result.ok` and inspect:
+
+- `error.code`
+- `error.message`
+- `error.details`
+
+Typical codes:
+
+- `FORBIDDEN`
+- `NOT_FOUND`
+- `INVALID_REQUEST`
+- `SERVICE_UNAVAILABLE`
+- `TIMEOUT`
+- `DISCONNECTED`
+
+## Strict startup failures
+
+`ShardwireStrictStartupError` means one or more diagnosis issues have `severity: 'error'`.
+
+Review `error.report.issues` and fix manifest, intents, filter declarations, or scope assumptions.

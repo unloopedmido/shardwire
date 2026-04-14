@@ -1,0 +1,59 @@
+---
+title: App Side Setup
+description: Connect app workers with connectBotBridge and handle events/actions safely.
+---
+
+`connectBotBridge(...)` creates the app-side client responsible for subscriptions, actions, and capability introspection.
+
+## Core options
+
+```ts
+const app = connectBotBridge({
+	url: 'wss://bridge.example.com/shardwire',
+	secret: process.env.SHARDWIRE_SECRET!,
+	secretId: 'dashboard',
+	appName: 'dashboard-api',
+	requestTimeoutMs: 15000,
+});
+```
+
+## Lifecycle sequence
+
+1. Register handlers with `app.on(...)`
+2. Optionally run `await app.preflight(...)`
+3. Call `await app.ready()`
+4. Use `app.actions.*` and branch on `result.ok`
+5. Close with `await app.close()`
+
+## Subscription example
+
+```ts
+app.on(
+	'interactionCreate',
+	({ interaction }) => {
+		console.log(interaction.customId);
+	},
+	{ customId: 'shardwire.demo.btn', interactionKind: 'button' },
+);
+```
+
+## Action example
+
+```ts
+const result = await app.actions.sendMessage({
+	channelId: '123456789012345678',
+	content: 'Hello from app side',
+});
+
+if (!result.ok) {
+	console.error(result.error.code, result.error.message, result.error.details);
+}
+```
+
+## Important guardrails
+
+- subscribe before `ready()`
+- always branch on `ActionResult`
+- inspect `app.capabilities()` after connect
+
+Continue to [Strict Startup](./strict-startup/) for fail-fast startup behavior.

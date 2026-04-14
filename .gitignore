@@ -1,3 +1,5 @@
 node_modules
-dist
-coverage
+apps/website/dist
+apps/website/.astro
+packages/shardwire/dist
+packages/shardwire/coverage

@@ -1,0 +1,52 @@
+---
+title: Diagnostics Toolkit
+description: Use catalog, preflight, explainCapability, and diagnosis reports to debug confidently.
+---
+
+Shardwire ships diagnostics as first-class APIs so you can validate capability assumptions before and after connection.
+
+## Catalog
+
+`app.catalog()` and `getShardwireCatalog()` expose built-in events, actions, and filter keys.
+
+```ts
+const catalog = app.catalog();
+console.log(catalog.events, catalog.actions, catalog.subscriptionFilters);
+```
+
+## Preflight
+
+`app.preflight(desired?)` connects/authenticates and returns structured `issues[]` without forcing you to register handlers first.
+
+```ts
+const report = await app.preflight({
+	events: ['messageCreate'],
+	actions: ['sendMessage'],
+});
+console.log(report.ok, report.issues);
+```
+
+## explainCapability
+
+Ask for one event/action and get a direct explanation about support and negotiation state.
+
+```ts
+app.explainCapability({ kind: 'event', name: 'messageCreate' });
+```
+
+## diagnoseShardwireApp
+
+Run full contract diagnosis against manifest + negotiated capabilities.
+
+```ts
+import { diagnoseShardwireApp } from 'shardwire';
+
+const report = diagnoseShardwireApp(manifest, app.capabilities(), {
+	botIntents: ['Guilds', 'GuildMessages', 'GuildMembers', 'MessageContent'],
+	subscriptions: [
+		{ event: 'messageCreate', filter: { channelId: '123456789012345678' } },
+	],
+});
+```
+
+Use diagnosis output during CI checks and startup readiness probes.

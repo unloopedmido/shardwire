@@ -1,0 +1,38 @@
+---
+title: Examples
+description: Canonical integration patterns and what each one demonstrates.
+---
+
+This page replaces local example source files with focused implementation recipes.
+
+## Minimal bridge
+
+Use when validating architecture on localhost.
+
+- bot: start bridge with one shared secret
+- app: connect, subscribe to `messageCreate`, print payloads
+
+## Moderation worker
+
+Use when app process performs controlled side effects.
+
+- subscribe to `messageCreate` with optional channel filter
+- run policy check
+- call `deleteMessage` or `banMember`
+- branch on `result.ok`
+
+## Interaction responder
+
+Use when handling Discord interactions from app-side workers.
+
+- subscribe to `interactionCreate` with `customId` + `interactionKind` filters
+- `deferInteraction` quickly
+- finalize with `editInteractionReply`
+
+## Production posture checklist
+
+- scoped secrets per app type
+- strict startup + manifest contract
+- diagnostics preflight in startup path
+- `wss://` transport for non-loopback
+- action-level observability via metrics hook
