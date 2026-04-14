@@ -12,7 +12,7 @@ import { createBotBridge } from 'shardwire';
 
 const bridge = createBotBridge({
   token: process.env.DISCORD_TOKEN!,
-  intents: ['Guilds', 'GuildMessages', 'GuildMembers'],
+  intents: ['Guilds', 'GuildMessages', 'GuildMembers', 'GuildVoiceStates'],
   server: {
     port: 3001,
     path: '/shardwire',
@@ -33,5 +33,7 @@ const bridge = createBotBridge({
 ## Intent discipline
 
 Only declare the intents you actually need. Missing intents silently shrink what events the bridge can ever negotiate, so they directly affect downstream app behavior.
+
+Voice features specifically require `GuildVoiceStates` for `voiceStateUpdate` negotiation.
 
 Use diagnostics and strict startup to catch that mismatch early instead of discovering it from “missing events” in production.

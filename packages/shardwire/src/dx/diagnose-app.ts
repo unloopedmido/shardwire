@@ -51,6 +51,7 @@ export const EVENT_SUBSCRIPTION_METADATA_KEYS: Record<BotEventName, ReadonlySet<
 	channelCreate: new Set(['guildId', 'channelId', 'channelType', 'parentChannelId']),
 	channelUpdate: new Set(['guildId', 'channelId', 'channelType', 'parentChannelId']),
 	channelDelete: new Set(['guildId', 'channelId', 'channelType', 'parentChannelId']),
+	voiceStateUpdate: new Set(['guildId', 'channelId', 'userId', 'voiceChannelId']),
 };
 
 /** @deprecated Use {@link EVENT_SUBSCRIPTION_METADATA_KEYS}. */

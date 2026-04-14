@@ -1,7 +1,7 @@
 # Shardwire API Surface (Current)
 
 Website reference: `https://unloopedmido.github.io/shardwire/`
-Error reference: `https://unloopedmido.github.io/shardwire/errors/`
+Error reference: `https://unloopedmido.github.io/shardwire/docs/operations/troubleshooting/`
 
 ## Public entry points
 
@@ -53,6 +53,7 @@ If user-facing guidance is needed, link directly to website pages instead of rep
 - `channelCreate`
 - `channelUpdate`
 - `channelDelete`
+- `voiceStateUpdate`
 
 ## Subscription filters
 
@@ -65,6 +66,7 @@ If user-facing guidance is needed, link directly to website pages instead of rep
 - `channelType`
 - `parentChannelId`
 - `threadId`
+- `voiceChannelId`
 
 ## Built-in actions (`app.actions.*`)
 
@@ -94,6 +96,10 @@ If user-facing guidance is needed, link directly to website pages instead of rep
 - `deleteChannel`
 - `createThread`
 - `archiveThread`
+- `moveMemberVoice`
+- `setMemberMute`
+- `setMemberDeaf`
+- `setMemberSuppressed`
 
 ## Action result shape
 
@@ -112,6 +118,7 @@ Always branch on `result.ok` before using `data`.
 - `messageReactionAdd`, `messageReactionRemove`: `GuildMessageReactions`
 - `guildMemberAdd`, `guildMemberRemove`, `guildMemberUpdate`: `GuildMembers`
 - `guildCreate`, `guildDelete`, `threadCreate`, `threadUpdate`, `threadDelete`, `channelCreate`, `channelUpdate`, `channelDelete`: `Guilds`
+- `voiceStateUpdate`: `GuildVoiceStates`
 
 ## Secret permissions model
 
@@ -138,6 +145,6 @@ Use this during startup and troubleshooting.
 
 Many runtime/config errors include:
 
-`See: https://unloopedmido.github.io/shardwire/errors/#<anchor>`
+`See: https://unloopedmido.github.io/shardwire/docs/operations/troubleshooting/#<anchor>`
 
 When this appears, route users to the exact anchor and provide concise remediation.

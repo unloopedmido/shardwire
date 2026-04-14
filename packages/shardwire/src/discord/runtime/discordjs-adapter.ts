@@ -20,6 +20,7 @@ import {
 	type ReadonlyCollection,
 	type ThreadChannel,
 	type User,
+	type VoiceState,
 } from 'discord.js';
 import { BOT_INTENT_BITS } from '../catalog';
 import type {
@@ -45,6 +46,7 @@ import {
 	serializeMessage,
 	serializeThread,
 	serializeUser,
+	serializeVoiceState,
 } from './serializers';
 
 type ReplyCapableInteraction = Interaction & {
@@ -197,6 +199,10 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
 			deleteChannel: (payload) => this.deleteChannel(payload),
 			createThread: (payload) => this.createThread(payload),
 			archiveThread: (payload) => this.archiveThread(payload),
+			moveMemberVoice: (payload) => this.moveMemberVoice(payload),
+			setMemberMute: (payload) => this.setMemberMute(payload),
+			setMemberDeaf: (payload) => this.setMemberDeaf(payload),
+			setMemberSuppressed: (payload) => this.setMemberSuppressed(payload),
 		};
 	}
 
@@ -520,6 +526,20 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
 				this.client.on(Events.ChannelDelete, listener);
 				return () => {
 					this.client.off(Events.ChannelDelete, listener);
+				};
+			}
+			case 'voiceStateUpdate': {
+				const listener = (oldState: VoiceState, newState: VoiceState) => {
+					handler({
+						receivedAt: Date.now(),
+						...this.shardEnvelope(),
+						oldState: serializeVoiceState(oldState),
+						state: serializeVoiceState(newState),
+					} as BotEventPayloadMap[K]);
+				};
+				this.client.on(Events.VoiceStateUpdate, listener);
+				return () => {
+					this.client.off(Events.VoiceStateUpdate, listener);
 				};
 			}
 			default:
@@ -928,6 +948,38 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
 		}
 		await raw.setArchived(payload.archived ?? true, payload.reason);
 		return serializeThread(raw);
+	}
+
+	private async moveMemberVoice(payload: BotActionPayloadMap['moveMemberVoice']) {
+		const guild = await this.client.guilds.fetch(payload.guildId);
+		const member = await guild.members.fetch(payload.userId);
+		await member.voice.setChannel(payload.channelId ?? null, payload.reason);
+		const refreshed = await member.fetch(true);
+		return serializeVoiceState(refreshed.voice);
+	}
+
+	private async setMemberMute(payload: BotActionPayloadMap['setMemberMute']) {
+		const guild = await this.client.guilds.fetch(payload.guildId);
+		const member = await guild.members.fetch(payload.userId);
+		await member.voice.setMute(payload.mute, payload.reason);
+		const refreshed = await member.fetch(true);
+		return serializeVoiceState(refreshed.voice);
+	}
+
+	private async setMemberDeaf(payload: BotActionPayloadMap['setMemberDeaf']) {
+		const guild = await this.client.guilds.fetch(payload.guildId);
+		const member = await guild.members.fetch(payload.userId);
+		await member.voice.setDeaf(payload.deaf, payload.reason);
+		const refreshed = await member.fetch(true);
+		return serializeVoiceState(refreshed.voice);
+	}
+
+	private async setMemberSuppressed(payload: BotActionPayloadMap['setMemberSuppressed']) {
+		const guild = await this.client.guilds.fetch(payload.guildId);
+		const member = await guild.members.fetch(payload.userId);
+		await member.voice.setSuppressed(payload.suppressed);
+		const refreshed = await member.fetch(true);
+		return serializeVoiceState(refreshed.voice);
 	}
 }
 

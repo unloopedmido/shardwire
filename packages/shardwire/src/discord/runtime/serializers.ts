@@ -15,6 +15,7 @@ import type {
 	PartialUser,
 	ThreadChannel,
 	User,
+	VoiceState,
 } from 'discord.js';
 import type {
 	BridgeChannel,
@@ -27,6 +28,7 @@ import type {
 	BridgeReactionEmoji,
 	BridgeThread,
 	BridgeUser,
+	BridgeVoiceState,
 } from '../types';
 
 function serializeEmbeds(message: Message | PartialMessage): APIEmbed[] {
@@ -59,6 +61,28 @@ export function serializeGuildMember(member: GuildMember | PartialGuildMember): 
 		...('communicationDisabledUntil' in member
 			? { communicationDisabledUntil: member.communicationDisabledUntil?.toISOString() ?? null }
 			: {}),
+	};
+}
+
+export function serializeVoiceState(state: VoiceState): BridgeVoiceState {
+	const requestToSpeakTimestamp =
+		typeof state.requestToSpeakTimestamp === 'number' && Number.isFinite(state.requestToSpeakTimestamp)
+			? new Date(state.requestToSpeakTimestamp).toISOString()
+			: null;
+
+	return {
+		guildId: state.guild.id,
+		userId: state.id,
+		...(state.channelId !== undefined ? { channelId: state.channelId } : {}),
+		...(state.sessionId !== undefined ? { sessionId: state.sessionId } : {}),
+		selfMute: state.selfMute ?? false,
+		selfDeaf: state.selfDeaf ?? false,
+		selfVideo: state.selfVideo ?? false,
+		selfStream: state.streaming ?? false,
+		serverMute: state.serverMute ?? false,
+		serverDeaf: state.serverDeaf ?? false,
+		suppress: state.suppress ?? false,
+		requestToSpeakTimestamp,
 	};
 }
 

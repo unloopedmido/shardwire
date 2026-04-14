@@ -27,6 +27,8 @@ export interface EventSubscriptionFilter {
 	parentChannelId?: Snowflake | readonly Snowflake[];
 	/** Matches guild thread channels only: same as message `channelId` when `channelType` is a guild thread. */
 	threadId?: Snowflake | readonly Snowflake[];
+	/** Matches the active voice channel id for `voiceStateUpdate` payloads when present. */
+	voiceChannelId?: Snowflake | readonly Snowflake[];
 }
 ```
 

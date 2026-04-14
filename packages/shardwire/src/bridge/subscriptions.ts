@@ -19,6 +19,7 @@ interface NormalizedEventSubscriptionFilter {
 	channelType?: number[];
 	parentChannelId?: string[];
 	threadId?: string[];
+	voiceChannelId?: string[];
 }
 
 export interface NormalizedEventSubscription<K extends BotEventName = BotEventName> {
@@ -75,6 +76,7 @@ export function normalizeEventSubscriptionFilter(
 	const channelTypes = normalizeNumberList(filter.channelType);
 	const parentChannelIds = normalizeStringList(filter.parentChannelId);
 	const threadIds = normalizeStringList(filter.threadId);
+	const voiceChannelIds = normalizeStringList(filter.voiceChannelId);
 
 	if (guildIds) {
 		normalized.guildId = guildIds;
@@ -102,6 +104,9 @@ export function normalizeEventSubscriptionFilter(
 	}
 	if (threadIds) {
 		normalized.threadId = threadIds;
+	}
+	if (voiceChannelIds) {
+		normalized.voiceChannelId = voiceChannelIds;
 	}
 
 	return Object.keys(normalized).length > 0 ? normalized : undefined;
@@ -174,6 +179,7 @@ function eventMetadata(
 	channelType?: number;
 	parentChannelId?: string;
 	threadId?: string;
+	voiceChannelId?: string;
 } {
 	switch (name) {
 		case 'ready':
@@ -319,6 +325,15 @@ function eventMetadata(
 				...(ch.parentId ? { parentChannelId: ch.parentId } : {}),
 			};
 		}
+		case 'voiceStateUpdate': {
+			const voicePayload = payload as BotEventPayloadMap['voiceStateUpdate'];
+			return {
+				guildId: voicePayload.state.guildId,
+				userId: voicePayload.state.userId,
+				...(voicePayload.state.channelId ? { channelId: voicePayload.state.channelId } : {}),
+				...(voicePayload.state.channelId ? { voiceChannelId: voicePayload.state.channelId } : {}),
+			};
+		}
 		default:
 			return {};
 	}
@@ -340,6 +355,7 @@ export function matchesEventSubscription(subscription: EventSubscription, payloa
 		matchesKind(metadata.interactionKind, normalized.filter.interactionKind) &&
 		matchesNumberField(metadata.channelType, normalized.filter.channelType) &&
 		matchesField(metadata.parentChannelId, normalized.filter.parentChannelId) &&
-		matchesField(metadata.threadId, normalized.filter.threadId)
+		matchesField(metadata.threadId, normalized.filter.threadId) &&
+		matchesField(metadata.voiceChannelId, normalized.filter.voiceChannelId)
 	);
 }

@@ -11,10 +11,13 @@ describe('DX catalog', () => {
 		const cat = getShardwireCatalog();
 		expect(cat.actions).toContain('sendMessage');
 		expect(cat.events.some((e) => e.name === 'messageCreate')).toBe(true);
+		expect(cat.events.some((e) => e.name === 'voiceStateUpdate')).toBe(true);
 		const msgCreate = cat.events.find((e) => e.name === 'messageCreate');
 		expect(msgCreate?.requiredIntents).toEqual(['GuildMessages']);
 		expect(cat.subscriptionFilters).toContain('guildId');
 		expect(cat.subscriptionFilters).toContain('threadId');
+		expect(cat.subscriptionFilters).toContain('voiceChannelId');
+		expect(cat.actions).toContain('moveMemberVoice');
 	});
 });
 
