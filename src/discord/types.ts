@@ -619,6 +619,136 @@ export interface PreflightDesired {
 	actions?: readonly BotActionName[];
 }
 
+/**
+ * Input to {@link defineShardwireApp}. **Keep this surface small** — only what the app needs from the bridge and
+ * which subscription filter keys it may use. Put transport, secrets, bot intents, strict startup, and other policy in
+ * `connectBotBridge` / `createBotBridge` / `app.ready` / env instead of growing the manifest into a config object.
+ */
+export interface ShardwireAppManifestDefinition {
+	/** Optional label (e.g. logging). Defaults to `'shardwire-app'` when omitted or blank. */
+	name?: string;
+	/** Events this app requires; each must appear in negotiated capabilities for the contract to hold. */
+	events: readonly BotEventName[];
+	/** Actions this app requires; each must appear in negotiated capabilities for the contract to hold. */
+	actions: readonly BotActionName[];
+	/**
+	 * Per-event subscription filter keys this app may use on `app.on(name, handler, filter)`.
+	 * Diagnosis validates each key against the catalog and against **whether the bridge ever supplies that key on
+	 * subscription matching metadata for this event** (structural impossibility only — not “suspicious” or low-traffic filters).
+	 */
+	filters?: Partial<Record<BotEventName, readonly ShardwireSubscriptionFilterKey[]>>;
+}
+
+/** Normalized manifest returned by {@link defineShardwireApp} (same fields, `name` always resolved). */
+export interface ShardwireAppManifest {
+	readonly name: string;
+	readonly events: readonly BotEventName[];
+	readonly actions: readonly BotActionName[];
+	readonly filters?: Partial<Record<BotEventName, readonly ShardwireSubscriptionFilterKey[]>>;
+}
+
+export type ShardwireAppDiagnosisSeverity = 'error' | 'warning' | 'info';
+
+export type ShardwireAppDiagnosisCategory = 'intent' | 'secret_scope' | 'subscription' | 'action' | 'unused_capability';
+
+/**
+ * Machine-readable issue codes from {@link diagnoseShardwireApp}.
+ *
+ * **Filter semantics (no “suspicious” heuristics):**
+ * - **`unsupported_filter_key`** — not a built-in key from `app.catalog().subscriptionFilters`.
+ * - **`filter_key_absent_from_event_metadata`** — key is built-in, but the bridge’s subscription matcher never supplies it for this event name, so a filter on it **cannot** match any payload (structural impossibility). Narrow filters that merely match rarely (e.g. a specific `guildId`) are **not** flagged.
+ */
+export type ShardwireAppDiagnosisIssueCode =
+	| 'missing_intent'
+	| 'missing_event_capability'
+	| 'missing_action_capability'
+	| 'unused_negotiated_event'
+	| 'unused_negotiated_action'
+	| 'unsupported_filter_key'
+	| 'filter_key_absent_from_event_metadata'
+	| 'subscription_event_not_in_manifest'
+	| 'manifest_filters_required_for_subscription'
+	| 'subscription_filter_key_not_declared_in_manifest'
+	| 'scope_broader_than_expected'
+	| 'strict_requires_bot_intents'
+	| 'bot_intents_unknown';
+
+export interface ShardwireAppDiagnosisIssue {
+	severity: ShardwireAppDiagnosisSeverity;
+	code: ShardwireAppDiagnosisIssueCode | (string & {});
+	category: ShardwireAppDiagnosisCategory;
+	message: string;
+	remediation?: string;
+	context?: Record<string, unknown>;
+}
+
+export interface ShardwireAppDiagnosisReport {
+	/**
+	 * `true` iff **no** issue has `severity: 'error'` — same gate as strict startup (`app.ready({ strict: true })`).
+	 * Warnings (for example `unused_negotiated_*`), unused negotiated capabilities, and any other non-error issues
+	 * never set this to `false`.
+	 */
+	ok: boolean;
+	issues: ShardwireAppDiagnosisIssue[];
+	/** Union of gateway intents required by manifest `events` (from the static catalog). */
+	requiredIntents: readonly BotIntentName[];
+	/** Same shape as {@link generateSecretScope}. */
+	minimumScope: SecretPermissions;
+}
+
+/** Options for {@link diagnoseShardwireApp}. Surplus negotiation uses `unused_negotiated_*` **warnings** only. */
+export interface DiagnoseShardwireAppOptions {
+	/** When set, issues `missing_intent` if the bot bridge intents omit requirements for manifest events. */
+	botIntents?: readonly BotIntentName[];
+	/**
+	 * When true (set internally by `app.ready({ strict: true })`), missing `botIntents` for intent-requiring manifests is an error.
+	 * Default false: emit `bot_intents_unknown` warning instead.
+	 */
+	strictIntentCheck?: boolean;
+	/**
+	 * Runtime `app.on` subscriptions: each `name` must appear in `manifest.events`.
+	 * Any non-empty `filter` must only use keys listed under `manifest.filters[name]` for that event.
+	 *
+	 * **`app.ready({ strict: true, manifest })` snapshot:** only handlers already registered when `ready` runs are
+	 * included here (whatever the caller passes). Registering `app.on(...)` after a successful strict `ready` is allowed
+	 * and is **not** re-validated against the manifest by Shardwire.
+	 */
+	subscriptions?: readonly EventSubscription[];
+	/**
+	 * Explicit opt-in maximum: when set, emits **`severity: 'error'`** if negotiated events or actions fall outside
+	 * these allow-lists (`scope_broader_than_expected`). Use `'*'` on `events` or `actions` to skip that axis.
+	 * The manifest never implies a maximum by itself; broader-than-manifest alone is only **`unused_negotiated_*` warnings**.
+	 */
+	expectedScope?: SecretPermissions;
+}
+
+export class ShardwireStrictStartupError extends Error {
+	constructor(
+		message: string,
+		public readonly report: ShardwireAppDiagnosisReport,
+	) {
+		super(message);
+		this.name = 'ShardwireStrictStartupError';
+	}
+}
+
+export interface AppBridgeReadyOptions {
+	/**
+	 * When true, refuses startup on **`severity: 'error'`** diagnosis issues (manifest vs negotiation, intents,
+	 * subscriptions vs manifest, optional **`expectedScope`**). Warnings such as **`unused_negotiated_*`** never block startup.
+	 */
+	strict?: boolean;
+	/** Required when `strict` is true. */
+	manifest?: ShardwireAppManifest;
+	/**
+	 * Bot process gateway intents (`createBotBridge({ intents })`).
+	 * Required in strict mode when any manifest event lists non-empty `requiredIntents` in the catalog.
+	 */
+	botIntents?: readonly BotIntentName[];
+	/** Optional maximum allowed negotiated surface (explicit opt-in; manifest defines minimum only). */
+	expectedScope?: SecretPermissions;
+}
+
 export interface EventSubscription<K extends BotEventName = BotEventName> {
 	name: K;
 	filter?: EventSubscriptionFilter;
@@ -781,7 +911,11 @@ export interface BotBridge {
 
 export interface AppBridge {
 	actions: AppBridgeActions;
-	ready(): Promise<void>;
+	/**
+	 * Awaits WebSocket authentication. Throws {@link BridgeCapabilityError} when handlers reference disallowed events.
+	 * With `strict`, validates manifest / intents / optional `expectedScope` after negotiation; throws {@link ShardwireStrictStartupError} on failure.
+	 */
+	ready(options?: AppBridgeReadyOptions): Promise<void>;
 	close(): Promise<void>;
 	connected(): boolean;
 	connectionId(): string | null;

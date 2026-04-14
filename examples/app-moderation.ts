@@ -8,7 +8,7 @@
  *   SHARDWIRE_SECRET_MODERATION — must match moderation scoped secret on the bot
  *   MOD_ALERT_CHANNEL_ID — optional snowflake; if set, only that channel is watched
  */
-import { connectBotBridge } from '../src';
+import { connectBotBridge, defineShardwireApp, generateSecretScope } from '../src';
 
 const port = Number(process.env.SHARDWIRE_PORT ?? 3001);
 const secret = process.env.SHARDWIRE_SECRET_MODERATION;
@@ -20,6 +20,22 @@ if (!secret) {
 
 const TRIGGER = 'shardwire-demo-delete';
 
+/** Match `examples/bot-production.ts` moderation scope + intents. */
+const BOT_INTENTS = ['Guilds', 'GuildMessages', 'GuildMembers', 'MessageContent'] as const;
+
+// Declare `filters` only for keys the handler may pass. No `MOD_ALERT_CHANNEL_ID` → no filter object → no `filters` entry.
+const manifest = defineShardwireApp({
+	events: ['ready', 'messageCreate'],
+	actions: ['deleteMessage'],
+	...(alertChannel
+		? {
+				filters: {
+					messageCreate: ['channelId'],
+				},
+			}
+		: {}),
+});
+
 async function main(): Promise<void> {
 	const app = connectBotBridge({
 		url: `ws://127.0.0.1:${port}/shardwire`,
@@ -27,6 +43,8 @@ async function main(): Promise<void> {
 		secretId: 'moderation',
 		appName: 'moderation-worker',
 	});
+
+	console.log('Moderation secret minimum allow (see bot-production):', generateSecretScope(manifest));
 
 	app.on('ready', ({ user }) => {
 		console.log('Bot ready as:', user.username);
@@ -53,7 +71,7 @@ async function main(): Promise<void> {
 		filter,
 	);
 
-	await app.ready();
+	await app.ready({ strict: true, manifest, botIntents: [...BOT_INTENTS] });
 	console.log('Capabilities:', app.capabilities());
 	console.log(
 		`Listening for messages containing "${TRIGGER}"${alertChannel ? ` in ${alertChannel}` : ''}. Ctrl+C to exit.`,

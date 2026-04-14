@@ -1,6 +1,12 @@
 import { createServer } from 'node:net';
 import { describe, expect, it } from 'vitest';
-import { BridgeCapabilityError, connectBotBridge, createBotBridge } from '../src';
+import {
+	BridgeCapabilityError,
+	connectBotBridge,
+	createBotBridge,
+	defineShardwireApp,
+	ShardwireStrictStartupError,
+} from '../src';
 import { createBotBridgeWithRuntime } from '../src/bot';
 import { authenticateSecret } from '../src/bridge/transport/server';
 import { serializeInteraction } from '../src/discord/runtime/serializers';
@@ -455,6 +461,214 @@ describe('discord-first bridge validation', () => {
 			expect(err.details?.reasonCode).toBe('not_in_capabilities');
 			expect(err.details?.requiredIntents).toEqual(['GuildMessages']);
 		}
+
+		await app.close();
+		await bot.close();
+	});
+
+	it('strict ready succeeds when manifest matches negotiated caps', async () => {
+		const port = await getFreePort();
+		const runtime = new FakeDiscordRuntime();
+		const bot = createBotBridgeWithRuntime(
+			{
+				token: 'fake-token',
+				intents: ['Guilds', 'GuildMessages'],
+				server: {
+					port,
+					secrets: [
+						{
+							id: 'scoped',
+							value: 'secret',
+							allow: {
+								events: ['messageCreate'],
+								actions: ['sendMessage'],
+							},
+						},
+					],
+				},
+			},
+			runtime,
+		);
+
+		const manifest = defineShardwireApp({
+			name: 'strict-app',
+			events: ['messageCreate'],
+			actions: ['sendMessage'],
+		});
+
+		const app = connectBotBridge({
+			url: `ws://127.0.0.1:${port}/shardwire`,
+			secret: 'secret',
+			secretId: 'scoped',
+		});
+
+		await bot.ready();
+		await app.ready({ strict: true, manifest, botIntents: ['GuildMessages', 'Guilds'] });
+
+		await app.close();
+		await bot.close();
+	});
+
+	it('strict ready throws when manifest requires actions outside negotiated scope', async () => {
+		const port = await getFreePort();
+		const runtime = new FakeDiscordRuntime();
+		const bot = createBotBridgeWithRuntime(
+			{
+				token: 'fake-token',
+				intents: ['Guilds', 'GuildMessages'],
+				server: {
+					port,
+					secrets: [
+						{
+							id: 'scoped',
+							value: 'secret',
+							allow: {
+								events: ['messageCreate'],
+								actions: ['sendMessage'],
+							},
+						},
+					],
+				},
+			},
+			runtime,
+		);
+
+		const manifest = defineShardwireApp({
+			name: 'strict-app',
+			events: ['messageCreate'],
+			actions: ['deleteMessage'],
+		});
+
+		const app = connectBotBridge({
+			url: `ws://127.0.0.1:${port}/shardwire`,
+			secret: 'secret',
+			secretId: 'scoped',
+		});
+
+		await bot.ready();
+		await expect(app.ready({ strict: true, manifest, botIntents: ['GuildMessages', 'Guilds'] })).rejects.toBeInstanceOf(
+			ShardwireStrictStartupError,
+		);
+
+		await app.close();
+		await bot.close();
+	});
+
+	it('strict ready throws TypeError when strict is true but manifest is missing', async () => {
+		const port = await getFreePort();
+		const runtime = new FakeDiscordRuntime();
+		const bot = createBotBridgeWithRuntime(
+			{
+				token: 'fake-token',
+				intents: ['GuildMessages'],
+				server: {
+					port,
+					secrets: ['secret'],
+				},
+			},
+			runtime,
+		);
+
+		const app = connectBotBridge({
+			url: `ws://127.0.0.1:${port}/shardwire`,
+			secret: 'secret',
+		});
+
+		await bot.ready();
+		await expect(app.ready({ strict: true } as never)).rejects.toThrow(/requires `manifest`/);
+
+		await app.close();
+		await bot.close();
+	});
+
+	it('strict ready throws when botIntents are omitted for intent-requiring manifest events', async () => {
+		const port = await getFreePort();
+		const runtime = new FakeDiscordRuntime();
+		const bot = createBotBridgeWithRuntime(
+			{
+				token: 'fake-token',
+				intents: ['Guilds', 'GuildMessages'],
+				server: {
+					port,
+					secrets: [
+						{
+							id: 'scoped',
+							value: 'secret',
+							allow: {
+								events: ['messageCreate'],
+								actions: ['sendMessage'],
+							},
+						},
+					],
+				},
+			},
+			runtime,
+		);
+
+		const manifest = defineShardwireApp({
+			name: 'strict-app',
+			events: ['messageCreate'],
+			actions: ['sendMessage'],
+		});
+
+		const app = connectBotBridge({
+			url: `ws://127.0.0.1:${port}/shardwire`,
+			secret: 'secret',
+			secretId: 'scoped',
+		});
+
+		await bot.ready();
+		await expect(app.ready({ strict: true, manifest })).rejects.toBeInstanceOf(ShardwireStrictStartupError);
+
+		await app.close();
+		await bot.close();
+	});
+
+	it('strict ready throws when negotiated surface is broader than expectedScope', async () => {
+		const port = await getFreePort();
+		const runtime = new FakeDiscordRuntime();
+		const bot = createBotBridgeWithRuntime(
+			{
+				token: 'fake-token',
+				intents: ['Guilds', 'GuildMessages'],
+				server: {
+					port,
+					secrets: [
+						{
+							id: 'scoped',
+							value: 'secret',
+							allow: {
+								events: ['messageCreate', 'guildCreate'],
+								actions: [],
+							},
+						},
+					],
+				},
+			},
+			runtime,
+		);
+
+		const manifest = defineShardwireApp({
+			name: 'strict-app',
+			events: ['messageCreate'],
+			actions: [],
+		});
+
+		const app = connectBotBridge({
+			url: `ws://127.0.0.1:${port}/shardwire`,
+			secret: 'secret',
+			secretId: 'scoped',
+		});
+
+		await bot.ready();
+		await expect(
+			app.ready({
+				strict: true,
+				manifest,
+				botIntents: ['GuildMessages', 'Guilds'],
+				expectedScope: { events: ['messageCreate'] },
+			}),
+		).rejects.toBeInstanceOf(ShardwireStrictStartupError);
 
 		await app.close();
 		await bot.close();
