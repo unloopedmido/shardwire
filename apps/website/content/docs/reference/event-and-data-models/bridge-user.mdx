@@ -1,0 +1,33 @@
+---
+title: "BridgeUser"
+description: "Reference for `BridgeUser`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `BridgeUser`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface BridgeUser {
+	id: Snowflake;
+	username: string;
+	discriminator: string;
+	globalName?: string | null;
+	avatarUrl?: string | null;
+	bot: boolean;
+	system: boolean;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="BridgeUser" />
+
+## Related Guides
+
+- [Bridge Architecture](/docs/concepts/bridge-architecture)
+- [Runtime Model](/docs/concepts/runtime-model)

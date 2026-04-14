@@ -1,0 +1,30 @@
+---
+title: "Introduction"
+description: "Shardwire keeps Discord runtime and app logic separated without giving up typed events, typed actions, or startup discipline."
+---
+
+Shardwire is a Discord-first bridge for teams that want to run gateway/runtime concerns in one process and move application logic somewhere else.
+
+That split matters when you need the bot connection to stay predictable while dashboards, workers, moderation tooling, or product logic evolve on their own schedule.
+
+## What lives where
+
+- The bot process runs `createBotBridge()` and owns Discord connectivity, intents, event normalization, and action execution.
+- The app process runs `connectBotBridge()` and consumes typed events while invoking typed actions across the bridge.
+- Scoped secrets and negotiated capabilities define exactly what each app process is allowed to see and do.
+
+## What this docs site covers
+
+- Start with `Getting Started` if you want the first working bridge.
+- See `Changelog` for release-by-release changes.
+- Read `Concepts` if you need the mental model before implementation.
+- Use `Guides` for manifests, strict startup, and workflow helpers.
+- Use `Operations` for deployment, diagnostics, and troubleshooting.
+- Use `Reference` for generated API docs built from the public package exports.
+
+## Why teams reach for it
+
+- Split-process architecture without inventing a custom event bus.
+- Capability-aware actions and subscriptions instead of ad-hoc permission checks.
+- Strict startup that can reject mismatched intents, secret scope, and subscriptions before traffic hits your app.
+- A public API surface small enough to reason about but broad enough to support real apps.

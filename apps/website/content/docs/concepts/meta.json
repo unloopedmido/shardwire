@@ -1,0 +1,9 @@
+{
+  "title": "Concepts",
+  "defaultOpen": true,
+  "pages": [
+    "bridge-architecture",
+    "capabilities-and-scopes",
+    "runtime-model"
+  ]
+}

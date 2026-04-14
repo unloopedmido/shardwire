@@ -11,6 +11,11 @@ import { createDiscordJsRuntimeAdapter } from '../discord/runtime/discordjs-adap
 import { BridgeTransportServer, authenticateSecret } from '../bridge/transport/server';
 import { assertBotBridgeOptions, normalizeSecrets, resolveCapabilitiesForSecret } from '../bridge/validation';
 
+/**
+ * Create the bot-process bridge: Discord gateway/runtime plus a WebSocket server for app connections.
+ *
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/bridge-apis/create-bot-bridge/
+ */
 export function createBotBridge(options: BotBridgeOptions): BotBridge {
 	const runtime = createDiscordJsRuntimeAdapter({
 		token: options.token,
@@ -20,6 +25,12 @@ export function createBotBridge(options: BotBridgeOptions): BotBridge {
 	return createBotBridgeWithRuntime(options, runtime);
 }
 
+/**
+ * Same as {@link createBotBridge}, but accepts a custom {@link DiscordRuntimeAdapter} (testing or alternate runtimes).
+ * Not a separate reference page — behavior matches {@link createBotBridge}.
+ *
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/bridge-apis/create-bot-bridge/
+ */
 export function createBotBridgeWithRuntime(options: BotBridgeOptions, runtime: DiscordRuntimeAdapter): BotBridge {
 	assertBotBridgeOptions(options);
 	const secrets = normalizeSecrets(options);

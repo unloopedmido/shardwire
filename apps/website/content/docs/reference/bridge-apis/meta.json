@@ -1,0 +1,19 @@
+{
+  "title": "Bridge APIs",
+  "pages": [
+    "index",
+    "app-bridge",
+    "app-bridge-metrics-hooks",
+    "app-bridge-options",
+    "app-bridge-ready-options",
+    "bot-bridge",
+    "bot-bridge-options",
+    "bot-bridge-secret",
+    "connect-bot-bridge",
+    "create-bot-bridge",
+    "scoped-secret-config",
+    "secret-permissions",
+    "shardwire-logger",
+    "unsubscribe"
+  ]
+}

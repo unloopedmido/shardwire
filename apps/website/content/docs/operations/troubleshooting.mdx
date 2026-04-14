@@ -1,0 +1,33 @@
+---
+title: "Troubleshooting"
+description: "Work failures from connection and capability negotiation outward; most issues become obvious once you inspect the negotiated surface."
+---
+
+## If the app cannot connect
+
+- verify the URL ends with `/shardwire` or your configured custom path
+- verify the secret matches a configured bridge secret
+- verify `ws://` is only being used on loopback
+
+## If handlers never fire
+
+- inspect `app.capabilities().events`
+- verify the required intents are enabled on `createBotBridge()`
+- confirm the scoped secret allows that event
+- confirm the subscription event name is correct
+
+## If an action fails
+
+- branch on `result.ok`
+- log `result.error.code`
+- inspect `result.error.details`
+- confirm the action is included in negotiated capabilities
+
+## If strict startup fails
+
+- read the attached diagnosis report
+- compare manifest events to bot intents
+- compare manifest actions to scoped secret permissions
+- compare runtime subscriptions to declared manifest filters
+
+Treat troubleshooting as a capability audit first, not a transport guess.

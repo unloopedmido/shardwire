@@ -9,8 +9,14 @@ import type {
 import type { GatewayIntentBits } from 'discord.js';
 import { withErrorDocsLink } from '../utils/docs-links';
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/bridge-apis/unsubscribe/
+ */
 export type Unsubscribe = () => void;
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/bridge-apis/shardwire-logger/
+ */
 export interface ShardwireLogger {
 	debug?: (message: string, meta?: Record<string, unknown>) => void;
 	info?: (message: string, meta?: Record<string, unknown>) => void;
@@ -18,8 +24,14 @@ export interface ShardwireLogger {
 	error?: (message: string, meta?: Record<string, unknown>) => void;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/bot-intent-name/
+ */
 export type BotIntentName = keyof typeof GatewayIntentBits;
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/bridge-user/
+ */
 export interface BridgeUser {
 	id: Snowflake;
 	username: string;
@@ -30,6 +42,9 @@ export interface BridgeUser {
 	system: boolean;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/bridge-attachment/
+ */
 export interface BridgeAttachment {
 	id: Snowflake;
 	name: string;
@@ -38,12 +53,18 @@ export interface BridgeAttachment {
 	size: number;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/bridge-message-reference/
+ */
 export interface BridgeMessageReference {
 	messageId?: Snowflake;
 	channelId?: Snowflake;
 	guildId?: Snowflake;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/bridge-guild-member/
+ */
 export interface BridgeGuildMember {
 	id: Snowflake;
 	guildId: Snowflake;
@@ -57,7 +78,8 @@ export interface BridgeGuildMember {
 	communicationDisabledUntil?: string | null;
 }
 
-/** Normalized guild snapshot for `guildCreate` / `guildDelete` events. */
+/** Normalized guild snapshot for `guildCreate` / `guildDelete` events.  * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/bridge-guild/
+ */
 export interface BridgeGuild {
 	id: Snowflake;
 	name: string;
@@ -65,7 +87,8 @@ export interface BridgeGuild {
 	ownerId?: Snowflake;
 }
 
-/** Normalized thread channel snapshot for thread lifecycle events. */
+/** Normalized thread channel snapshot for thread lifecycle events.  * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/bridge-thread/
+ */
 export interface BridgeThread {
 	id: Snowflake;
 	guildId: Snowflake;
@@ -76,7 +99,8 @@ export interface BridgeThread {
 	locked?: boolean;
 }
 
-/** Normalized non-thread channel snapshot for channel lifecycle events. */
+/** Normalized non-thread channel snapshot for channel lifecycle events.  * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/bridge-channel/
+ */
 export interface BridgeChannel {
 	id: Snowflake;
 	type: number;
@@ -85,6 +109,9 @@ export interface BridgeChannel {
 	parentId?: Snowflake | null;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/bridge-message/
+ */
 export interface BridgeMessage {
 	id: Snowflake;
 	channelId: Snowflake;
@@ -105,6 +132,9 @@ export interface BridgeMessage {
 	parentChannelId?: Snowflake;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/bridge-deleted-message/
+ */
 export interface BridgeDeletedMessage {
 	id: Snowflake;
 	channelId: Snowflake;
@@ -114,12 +144,18 @@ export interface BridgeDeletedMessage {
 	parentChannelId?: Snowflake;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/bridge-reaction-emoji/
+ */
 export interface BridgeReactionEmoji {
 	id?: Snowflake;
 	name?: string | null;
 	animated?: boolean;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/bridge-message-reaction/
+ */
 export interface BridgeMessageReaction {
 	messageId: Snowflake;
 	channelId: Snowflake;
@@ -128,6 +164,9 @@ export interface BridgeMessageReaction {
 	emoji: BridgeReactionEmoji;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/bridge-interaction-kind/
+ */
 export type BridgeInteractionKind =
 	| 'chatInput'
 	| 'contextMenu'
@@ -140,6 +179,9 @@ export type BridgeInteractionKind =
 	| 'modalSubmit'
 	| 'unknown';
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/bridge-interaction/
+ */
 export interface BridgeInteraction {
 	id: Snowflake;
 	applicationId: Snowflake;
@@ -160,88 +202,148 @@ export interface BridgeInteraction {
 	message?: BridgeMessage;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/event-envelope-base/
+ */
 export interface EventEnvelopeBase {
 	receivedAt: number;
 	/** Populated when the bot runs under `ShardingManager` (multi-shard). */
 	shardId?: number;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/ready-event-payload/
+ */
 export interface ReadyEventPayload extends EventEnvelopeBase {
 	user: BridgeUser;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/interaction-create-event-payload/
+ */
 export interface InteractionCreateEventPayload extends EventEnvelopeBase {
 	interaction: BridgeInteraction;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/message-create-event-payload/
+ */
 export interface MessageCreateEventPayload extends EventEnvelopeBase {
 	message: BridgeMessage;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/message-update-event-payload/
+ */
 export interface MessageUpdateEventPayload extends EventEnvelopeBase {
 	oldMessage?: BridgeMessage;
 	message: BridgeMessage;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/message-delete-event-payload/
+ */
 export interface MessageDeleteEventPayload extends EventEnvelopeBase {
 	message: BridgeDeletedMessage;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/guild-member-add-event-payload/
+ */
 export interface GuildMemberAddEventPayload extends EventEnvelopeBase {
 	member: BridgeGuildMember;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/guild-member-remove-event-payload/
+ */
 export interface GuildMemberRemoveEventPayload extends EventEnvelopeBase {
 	member: BridgeGuildMember;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/guild-member-update-event-payload/
+ */
 export interface GuildMemberUpdateEventPayload extends EventEnvelopeBase {
 	oldMember?: BridgeGuildMember;
 	member: BridgeGuildMember;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/guild-create-event-payload/
+ */
 export interface GuildCreateEventPayload extends EventEnvelopeBase {
 	guild: BridgeGuild;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/guild-delete-event-payload/
+ */
 export interface GuildDeleteEventPayload extends EventEnvelopeBase {
 	guild: BridgeGuild;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/thread-create-event-payload/
+ */
 export interface ThreadCreateEventPayload extends EventEnvelopeBase {
 	thread: BridgeThread;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/thread-update-event-payload/
+ */
 export interface ThreadUpdateEventPayload extends EventEnvelopeBase {
 	oldThread?: BridgeThread;
 	thread: BridgeThread;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/thread-delete-event-payload/
+ */
 export interface ThreadDeleteEventPayload extends EventEnvelopeBase {
 	thread: BridgeThread;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/message-reaction-add-event-payload/
+ */
 export interface MessageReactionAddEventPayload extends EventEnvelopeBase {
 	reaction: BridgeMessageReaction;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/message-reaction-remove-event-payload/
+ */
 export interface MessageReactionRemoveEventPayload extends EventEnvelopeBase {
 	reaction: BridgeMessageReaction;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/channel-create-event-payload/
+ */
 export interface ChannelCreateEventPayload extends EventEnvelopeBase {
 	channel: BridgeChannel;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/channel-update-event-payload/
+ */
 export interface ChannelUpdateEventPayload extends EventEnvelopeBase {
 	oldChannel?: BridgeChannel;
 	channel: BridgeChannel;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/channel-delete-event-payload/
+ */
 export interface ChannelDeleteEventPayload extends EventEnvelopeBase {
 	channel: BridgeChannel;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/message-bulk-delete-event-payload/
+ */
 export interface MessageBulkDeleteEventPayload extends EventEnvelopeBase {
 	channelId: Snowflake;
 	guildId: Snowflake;
@@ -252,6 +354,9 @@ export interface MessageBulkDeleteEventPayload extends EventEnvelopeBase {
 	parentChannelId?: Snowflake;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/bot-event-payload-map/
+ */
 export interface BotEventPayloadMap {
 	ready: ReadyEventPayload;
 	interactionCreate: InteractionCreateEventPayload;
@@ -274,8 +379,14 @@ export interface BotEventPayloadMap {
 	channelDelete: ChannelDeleteEventPayload;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/bot-event-name/
+ */
 export type BotEventName = keyof BotEventPayloadMap;
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/bridge-message-input/
+ */
 export interface BridgeMessageInput {
 	content?: string;
 	embeds?: APIEmbed[];
@@ -286,51 +397,84 @@ export interface BridgeMessageInput {
 	stickerIds?: Snowflake[];
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/send-message-action-payload/
+ */
 export interface SendMessageActionPayload extends BridgeMessageInput {
 	channelId: Snowflake;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/edit-message-action-payload/
+ */
 export interface EditMessageActionPayload extends BridgeMessageInput {
 	channelId: Snowflake;
 	messageId: Snowflake;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/delete-message-action-payload/
+ */
 export interface DeleteMessageActionPayload {
 	channelId: Snowflake;
 	messageId: Snowflake;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/reply-to-interaction-action-payload/
+ */
 export interface ReplyToInteractionActionPayload extends BridgeMessageInput {
 	interactionId: Snowflake;
 	ephemeral?: boolean;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/defer-interaction-action-payload/
+ */
 export interface DeferInteractionActionPayload {
 	interactionId: Snowflake;
 	ephemeral?: boolean;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/follow-up-interaction-action-payload/
+ */
 export interface FollowUpInteractionActionPayload extends BridgeMessageInput {
 	interactionId: Snowflake;
 	ephemeral?: boolean;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/defer-update-interaction-action-payload/
+ */
 export interface DeferUpdateInteractionActionPayload {
 	interactionId: Snowflake;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/edit-interaction-reply-action-payload/
+ */
 export interface EditInteractionReplyActionPayload extends BridgeMessageInput {
 	interactionId: Snowflake;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/delete-interaction-reply-action-payload/
+ */
 export interface DeleteInteractionReplyActionPayload {
 	interactionId: Snowflake;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/update-interaction-action-payload/
+ */
 export interface UpdateInteractionActionPayload extends BridgeMessageInput {
 	interactionId: Snowflake;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/show-modal-action-payload/
+ */
 export interface ShowModalActionPayload {
 	interactionId: Snowflake;
 	title: string;
@@ -338,16 +482,25 @@ export interface ShowModalActionPayload {
 	components: APIActionRowComponent<APITextInputComponent>[];
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/fetch-message-action-payload/
+ */
 export interface FetchMessageActionPayload {
 	channelId: Snowflake;
 	messageId: Snowflake;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/fetch-member-action-payload/
+ */
 export interface FetchMemberActionPayload {
 	guildId: Snowflake;
 	userId: Snowflake;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/ban-member-action-payload/
+ */
 export interface BanMemberActionPayload {
 	guildId: Snowflake;
 	userId: Snowflake;
@@ -355,12 +508,18 @@ export interface BanMemberActionPayload {
 	deleteMessageSeconds?: number;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/kick-member-action-payload/
+ */
 export interface KickMemberActionPayload {
 	guildId: Snowflake;
 	userId: Snowflake;
 	reason?: string;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/add-member-role-action-payload/
+ */
 export interface AddMemberRoleActionPayload {
 	guildId: Snowflake;
 	userId: Snowflake;
@@ -368,6 +527,9 @@ export interface AddMemberRoleActionPayload {
 	reason?: string;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/remove-member-role-action-payload/
+ */
 export interface RemoveMemberRoleActionPayload {
 	guildId: Snowflake;
 	userId: Snowflake;
@@ -375,18 +537,27 @@ export interface RemoveMemberRoleActionPayload {
 	reason?: string;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/add-message-reaction-action-payload/
+ */
 export interface AddMessageReactionActionPayload {
 	channelId: Snowflake;
 	messageId: Snowflake;
 	emoji: string;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/remove-own-message-reaction-action-payload/
+ */
 export interface RemoveOwnMessageReactionActionPayload {
 	channelId: Snowflake;
 	messageId: Snowflake;
 	emoji: string;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/timeout-member-action-payload/
+ */
 export interface TimeoutMemberActionPayload {
 	guildId: Snowflake;
 	userId: Snowflake;
@@ -395,12 +566,18 @@ export interface TimeoutMemberActionPayload {
 	reason?: string;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/remove-member-timeout-action-payload/
+ */
 export interface RemoveMemberTimeoutActionPayload {
 	guildId: Snowflake;
 	userId: Snowflake;
 	reason?: string;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/create-channel-action-payload/
+ */
 export interface CreateChannelActionPayload {
 	guildId: Snowflake;
 	name: string;
@@ -411,6 +588,9 @@ export interface CreateChannelActionPayload {
 	reason?: string;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/edit-channel-action-payload/
+ */
 export interface EditChannelActionPayload {
 	channelId: Snowflake;
 	name?: string | null;
@@ -419,12 +599,16 @@ export interface EditChannelActionPayload {
 	reason?: string;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/delete-channel-action-payload/
+ */
 export interface DeleteChannelActionPayload {
 	channelId: Snowflake;
 	reason?: string;
 }
 
-/** `autoArchiveDuration` is in minutes (Discord-supported values). */
+/** `autoArchiveDuration` is in minutes (Discord-supported values).  * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/create-thread-action-payload/
+ */
 export interface CreateThreadActionPayload {
 	parentChannelId: Snowflake;
 	name: string;
@@ -435,12 +619,18 @@ export interface CreateThreadActionPayload {
 	reason?: string;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/archive-thread-action-payload/
+ */
 export interface ArchiveThreadActionPayload {
 	threadId: Snowflake;
 	archived?: boolean;
 	reason?: string;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/bot-action-payload-map/
+ */
 export interface BotActionPayloadMap {
 	sendMessage: SendMessageActionPayload;
 	editMessage: EditMessageActionPayload;
@@ -470,48 +660,75 @@ export interface BotActionPayloadMap {
 	archiveThread: ArchiveThreadActionPayload;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/delete-message-action-result/
+ */
 export interface DeleteMessageActionResult {
 	deleted: true;
 	channelId: Snowflake;
 	messageId: Snowflake;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/defer-interaction-action-result/
+ */
 export interface DeferInteractionActionResult {
 	deferred: true;
 	interactionId: Snowflake;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/defer-update-interaction-action-result/
+ */
 export interface DeferUpdateInteractionActionResult {
 	deferred: true;
 	interactionId: Snowflake;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/delete-interaction-reply-action-result/
+ */
 export interface DeleteInteractionReplyActionResult {
 	deleted: true;
 	interactionId: Snowflake;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/show-modal-action-result/
+ */
 export interface ShowModalActionResult {
 	shown: true;
 	interactionId: Snowflake;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/member-moderation-action-result/
+ */
 export interface MemberModerationActionResult {
 	guildId: Snowflake;
 	userId: Snowflake;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/message-reaction-action-result/
+ */
 export interface MessageReactionActionResult {
 	messageId: Snowflake;
 	channelId: Snowflake;
 	emoji: string;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/delete-channel-action-result/
+ */
 export interface DeleteChannelActionResult {
 	deleted: true;
 	channelId: Snowflake;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/bot-action-result-data-map/
+ */
 export interface BotActionResultDataMap {
 	sendMessage: BridgeMessage;
 	editMessage: BridgeMessage;
@@ -541,13 +758,22 @@ export interface BotActionResultDataMap {
 	archiveThread: BridgeThread;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/bot-action-name/
+ */
 export type BotActionName = keyof BotActionPayloadMap;
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/bridge-capabilities/
+ */
 export interface BridgeCapabilities {
 	events: BotEventName[];
 	actions: BotActionName[];
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/event-subscription-filter/
+ */
 export interface EventSubscriptionFilter {
 	guildId?: Snowflake | readonly Snowflake[];
 	channelId?: Snowflake | readonly Snowflake[];
@@ -565,27 +791,37 @@ export interface EventSubscriptionFilter {
 	threadId?: Snowflake | readonly Snowflake[];
 }
 
-/** Keys supported on `EventSubscriptionFilter` for `app.on(..., filter)`. */
+/** Keys supported on `EventSubscriptionFilter` for `app.on(..., filter)`.  * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/shardwire-subscription-filter-key/
+ */
 export type ShardwireSubscriptionFilterKey = keyof EventSubscriptionFilter;
 
-/** One built-in event and its gateway intent requirements (for `app.catalog()`). */
+/** One built-in event and its gateway intent requirements (for `app.catalog()`).  * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/shardwire-catalog-event/
+ */
 export interface ShardwireCatalogEvent {
 	name: BotEventName;
 	requiredIntents: readonly BotIntentName[];
 }
 
-/** Static discovery surface for built-in events, actions, and subscription filters. */
+/** Static discovery surface for built-in events, actions, and subscription filters.  * @see https://unloopedmido.github.io/shardwire/docs/reference/contracts-and-diagnostics/shardwire-catalog/
+ */
 export interface ShardwireCatalog {
 	events: readonly ShardwireCatalogEvent[];
 	actions: readonly BotActionName[];
 	subscriptionFilters: readonly ShardwireSubscriptionFilterKey[];
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/contracts-and-diagnostics/capability-explanation-kind/
+ */
 export type CapabilityExplanationKind = 'event' | 'action';
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/contracts-and-diagnostics/capability-explanation-reason-code/
+ */
 export type CapabilityExplanationReasonCode = 'unknown_name' | 'not_negotiated' | 'allowed' | 'denied_by_bridge';
 
-/** Result of `app.explainCapability(...)`. */
+/** Result of `app.explainCapability(...)`.  * @see https://unloopedmido.github.io/shardwire/docs/reference/contracts-and-diagnostics/capability-explanation/
+ */
 export interface CapabilityExplanation {
 	kind: CapabilityExplanationKind;
 	name: string;
@@ -599,8 +835,14 @@ export interface CapabilityExplanation {
 	remediation?: string;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/contracts-and-diagnostics/preflight-issue-severity/
+ */
 export type PreflightIssueSeverity = 'error' | 'warning';
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/contracts-and-diagnostics/preflight-issue/
+ */
 export interface PreflightIssue {
 	severity: PreflightIssueSeverity;
 	code: string;
@@ -608,6 +850,9 @@ export interface PreflightIssue {
 	remediation?: string;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/contracts-and-diagnostics/preflight-report/
+ */
 export interface PreflightReport {
 	ok: boolean;
 	connected: boolean;
@@ -615,6 +860,9 @@ export interface PreflightReport {
 	issues: PreflightIssue[];
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/contracts-and-diagnostics/preflight-desired/
+ */
 export interface PreflightDesired {
 	events?: readonly BotEventName[];
 	actions?: readonly BotActionName[];
@@ -624,6 +872,7 @@ export interface PreflightDesired {
  * Input to {@link defineShardwireApp}. **Keep this surface small** — only what the app needs from the bridge and
  * which subscription filter keys it may use. Put transport, secrets, bot intents, strict startup, and other policy in
  * `connectBotBridge` / `createBotBridge` / `app.ready` / env instead of growing the manifest into a config object.
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/contracts-and-diagnostics/shardwire-app-manifest-definition/
  */
 export interface ShardwireAppManifestDefinition {
 	/** Optional label (e.g. logging). Defaults to `'shardwire-app'` when omitted or blank. */
@@ -640,7 +889,8 @@ export interface ShardwireAppManifestDefinition {
 	filters?: Partial<Record<BotEventName, readonly ShardwireSubscriptionFilterKey[]>>;
 }
 
-/** Normalized manifest returned by {@link defineShardwireApp} (same fields, `name` always resolved). */
+/** Normalized manifest returned by {@link defineShardwireApp} (same fields, `name` always resolved).  * @see https://unloopedmido.github.io/shardwire/docs/reference/contracts-and-diagnostics/shardwire-app-manifest/
+ */
 export interface ShardwireAppManifest {
 	readonly name: string;
 	readonly events: readonly BotEventName[];
@@ -648,8 +898,14 @@ export interface ShardwireAppManifest {
 	readonly filters?: Partial<Record<BotEventName, readonly ShardwireSubscriptionFilterKey[]>>;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/contracts-and-diagnostics/shardwire-app-diagnosis-severity/
+ */
 export type ShardwireAppDiagnosisSeverity = 'error' | 'warning' | 'info';
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/contracts-and-diagnostics/shardwire-app-diagnosis-category/
+ */
 export type ShardwireAppDiagnosisCategory = 'intent' | 'secret_scope' | 'subscription' | 'action' | 'unused_capability';
 
 /**
@@ -658,6 +914,7 @@ export type ShardwireAppDiagnosisCategory = 'intent' | 'secret_scope' | 'subscri
  * **Filter semantics (no “suspicious” heuristics):**
  * - **`unsupported_filter_key`** — not a built-in key from `app.catalog().subscriptionFilters`.
  * - **`filter_key_absent_from_event_metadata`** — key is built-in, but the bridge’s subscription matcher never supplies it for this event name, so a filter on it **cannot** match any payload (structural impossibility). Narrow filters that merely match rarely (e.g. a specific `guildId`) are **not** flagged.
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/contracts-and-diagnostics/shardwire-app-diagnosis-issue-code/
  */
 export type ShardwireAppDiagnosisIssueCode =
 	| 'missing_intent'
@@ -674,6 +931,9 @@ export type ShardwireAppDiagnosisIssueCode =
 	| 'strict_requires_bot_intents'
 	| 'bot_intents_unknown';
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/contracts-and-diagnostics/shardwire-app-diagnosis-issue/
+ */
 export interface ShardwireAppDiagnosisIssue {
 	severity: ShardwireAppDiagnosisSeverity;
 	code: ShardwireAppDiagnosisIssueCode | (string & {});
@@ -683,6 +943,9 @@ export interface ShardwireAppDiagnosisIssue {
 	context?: Record<string, unknown>;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/contracts-and-diagnostics/shardwire-app-diagnosis-report/
+ */
 export interface ShardwireAppDiagnosisReport {
 	/**
 	 * `true` iff **no** issue has `severity: 'error'` — same gate as strict startup (`app.ready({ strict: true })`).
@@ -697,7 +960,8 @@ export interface ShardwireAppDiagnosisReport {
 	minimumScope: SecretPermissions;
 }
 
-/** Options for {@link diagnoseShardwireApp}. Surplus negotiation uses `unused_negotiated_*` **warnings** only. */
+/** Options for {@link diagnoseShardwireApp}. Surplus negotiation uses `unused_negotiated_*` **warnings** only.  * @see https://unloopedmido.github.io/shardwire/docs/reference/contracts-and-diagnostics/diagnose-shardwire-app-options/
+ */
 export interface DiagnoseShardwireAppOptions {
 	/** When set, issues `missing_intent` if the bot bridge intents omit requirements for manifest events. */
 	botIntents?: readonly BotIntentName[];
@@ -723,6 +987,9 @@ export interface DiagnoseShardwireAppOptions {
 	expectedScope?: SecretPermissions;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/errors-and-failures/shardwire-strict-startup-error/
+ */
 export class ShardwireStrictStartupError extends Error {
 	constructor(
 		message: string,
@@ -733,6 +1000,9 @@ export class ShardwireStrictStartupError extends Error {
 	}
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/bridge-apis/app-bridge-ready-options/
+ */
 export interface AppBridgeReadyOptions {
 	/**
 	 * When true, refuses startup on **`severity: 'error'`** diagnosis issues (manifest vs negotiation, intents,
@@ -750,25 +1020,38 @@ export interface AppBridgeReadyOptions {
 	expectedScope?: SecretPermissions;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/event-subscription/
+ */
 export interface EventSubscription<K extends BotEventName = BotEventName> {
 	name: K;
 	filter?: EventSubscriptionFilter;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/bridge-apis/secret-permissions/
+ */
 export interface SecretPermissions {
 	events?: '*' | readonly BotEventName[];
 	actions?: '*' | readonly BotActionName[];
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/bridge-apis/scoped-secret-config/
+ */
 export interface ScopedSecretConfig {
 	id?: string;
 	value: string;
 	allow?: SecretPermissions;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/bridge-apis/bot-bridge-secret/
+ */
 export type BotBridgeSecret = string | ScopedSecretConfig;
 
-/** Structured Discord / transport context for failed actions (machine-readable). */
+/** Structured Discord / transport context for failed actions (machine-readable).  * @see https://unloopedmido.github.io/shardwire/docs/reference/errors-and-failures/action-error-details/
+ */
 export interface ActionErrorDetails {
 	discordStatus?: number;
 	discordCode?: number;
@@ -779,6 +1062,9 @@ export interface ActionErrorDetails {
 	[key: string]: unknown;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/bridge-apis/bot-bridge-options/
+ */
 export interface BotBridgeOptions {
 	token: string;
 	intents: readonly BotIntentName[];
@@ -807,6 +1093,9 @@ export interface BotBridgeOptions {
 	logger?: ShardwireLogger;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/bridge-apis/app-bridge-metrics-hooks/
+ */
 export interface AppBridgeMetricsHooks {
 	onActionComplete?: (meta: {
 		name: BotActionName;
@@ -821,6 +1110,9 @@ export interface AppBridgeMetricsHooks {
 	}) => void;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/bridge-apis/app-bridge-options/
+ */
 export interface AppBridgeOptions {
 	url: string;
 	secret: string;
@@ -837,6 +1129,9 @@ export interface AppBridgeOptions {
 	metrics?: AppBridgeMetricsHooks;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/errors-and-failures/action-error/
+ */
 export interface ActionError {
 	code:
 		| 'UNAUTHORIZED'
@@ -851,6 +1146,9 @@ export interface ActionError {
 	details?: ActionErrorDetails | unknown;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/errors-and-failures/action-success/
+ */
 export interface ActionSuccess<T> {
 	ok: true;
 	requestId: string;
@@ -858,6 +1156,9 @@ export interface ActionSuccess<T> {
 	data: T;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/errors-and-failures/action-failure/
+ */
 export interface ActionFailure {
 	ok: false;
 	requestId: string;
@@ -865,9 +1166,13 @@ export interface ActionFailure {
 	error: ActionError;
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/errors-and-failures/action-result/
+ */
 export type ActionResult<T> = ActionSuccess<T> | ActionFailure;
 
-/** Structured context on `BridgeCapabilityError` and capability-related action failures. */
+/** Structured context on `BridgeCapabilityError` and capability-related action failures.  * @see https://unloopedmido.github.io/shardwire/docs/reference/errors-and-failures/bridge-capability-error-details/
+ */
 export interface BridgeCapabilityErrorDetails {
 	reasonCode: 'not_in_capabilities' | 'unknown_event' | 'unknown_action';
 	kind?: 'event' | 'action';
@@ -876,6 +1181,9 @@ export interface BridgeCapabilityErrorDetails {
 	requiredIntents?: readonly BotIntentName[];
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/errors-and-failures/bridge-capability-error/
+ */
 export class BridgeCapabilityError extends Error {
 	constructor(
 		public readonly kind: 'event' | 'action',
@@ -890,8 +1198,14 @@ export class BridgeCapabilityError extends Error {
 	}
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/event-and-data-models/event-handler/
+ */
 export type EventHandler<K extends BotEventName> = (payload: BotEventPayloadMap[K]) => void;
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/app-bridge-action-invoke-options/
+ */
 export type AppBridgeActionInvokeOptions = {
 	timeoutMs?: number;
 	requestId?: string;
@@ -899,6 +1213,9 @@ export type AppBridgeActionInvokeOptions = {
 	idempotencyKey?: string;
 };
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/action-models/app-bridge-actions/
+ */
 export type AppBridgeActions = {
 	[K in BotActionName]: (
 		payload: BotActionPayloadMap[K],
@@ -906,12 +1223,18 @@ export type AppBridgeActions = {
 	) => Promise<ActionResult<BotActionResultDataMap[K]>>;
 };
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/bridge-apis/bot-bridge/
+ */
 export interface BotBridge {
 	ready(): Promise<void>;
 	close(): Promise<void>;
 	status(): { ready: boolean; connectionCount: number };
 }
 
+/**
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/bridge-apis/app-bridge/
+ */
 export interface AppBridge {
 	actions: AppBridgeActions;
 	/**

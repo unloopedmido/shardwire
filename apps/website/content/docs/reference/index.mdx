@@ -1,0 +1,23 @@
+---
+title: "Reference"
+description: "Generated API and type reference for the public Shardwire surface."
+---
+
+The reference section is generated directly from the public exports of `packages/shardwire/src/index.ts`.
+
+It is organized by operational role instead of source-file ownership so the API surface reads like the product, not the repo.
+
+## Sections
+
+- [Bridge APIs](/docs/reference/bridge-apis)
+  Bot-side and app-side bridge entry points, configuration types, and negotiated capabilities.
+- [Contracts & Diagnostics](/docs/reference/contracts-and-diagnostics)
+  Manifest contracts, capability discovery, strict startup, and diagnostics helpers.
+- [Workflow Helpers](/docs/reference/workflows)
+  Higher-level helpers that combine multiple bridge actions into practical workflows.
+- [Errors & Failures](/docs/reference/errors-and-failures)
+  Error classes, failure payloads, and result wrappers you should branch on explicitly.
+- [Event & Data Models](/docs/reference/event-and-data-models)
+  Normalized Discord payload models, event envelopes, catalog metadata, and bridge-side data shapes.
+- [Action Models](/docs/reference/action-models)
+  Action payloads, action result data, and the typed result wrappers returned from the bridge.

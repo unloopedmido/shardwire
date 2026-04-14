@@ -1,0 +1,33 @@
+---
+title: "ActionErrorDetails"
+description: "Structured Discord / transport context for failed actions (machine-readable). *"
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Structured Discord / transport context for failed actions (machine-readable). *
+
+## Signature
+
+```ts
+export interface ActionErrorDetails {
+	discordStatus?: number;
+	discordCode?: number;
+	/** When true, callers may retry with backoff (e.g. rate limits). */
+	retryable?: boolean;
+	/** Suggested wait derived from Discord `retry_after` (milliseconds), when available. */
+	retryAfterMs?: number;
+	[key: string]: unknown;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="ActionErrorDetails" />
+
+## Related Guides
+
+- [Diagnostics](/docs/operations/diagnostics)
+- [Troubleshooting](/docs/operations/troubleshooting)

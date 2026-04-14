@@ -1,0 +1,30 @@
+---
+title: "BridgeGuild"
+description: "Normalized guild snapshot for `guildCreate` / `guildDelete` events. *"
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Normalized guild snapshot for `guildCreate` / `guildDelete` events. *
+
+## Signature
+
+```ts
+export interface BridgeGuild {
+	id: Snowflake;
+	name: string;
+	icon?: string | null;
+	ownerId?: Snowflake;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="BridgeGuild" />
+
+## Related Guides
+
+- [Bridge Architecture](/docs/concepts/bridge-architecture)
+- [Runtime Model](/docs/concepts/runtime-model)

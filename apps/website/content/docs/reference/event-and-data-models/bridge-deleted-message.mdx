@@ -1,0 +1,32 @@
+---
+title: "BridgeDeletedMessage"
+description: "Reference for `BridgeDeletedMessage`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `BridgeDeletedMessage`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface BridgeDeletedMessage {
+	id: Snowflake;
+	channelId: Snowflake;
+	guildId?: Snowflake;
+	deletedAt: string;
+	channelType?: number;
+	parentChannelId?: Snowflake;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="BridgeDeletedMessage" />
+
+## Related Guides
+
+- [Bridge Architecture](/docs/concepts/bridge-architecture)
+- [Runtime Model](/docs/concepts/runtime-model)

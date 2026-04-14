@@ -1,0 +1,38 @@
+---
+title: "ShardwireAppDiagnosisReport"
+description: "Reference for `ShardwireAppDiagnosisReport`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `ShardwireAppDiagnosisReport`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface ShardwireAppDiagnosisReport {
+	/**
+	 * `true` iff **no** issue has `severity: 'error'` — same gate as strict startup (`app.ready({ strict: true })`).
+	 * Warnings (for example `unused_negotiated_*`), unused negotiated capabilities, and any other non-error issues
+	 * never set this to `false`.
+	 */
+	ok: boolean;
+	issues: ShardwireAppDiagnosisIssue[];
+	/** Union of gateway intents required by manifest `events` (from the static catalog). */
+	requiredIntents: readonly BotIntentName[];
+	/** Same shape as {@link generateSecretScope}. */
+	minimumScope: SecretPermissions;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="ShardwireAppDiagnosisReport" />
+
+## Related Guides
+
+- [Manifests](/docs/guides/manifests)
+- [Strict Startup](/docs/guides/strict-startup)
+- [Diagnostics](/docs/operations/diagnostics)

@@ -1,0 +1,54 @@
+---
+title: "Capabilities & Scoped Secrets"
+description: "Capabilities are negotiated from intents and secret scope; scoped secrets are how you keep each connected app narrow by default."
+---
+
+Every app connection has a capability surface. That surface is negotiated from two inputs:
+
+- the events the bot process can actually produce from its enabled intents
+- the events and actions the configured secret allows
+
+## What a scoped secret controls
+
+A scoped secret can narrow:
+
+- allowed events
+- allowed actions
+
+That turns a single bridge into a controlled access layer for multiple app consumers.
+
+```ts
+const bridge = createBotBridge({
+  token: process.env.DISCORD_TOKEN!,
+  intents: ['Guilds', 'GuildMessages', 'MessageContent'],
+  server: {
+    port: 3001,
+    secrets: [
+      {
+        id: 'dashboard',
+        value: process.env.DASHBOARD_SECRET!,
+        allow: {
+          events: ['messageCreate'],
+          actions: ['sendMessage'],
+        },
+      },
+    ],
+  },
+});
+```
+
+## What `app.capabilities()` gives you
+
+Call `app.capabilities()` after `await app.ready()` to inspect the negotiated surface for the current connection.
+
+Use it to confirm:
+
+- the event you subscribed to is actually available
+- the action you plan to call can succeed
+- your deployed secret scope matches your mental model
+
+## The practical rule
+
+Do not treat manifests as the maximum scope. They define the minimum contract an app needs.
+
+If you need to fail startup when a connection is broader than expected, use strict startup with `expectedScope`.

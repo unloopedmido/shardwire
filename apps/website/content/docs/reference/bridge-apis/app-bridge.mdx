@@ -1,0 +1,56 @@
+---
+title: "AppBridge"
+description: "Reference for `AppBridge`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `AppBridge`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface AppBridge {
+	actions: AppBridgeActions;
+	/**
+	 * Awaits WebSocket authentication. Throws {@link BridgeCapabilityError} when handlers reference disallowed events.
+	 * With `strict`, validates manifest / intents / optional `expectedScope` after negotiation; throws {@link ShardwireStrictStartupError} on failure.
+	 */
+	ready(options?: AppBridgeReadyOptions): Promise<void>;
+	close(): Promise<void>;
+	connected(): boolean;
+	connectionId(): string | null;
+	capabilities(): BridgeCapabilities;
+	/**
+	 * Static discovery: built-in events (with intent hints), actions, and subscription filter keys.
+	 * Does not require a connection.
+	 */
+	catalog(): ShardwireCatalog;
+	/**
+	 * Explain whether an event or action is built-in and whether the current connection allows it.
+	 * Call after `await app.ready()` for `allowedByBridge` / `reasonCode` beyond `not_negotiated`.
+	 */
+	explainCapability(
+		query: { kind: 'event'; name: BotEventName } | { kind: 'action'; name: BotActionName },
+	): CapabilityExplanation;
+	/**
+	 * Run startup diagnostics after authenticating. Does not throw on subscription/capability mismatches;
+	 * use `report.ok` and `report.issues`. Call before `app.on(...)` to validate `desired` against negotiated caps.
+	 */
+	preflight(desired?: PreflightDesired): Promise<PreflightReport>;
+	on<K extends BotEventName>(name: K, handler: EventHandler<K>, filter?: EventSubscriptionFilter): Unsubscribe;
+	off<K extends BotEventName>(name: K, handler: EventHandler<K>): void;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="AppBridge" />
+
+## Related Guides
+
+- [Getting Started](/docs/getting-started)
+- [Bot Bridge](/docs/guides/bot-bridge)
+- [App Bridge](/docs/guides/app-bridge)

@@ -1,0 +1,34 @@
+---
+title: "Workflow Helpers"
+description: "Use the built-in workflow helpers when a common multi-step action sequence already exists in the public API."
+---
+
+Shardwire exposes a small set of helpers for common action sequences that would otherwise be repeated in app code.
+
+## Available helpers
+
+- `deferThenEditInteractionReply`
+- `deferUpdateThenEditInteractionReply`
+- `createThreadThenSendMessage`
+
+## Why use them
+
+- they capture a known-good action order
+- they keep handlers concise
+- they return typed action results that fit the rest of the API
+
+## Example
+
+```ts
+import { deferThenEditInteractionReply } from 'shardwire';
+
+const result = await deferThenEditInteractionReply(app, interaction, {
+  content: 'Working on it…',
+});
+
+if (!result.ok) {
+  console.error(result.error.code);
+}
+```
+
+Use the generated reference for the exact workflow signatures and result types.

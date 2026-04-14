@@ -1,0 +1,30 @@
+---
+title: "RemoveMemberRoleActionPayload"
+description: "Reference for `RemoveMemberRoleActionPayload`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `RemoveMemberRoleActionPayload`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface RemoveMemberRoleActionPayload {
+	guildId: Snowflake;
+	userId: Snowflake;
+	roleId: Snowflake;
+	reason?: string;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="RemoveMemberRoleActionPayload" />
+
+## Related Guides
+
+- [Capabilities & Scoped Secrets](/docs/concepts/capabilities-and-scopes)
+- [App Bridge](/docs/guides/app-bridge)

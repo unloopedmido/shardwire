@@ -1,0 +1,28 @@
+---
+title: "ReplyToInteractionActionPayload"
+description: "Reference for `ReplyToInteractionActionPayload`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `ReplyToInteractionActionPayload`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface ReplyToInteractionActionPayload extends BridgeMessageInput {
+	interactionId: Snowflake;
+	ephemeral?: boolean;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="ReplyToInteractionActionPayload" />
+
+## Related Guides
+
+- [Capabilities & Scoped Secrets](/docs/concepts/capabilities-and-scopes)
+- [App Bridge](/docs/guides/app-bridge)

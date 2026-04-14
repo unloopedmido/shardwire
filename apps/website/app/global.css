@@ -1,0 +1,76 @@
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+
+@theme inline {
+  --font-sans: var(--font-ibm-plex-sans);
+  --font-mono: var(--font-ibm-plex-mono);
+}
+
+:root {
+  --site-background: #ffffff;
+  --site-background-elevated: #f5f5f5;
+  --site-foreground: #000000;
+  
+  --site-line: #e5e5e5;
+  --site-line-strong: #cccccc;
+  --site-panel: #fafafa;
+  
+  --site-accent: #333333;
+  --site-accent-strong: #000000;
+
+  --color-background: var(--site-background);
+  --color-foreground: var(--site-foreground);
+  --color-fd-background: var(--site-background);
+  --color-fd-foreground: var(--site-foreground);
+  --color-fd-muted: #f0f0f0;
+  --color-fd-muted-foreground: #666666;
+  --color-fd-popover: #ffffff;
+  --color-fd-card: #f5f5f5;
+  --color-fd-border: #e5e5e5;
+}
+
+.dark {
+  --site-background: #000000;
+  --site-background-elevated: #0a0a0a;
+  --site-foreground: #ffffff;
+  
+  --site-line: #1a1a1a;
+  --site-line-strong: #333333;
+  --site-panel: #0a0a0a;
+  
+  --site-accent: #ededed;
+  --site-accent-strong: #ffffff;
+
+  --color-background: var(--site-background);
+  --color-foreground: var(--site-foreground);
+  --color-fd-background: var(--site-background);
+  --color-fd-foreground: var(--site-foreground);
+  --color-fd-muted: #1a1a1a;
+  --color-fd-muted-foreground: #888888;
+  --color-fd-popover: #0a0a0a;
+  --color-fd-card: #0a0a0a;
+  --color-fd-border: #1a1a1a;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--site-background);
+}
+
+body {
+  background-color: var(--site-background);
+  color: var(--site-foreground);
+  font-family: var(--font-ibm-plex-sans), sans-serif;
+  min-height: 100vh;
+}
+
+::selection {
+  background: var(--site-line-strong);
+  color: var(--site-foreground);
+}
+
+[data-site-panel] {
+  background: var(--site-panel);
+  border-color: var(--site-line);
+}

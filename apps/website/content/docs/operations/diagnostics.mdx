@@ -1,0 +1,36 @@
+---
+title: "Diagnostics"
+description: "Use the built-in diagnostic helpers before you widen scope or add custom logging."
+---
+
+Shardwire ships diagnostic surfaces because most bridge failures are capability-shape failures, not low-level transport mysteries.
+
+## Primary tools
+
+- `app.capabilities()` for the live negotiated surface
+- `app.catalog()` for the static built-in event/action catalog
+- `diagnoseShardwireApp()` for manifest versus runtime checks
+
+## Example
+
+```ts
+import { diagnoseShardwireApp } from 'shardwire';
+
+const report = diagnoseShardwireApp(manifest, app.capabilities(), {
+  botIntents: ['Guilds', 'GuildMessages', 'MessageContent'],
+  subscriptions: [{ name: 'messageCreate', filter: { guildId } }],
+});
+
+if (!report.ok) {
+  console.error(report.issues);
+}
+```
+
+## What to inspect first
+
+- are you connected and authenticated?
+- does the negotiated capability surface include the event or action?
+- do bot intents cover the manifest events?
+- does the runtime subscription match the manifest contract?
+
+Read the generated reference for the diagnosis report types if you want to automate handling or formatting.

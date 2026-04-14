@@ -1,0 +1,14 @@
+{
+  "title": "Errors & Failures",
+  "pages": [
+    "index",
+    "action-error",
+    "action-error-details",
+    "action-failure",
+    "action-result",
+    "action-success",
+    "bridge-capability-error",
+    "bridge-capability-error-details",
+    "shardwire-strict-startup-error"
+  ]
+}

@@ -1,0 +1,28 @@
+---
+title: "ThreadUpdateEventPayload"
+description: "Reference for `ThreadUpdateEventPayload`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `ThreadUpdateEventPayload`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface ThreadUpdateEventPayload extends EventEnvelopeBase {
+	oldThread?: BridgeThread;
+	thread: BridgeThread;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="ThreadUpdateEventPayload" />
+
+## Related Guides
+
+- [Bridge Architecture](/docs/concepts/bridge-architecture)
+- [Runtime Model](/docs/concepts/runtime-model)

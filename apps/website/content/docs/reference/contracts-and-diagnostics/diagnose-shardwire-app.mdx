@@ -1,0 +1,38 @@
+---
+title: "diagnoseShardwireApp"
+description: "Compares the manifest contract to negotiated capabilities, optional `expectedScope`, optional `botIntents`, and optional runtime subscriptions. **`report.ok`** is `true` iff there are zero issues with `severity: 'error'` (warnings never flip it). **Surplus negotiation** (events or actions granted but not listed on the manifest) emits **`unused_negotiated_*`** issues with `severity: 'warning'` only — useful for review, never treated as a hard failure and never affects `report.ok`. **`expectedScope`** is the only way to turn “broader than I want” into **`severity: 'error'`** (`scope_broader_than_expected`). **Manifest filter keys:** `unsupported_filter_key` means not in the Shardwire catalog. `filter_key_absent_from_event_metadata` means the key is catalog-valid but **never** appears on matching metadata for that event (structurally impossible), not “might rarely match” or other traffic heuristics."
+---
+
+`function` exported from `src/dx/diagnose-app.ts`.
+
+## Summary
+
+Compares the manifest contract to negotiated capabilities, optional `expectedScope`, optional `botIntents`, and optional runtime subscriptions. **`report.ok`** is `true` iff there are zero issues with `severity: 'error'` (warnings never flip it). **Surplus negotiation** (events or actions granted but not listed on the manifest) emits **`unused_negotiated_*`** issues with `severity: 'warning'` only — useful for review, never treated as a hard failure and never affects `report.ok`. **`expectedScope`** is the only way to turn “broader than I want” into **`severity: 'error'`** (`scope_broader_than_expected`). **Manifest filter keys:** `unsupported_filter_key` means not in the Shardwire catalog. `filter_key_absent_from_event_metadata` means the key is catalog-valid but **never** appears on matching metadata for that event (structurally impossible), not “might rarely match” or other traffic heuristics.
+
+## Signature
+
+```ts
+/**
+ * Compares the manifest contract to negotiated capabilities, optional `expectedScope`, optional `botIntents`,
+ * and optional runtime subscriptions.
+ *
+ * **`report.ok`** is `true` iff there are zero issues with `severity: 'error'` (warnings never flip it).
+ *
+ * **Surplus negotiation** (events or actions granted but not listed on the manifest) emits **`unused_negotiated_*`**
+ * issues with `severity: 'warning'` only — useful for review, never treated as a hard failure and never affects `report.ok`.
+ * **`expectedScope`** is the only way to turn “broader than I want” into **`severity: 'error'`** (`scope_broader_than_expected`).
+ *
+ * **Manifest filter keys:** `unsupported_filter_key` means not in the Shardwire catalog. `filter_key_absent_from_event_metadata`
+ * means the key is catalog-valid but **never** appears on matching metadata for that event (structurally impossible), not
+ * “might rarely match” or other traffic heuristics.
+ *
+ * @see https://unloopedmido.github.io/shardwire/docs/reference/contracts-and-diagnostics/diagnose-shardwire-app/
+ */
+export function diagnoseShardwireApp(manifest: ShardwireAppManifest, negotiated: BridgeCapabilities, options?: DiagnoseShardwireAppOptions): ShardwireAppDiagnosisReport;
+```
+
+## Related Guides
+
+- [Manifests](/docs/guides/manifests)
+- [Strict Startup](/docs/guides/strict-startup)
+- [Diagnostics](/docs/operations/diagnostics)

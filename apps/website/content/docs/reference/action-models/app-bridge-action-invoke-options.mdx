@@ -1,0 +1,30 @@
+---
+title: "AppBridgeActionInvokeOptions"
+description: "Reference for `AppBridgeActionInvokeOptions`, exported as part of the public Shardwire surface."
+---
+
+`type` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `AppBridgeActionInvokeOptions`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export type AppBridgeActionInvokeOptions = {
+	timeoutMs?: number;
+	requestId?: string;
+	/** When set, duplicate keys within TTL return the first result (best-effort idempotency). */
+	idempotencyKey?: string;
+};
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="AppBridgeActionInvokeOptions" />
+
+## Related Guides
+
+- [Capabilities & Scoped Secrets](/docs/concepts/capabilities-and-scopes)
+- [App Bridge](/docs/guides/app-bridge)

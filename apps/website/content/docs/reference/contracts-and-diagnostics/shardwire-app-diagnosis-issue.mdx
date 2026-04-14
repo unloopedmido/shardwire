@@ -1,0 +1,33 @@
+---
+title: "ShardwireAppDiagnosisIssue"
+description: "Reference for `ShardwireAppDiagnosisIssue`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `ShardwireAppDiagnosisIssue`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface ShardwireAppDiagnosisIssue {
+	severity: ShardwireAppDiagnosisSeverity;
+	code: ShardwireAppDiagnosisIssueCode | (string & {});
+	category: ShardwireAppDiagnosisCategory;
+	message: string;
+	remediation?: string;
+	context?: Record<string, unknown>;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="ShardwireAppDiagnosisIssue" />
+
+## Related Guides
+
+- [Manifests](/docs/guides/manifests)
+- [Strict Startup](/docs/guides/strict-startup)
+- [Diagnostics](/docs/operations/diagnostics)

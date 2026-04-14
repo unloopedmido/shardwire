@@ -1,0 +1,30 @@
+---
+title: "AddMemberRoleActionPayload"
+description: "Reference for `AddMemberRoleActionPayload`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `AddMemberRoleActionPayload`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface AddMemberRoleActionPayload {
+	guildId: Snowflake;
+	userId: Snowflake;
+	roleId: Snowflake;
+	reason?: string;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="AddMemberRoleActionPayload" />
+
+## Related Guides
+
+- [Capabilities & Scoped Secrets](/docs/concepts/capabilities-and-scopes)
+- [App Bridge](/docs/guides/app-bridge)

@@ -1,0 +1,29 @@
+---
+title: "EventEnvelopeBase"
+description: "Reference for `EventEnvelopeBase`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `EventEnvelopeBase`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface EventEnvelopeBase {
+	receivedAt: number;
+	/** Populated when the bot runs under `ShardingManager` (multi-shard). */
+	shardId?: number;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="EventEnvelopeBase" />
+
+## Related Guides
+
+- [Bridge Architecture](/docs/concepts/bridge-architecture)
+- [Runtime Model](/docs/concepts/runtime-model)

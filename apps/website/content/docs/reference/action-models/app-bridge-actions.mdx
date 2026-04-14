@@ -1,0 +1,26 @@
+---
+title: "AppBridgeActions"
+description: "Reference for `AppBridgeActions`, exported as part of the public Shardwire surface."
+---
+
+`type` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `AppBridgeActions`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export type AppBridgeActions = {
+	[K in BotActionName]: (
+		payload: BotActionPayloadMap[K],
+		options?: AppBridgeActionInvokeOptions,
+	) => Promise<ActionResult<BotActionResultDataMap[K]>>;
+};
+```
+
+## Related Guides
+
+- [Capabilities & Scoped Secrets](/docs/concepts/capabilities-and-scopes)
+- [App Bridge](/docs/guides/app-bridge)

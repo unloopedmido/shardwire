@@ -1,0 +1,28 @@
+---
+title: "ShardwireCatalogEvent"
+description: "One built-in event and its gateway intent requirements (for `app.catalog()`). *"
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+One built-in event and its gateway intent requirements (for `app.catalog()`). *
+
+## Signature
+
+```ts
+export interface ShardwireCatalogEvent {
+	name: BotEventName;
+	requiredIntents: readonly BotIntentName[];
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="ShardwireCatalogEvent" />
+
+## Related Guides
+
+- [Bridge Architecture](/docs/concepts/bridge-architecture)
+- [Runtime Model](/docs/concepts/runtime-model)

@@ -11,7 +11,7 @@
 		"resolveJsonModule": true,
 		"noUncheckedIndexedAccess": true,
 		"exactOptionalPropertyTypes": true,
-		"ignoreDeprecations": "6.0",
+		"ignoreDeprecations": "5.0",
 		"rootDir": "src",
 		"outDir": "dist",
 		"lib": ["ES2022", "DOM"]

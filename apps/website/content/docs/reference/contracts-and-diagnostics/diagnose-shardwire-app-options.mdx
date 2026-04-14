@@ -1,0 +1,49 @@
+---
+title: "DiagnoseShardwireAppOptions"
+description: "Options for diagnoseShardwireApp. Surplus negotiation uses `unused_negotiated_*` **warnings** only. *"
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Options for diagnoseShardwireApp. Surplus negotiation uses `unused_negotiated_*` **warnings** only. *
+
+## Signature
+
+```ts
+export interface DiagnoseShardwireAppOptions {
+	/** When set, issues `missing_intent` if the bot bridge intents omit requirements for manifest events. */
+	botIntents?: readonly BotIntentName[];
+	/**
+	 * When true (set internally by `app.ready({ strict: true })`), missing `botIntents` for intent-requiring manifests is an error.
+	 * Default false: emit `bot_intents_unknown` warning instead.
+	 */
+	strictIntentCheck?: boolean;
+	/**
+	 * Runtime `app.on` subscriptions: each `name` must appear in `manifest.events`.
+	 * Any non-empty `filter` must only use keys listed under `manifest.filters[name]` for that event.
+	 *
+	 * **`app.ready({ strict: true, manifest })` snapshot:** only handlers already registered when `ready` runs are
+	 * included here (whatever the caller passes). Registering `app.on(...)` after a successful strict `ready` is allowed
+	 * and is **not** re-validated against the manifest by Shardwire.
+	 */
+	subscriptions?: readonly EventSubscription[];
+	/**
+	 * Explicit opt-in maximum: when set, emits **`severity: 'error'`** if negotiated events or actions fall outside
+	 * these allow-lists (`scope_broader_than_expected`). Use `'*'` on `events` or `actions` to skip that axis.
+	 * The manifest never implies a maximum by itself; broader-than-manifest alone is only **`unused_negotiated_*` warnings**.
+	 */
+	expectedScope?: SecretPermissions;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="DiagnoseShardwireAppOptions" />
+
+## Related Guides
+
+- [Manifests](/docs/guides/manifests)
+- [Strict Startup](/docs/guides/strict-startup)
+- [Diagnostics](/docs/operations/diagnostics)

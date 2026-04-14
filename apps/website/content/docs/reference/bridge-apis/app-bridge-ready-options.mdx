@@ -1,0 +1,41 @@
+---
+title: "AppBridgeReadyOptions"
+description: "Reference for `AppBridgeReadyOptions`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `AppBridgeReadyOptions`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface AppBridgeReadyOptions {
+	/**
+	 * When true, refuses startup on **`severity: 'error'`** diagnosis issues (manifest vs negotiation, intents,
+	 * subscriptions vs manifest, optional **`expectedScope`**). Warnings such as **`unused_negotiated_*`** never block startup.
+	 */
+	strict?: boolean;
+	/** Required when `strict` is true. */
+	manifest?: ShardwireAppManifest;
+	/**
+	 * Bot process gateway intents (`createBotBridge({ intents })`).
+	 * Required in strict mode when any manifest event lists non-empty `requiredIntents` in the catalog.
+	 */
+	botIntents?: readonly BotIntentName[];
+	/** Optional maximum allowed negotiated surface (explicit opt-in; manifest defines minimum only). */
+	expectedScope?: SecretPermissions;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="AppBridgeReadyOptions" />
+
+## Related Guides
+
+- [Getting Started](/docs/getting-started)
+- [Bot Bridge](/docs/guides/bot-bridge)
+- [App Bridge](/docs/guides/app-bridge)

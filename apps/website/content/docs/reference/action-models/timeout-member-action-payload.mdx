@@ -1,0 +1,31 @@
+---
+title: "TimeoutMemberActionPayload"
+description: "Reference for `TimeoutMemberActionPayload`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `TimeoutMemberActionPayload`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface TimeoutMemberActionPayload {
+	guildId: Snowflake;
+	userId: Snowflake;
+	/** Duration in milliseconds (Discord allows up to 28 days). */
+	durationMs: number;
+	reason?: string;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="TimeoutMemberActionPayload" />
+
+## Related Guides
+
+- [Capabilities & Scoped Secrets](/docs/concepts/capabilities-and-scopes)
+- [App Bridge](/docs/guides/app-bridge)

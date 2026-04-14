@@ -1,0 +1,40 @@
+---
+title: "EventSubscriptionFilter"
+description: "Reference for `EventSubscriptionFilter`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `EventSubscriptionFilter`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface EventSubscriptionFilter {
+	guildId?: Snowflake | readonly Snowflake[];
+	channelId?: Snowflake | readonly Snowflake[];
+	userId?: Snowflake | readonly Snowflake[];
+	commandName?: string | readonly string[];
+	/** Matches `BridgeInteraction.customId` when present (components, modals). */
+	customId?: string | readonly string[];
+	/** Matches `BridgeInteraction.kind`. */
+	interactionKind?: BridgeInteractionKind | readonly BridgeInteractionKind[];
+	/** Matches Discord `ChannelType` when present on the payload (messages, interactions, bulk delete). */
+	channelType?: number | readonly number[];
+	/** Matches `BridgeMessage.parentChannelId` / thread parent / channel parent when present. */
+	parentChannelId?: Snowflake | readonly Snowflake[];
+	/** Matches guild thread channels only: same as message `channelId` when `channelType` is a guild thread. */
+	threadId?: Snowflake | readonly Snowflake[];
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="EventSubscriptionFilter" />
+
+## Related Guides
+
+- [Bridge Architecture](/docs/concepts/bridge-architecture)
+- [Runtime Model](/docs/concepts/runtime-model)

@@ -1,0 +1,52 @@
+---
+title: "BotActionPayloadMap"
+description: "Reference for `BotActionPayloadMap`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `BotActionPayloadMap`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface BotActionPayloadMap {
+	sendMessage: SendMessageActionPayload;
+	editMessage: EditMessageActionPayload;
+	deleteMessage: DeleteMessageActionPayload;
+	replyToInteraction: ReplyToInteractionActionPayload;
+	deferInteraction: DeferInteractionActionPayload;
+	deferUpdateInteraction: DeferUpdateInteractionActionPayload;
+	followUpInteraction: FollowUpInteractionActionPayload;
+	editInteractionReply: EditInteractionReplyActionPayload;
+	deleteInteractionReply: DeleteInteractionReplyActionPayload;
+	updateInteraction: UpdateInteractionActionPayload;
+	showModal: ShowModalActionPayload;
+	fetchMessage: FetchMessageActionPayload;
+	fetchMember: FetchMemberActionPayload;
+	banMember: BanMemberActionPayload;
+	kickMember: KickMemberActionPayload;
+	addMemberRole: AddMemberRoleActionPayload;
+	removeMemberRole: RemoveMemberRoleActionPayload;
+	addMessageReaction: AddMessageReactionActionPayload;
+	removeOwnMessageReaction: RemoveOwnMessageReactionActionPayload;
+	timeoutMember: TimeoutMemberActionPayload;
+	removeMemberTimeout: RemoveMemberTimeoutActionPayload;
+	createChannel: CreateChannelActionPayload;
+	editChannel: EditChannelActionPayload;
+	deleteChannel: DeleteChannelActionPayload;
+	createThread: CreateThreadActionPayload;
+	archiveThread: ArchiveThreadActionPayload;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="BotActionPayloadMap" />
+
+## Related Guides
+
+- [Capabilities & Scoped Secrets](/docs/concepts/capabilities-and-scopes)
+- [App Bridge](/docs/guides/app-bridge)

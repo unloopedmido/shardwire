@@ -1,0 +1,45 @@
+---
+title: "BotEventPayloadMap"
+description: "Reference for `BotEventPayloadMap`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `BotEventPayloadMap`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface BotEventPayloadMap {
+	ready: ReadyEventPayload;
+	interactionCreate: InteractionCreateEventPayload;
+	messageCreate: MessageCreateEventPayload;
+	messageUpdate: MessageUpdateEventPayload;
+	messageDelete: MessageDeleteEventPayload;
+	messageBulkDelete: MessageBulkDeleteEventPayload;
+	messageReactionAdd: MessageReactionAddEventPayload;
+	messageReactionRemove: MessageReactionRemoveEventPayload;
+	guildCreate: GuildCreateEventPayload;
+	guildDelete: GuildDeleteEventPayload;
+	guildMemberAdd: GuildMemberAddEventPayload;
+	guildMemberRemove: GuildMemberRemoveEventPayload;
+	guildMemberUpdate: GuildMemberUpdateEventPayload;
+	threadCreate: ThreadCreateEventPayload;
+	threadUpdate: ThreadUpdateEventPayload;
+	threadDelete: ThreadDeleteEventPayload;
+	channelCreate: ChannelCreateEventPayload;
+	channelUpdate: ChannelUpdateEventPayload;
+	channelDelete: ChannelDeleteEventPayload;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="BotEventPayloadMap" />
+
+## Related Guides
+
+- [Bridge Architecture](/docs/concepts/bridge-architecture)
+- [Runtime Model](/docs/concepts/runtime-model)

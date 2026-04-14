@@ -1,0 +1,26 @@
+{
+  "title": "Contracts & Diagnostics",
+  "pages": [
+    "index",
+    "capability-explanation",
+    "capability-explanation-kind",
+    "capability-explanation-reason-code",
+    "define-shardwire-app",
+    "diagnose-shardwire-app",
+    "diagnose-shardwire-app-options",
+    "generate-secret-scope",
+    "get-shardwire-catalog",
+    "preflight-desired",
+    "preflight-issue",
+    "preflight-issue-severity",
+    "preflight-report",
+    "shardwire-app-diagnosis-category",
+    "shardwire-app-diagnosis-issue",
+    "shardwire-app-diagnosis-issue-code",
+    "shardwire-app-diagnosis-report",
+    "shardwire-app-diagnosis-severity",
+    "shardwire-app-manifest",
+    "shardwire-app-manifest-definition",
+    "shardwire-catalog"
+  ]
+}

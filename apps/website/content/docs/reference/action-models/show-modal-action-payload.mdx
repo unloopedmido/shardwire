@@ -1,0 +1,30 @@
+---
+title: "ShowModalActionPayload"
+description: "Reference for `ShowModalActionPayload`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `ShowModalActionPayload`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface ShowModalActionPayload {
+	interactionId: Snowflake;
+	title: string;
+	customId: string;
+	components: APIActionRowComponent<APITextInputComponent>[];
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="ShowModalActionPayload" />
+
+## Related Guides
+
+- [Capabilities & Scoped Secrets](/docs/concepts/capabilities-and-scopes)
+- [App Bridge](/docs/guides/app-bridge)

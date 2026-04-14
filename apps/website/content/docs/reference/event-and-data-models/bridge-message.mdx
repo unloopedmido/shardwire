@@ -1,0 +1,43 @@
+---
+title: "BridgeMessage"
+description: "Reference for `BridgeMessage`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `BridgeMessage`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface BridgeMessage {
+	id: Snowflake;
+	channelId: Snowflake;
+	guildId?: Snowflake;
+	author?: BridgeUser;
+	member?: BridgeGuildMember;
+	content?: string;
+	createdAt?: string;
+	editedAt?: string | null;
+	attachments: BridgeAttachment[];
+	embeds: APIEmbed[];
+	/** Message component rows (JSON-serializable API shape). */
+	components?: APIActionRowComponent<APIComponentInMessageActionRow>[];
+	reference?: BridgeMessageReference;
+	/** Discord `ChannelType` when the runtime could resolve `message.channel`. */
+	channelType?: number;
+	/** Parent category (guild text channels) or parent text/forum (threads), when known. */
+	parentChannelId?: Snowflake;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="BridgeMessage" />
+
+## Related Guides
+
+- [Bridge Architecture](/docs/concepts/bridge-architecture)
+- [Runtime Model](/docs/concepts/runtime-model)

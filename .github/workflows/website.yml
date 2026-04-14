@@ -45,7 +45,7 @@ jobs:
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: apps/website/dist
+          path: apps/website/out
 
   deploy:
     needs: build

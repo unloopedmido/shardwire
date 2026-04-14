@@ -1,0 +1,40 @@
+---
+title: "AppBridgeOptions"
+description: "Reference for `AppBridgeOptions`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `AppBridgeOptions`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface AppBridgeOptions {
+	url: string;
+	secret: string;
+	secretId?: string;
+	appName?: string;
+	reconnect?: {
+		enabled?: boolean;
+		initialDelayMs?: number;
+		maxDelayMs?: number;
+		jitter?: boolean;
+	};
+	requestTimeoutMs?: number;
+	logger?: ShardwireLogger;
+	metrics?: AppBridgeMetricsHooks;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="AppBridgeOptions" />
+
+## Related Guides
+
+- [Getting Started](/docs/getting-started)
+- [Bot Bridge](/docs/guides/bot-bridge)
+- [App Bridge](/docs/guides/app-bridge)
