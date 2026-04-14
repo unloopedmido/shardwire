@@ -7,6 +7,17 @@ This page lists **notable changes in the `shardwire` package** from **v1.0.0** t
 
 Release tags on GitHub: [`v1.0.0` … current](https://github.com/unloopedmido/shardwire/tags).
 
+## 1.7.0
+
+Minor release focused on full voice-surface coverage and publish readiness polish.
+
+- Added built-in event: **`voiceStateUpdate`** with normalized **`BridgeVoiceState`** payloads.
+- Added built-in actions: **`moveMemberVoice`**, **`setMemberMute`**, **`setMemberDeaf`**, and **`setMemberSuppressed`**.
+- Added subscription filter key: **`voiceChannelId`** for `voiceStateUpdate` event routing.
+- Extended runtime + diagnostics/catalog metadata to include voice intents, capability discovery, and subscription matching semantics.
+- Regenerated reference docs for new voice event/data and action models.
+- Updated skill references and docs guidance to include voice event/action/filter coverage.
+
 ## 1.6.1
 
 Patch release: include package metadata in the npm tarball.
