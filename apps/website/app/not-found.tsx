@@ -1,7 +1,14 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { HomeLayout } from 'fumadocs-ui/layouts/home';
 
 import { baseOptions } from '@/lib/layout.shared';
+
+export const metadata: Metadata = {
+  title: 'Page not found',
+  description: 'This URL is not part of the Shardwire documentation site.',
+  robots: { index: false, follow: true },
+};
 
 export default function NotFound() {
   return (
