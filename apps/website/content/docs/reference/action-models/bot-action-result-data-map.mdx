@@ -39,6 +39,10 @@ export interface BotActionResultDataMap {
 	deleteChannel: DeleteChannelActionResult;
 	createThread: BridgeThread;
 	archiveThread: BridgeThread;
+	moveMemberVoice: BridgeVoiceState;
+	setMemberMute: BridgeVoiceState;
+	setMemberDeaf: BridgeVoiceState;
+	setMemberSuppressed: BridgeVoiceState;
 }
 ```
 

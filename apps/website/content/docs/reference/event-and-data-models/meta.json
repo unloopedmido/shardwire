@@ -20,6 +20,7 @@
     "bridge-reaction-emoji",
     "bridge-thread",
     "bridge-user",
+    "bridge-voice-state",
     "channel-create-event-payload",
     "channel-delete-event-payload",
     "channel-update-event-payload",
@@ -44,6 +45,7 @@
     "shardwire-subscription-filter-key",
     "thread-create-event-payload",
     "thread-delete-event-payload",
-    "thread-update-event-payload"
+    "thread-update-event-payload",
+    "voice-state-update-event-payload"
   ]
 }

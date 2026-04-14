@@ -65,6 +65,11 @@ export function serializeGuildMember(member: GuildMember | PartialGuildMember): 
 }
 
 export function serializeVoiceState(state: VoiceState): BridgeVoiceState {
+	const requestToSpeakTimestamp =
+		typeof state.requestToSpeakTimestamp === 'number' && Number.isFinite(state.requestToSpeakTimestamp)
+			? new Date(state.requestToSpeakTimestamp).toISOString()
+			: null;
+
 	return {
 		guildId: state.guild.id,
 		userId: state.id,
@@ -77,9 +82,7 @@ export function serializeVoiceState(state: VoiceState): BridgeVoiceState {
 		serverMute: state.serverMute,
 		serverDeaf: state.serverDeaf,
 		suppress: state.suppress,
-		...(state.requestToSpeakTimestamp !== null && state.requestToSpeakTimestamp !== undefined
-			? { requestToSpeakTimestamp: state.requestToSpeakTimestamp.toISOString() }
-			: { requestToSpeakTimestamp: null }),
+		requestToSpeakTimestamp,
 	};
 }
 
