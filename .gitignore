@@ -3,3 +3,4 @@ apps/website/dist
 apps/website/.astro
 packages/shardwire/dist
 packages/shardwire/coverage
+.vscode
