@@ -148,6 +148,7 @@ Built-in events:
 - `channelCreate`
 - `channelUpdate`
 - `channelDelete`
+- `voiceStateUpdate`
 
 Built-in actions:
 
@@ -177,6 +178,10 @@ Built-in actions:
 - `deleteChannel`
 - `createThread`
 - `archiveThread`
+- `moveMemberVoice`
+- `setMemberMute`
+- `setMemberDeaf`
+- `setMemberSuppressed`
 
 If user asks for behavior outside this surface:
 

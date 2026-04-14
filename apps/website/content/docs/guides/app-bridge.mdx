@@ -45,6 +45,29 @@ if (!result.ok) {
 }
 ```
 
+## Voice subscriptions and controls
+
+```ts
+app.on(
+  'voiceStateUpdate',
+  ({ state }) => {
+    if (state.channelId !== 'voice-room-1') return;
+    console.log('in target voice room:', state.userId);
+  },
+  { voiceChannelId: 'voice-room-1' },
+);
+
+const moved = await app.actions.moveMemberVoice({
+  guildId,
+  userId,
+  channelId: 'voice-room-1',
+});
+
+if (!moved.ok) {
+  console.error(moved.error.code, moved.error.message);
+}
+```
+
 ## What belongs here
 
 - subscriptions
