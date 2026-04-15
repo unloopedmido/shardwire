@@ -14,8 +14,12 @@ Reference for `BotActionPayloadMap`, exported as part of the public Shardwire su
 ```ts
 export interface BotActionPayloadMap {
 	sendMessage: SendMessageActionPayload;
+	sendDirectMessage: SendDirectMessageActionPayload;
 	editMessage: EditMessageActionPayload;
 	deleteMessage: DeleteMessageActionPayload;
+	pinMessage: PinMessageActionPayload;
+	unpinMessage: UnpinMessageActionPayload;
+	bulkDeleteMessages: BulkDeleteMessagesActionPayload;
 	replyToInteraction: ReplyToInteractionActionPayload;
 	deferInteraction: DeferInteractionActionPayload;
 	deferUpdateInteraction: DeferUpdateInteractionActionPayload;
@@ -25,8 +29,12 @@ export interface BotActionPayloadMap {
 	updateInteraction: UpdateInteractionActionPayload;
 	showModal: ShowModalActionPayload;
 	fetchMessage: FetchMessageActionPayload;
+	fetchChannel: FetchChannelActionPayload;
+	fetchThread: FetchThreadActionPayload;
+	fetchGuild: FetchGuildActionPayload;
 	fetchMember: FetchMemberActionPayload;
 	banMember: BanMemberActionPayload;
+	unbanMember: UnbanMemberActionPayload;
 	kickMember: KickMemberActionPayload;
 	addMemberRole: AddMemberRoleActionPayload;
 	removeMemberRole: RemoveMemberRoleActionPayload;

@@ -21,8 +21,11 @@ export interface BotEventPayloadMap {
 	messageBulkDelete: MessageBulkDeleteEventPayload;
 	messageReactionAdd: MessageReactionAddEventPayload;
 	messageReactionRemove: MessageReactionRemoveEventPayload;
+	messageReactionRemoveAll: MessageReactionRemoveAllEventPayload;
+	messageReactionRemoveEmoji: MessageReactionRemoveEmojiEventPayload;
 	guildCreate: GuildCreateEventPayload;
 	guildDelete: GuildDeleteEventPayload;
+	guildUpdate: GuildUpdateEventPayload;
 	guildMemberAdd: GuildMemberAddEventPayload;
 	guildMemberRemove: GuildMemberRemoveEventPayload;
 	guildMemberUpdate: GuildMemberUpdateEventPayload;
@@ -32,6 +35,8 @@ export interface BotEventPayloadMap {
 	channelCreate: ChannelCreateEventPayload;
 	channelUpdate: ChannelUpdateEventPayload;
 	channelDelete: ChannelDeleteEventPayload;
+	typingStart: TypingStartEventPayload;
+	webhooksUpdate: WebhooksUpdateEventPayload;
 	voiceStateUpdate: VoiceStateUpdateEventPayload;
 }
 ```
