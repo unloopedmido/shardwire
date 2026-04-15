@@ -1,0 +1,30 @@
+---
+title: "TypingStartEventPayload"
+description: "Reference for `TypingStartEventPayload`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `TypingStartEventPayload`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface TypingStartEventPayload extends EventEnvelopeBase {
+	channelId: Snowflake;
+	userId: Snowflake;
+	startedAt: number;
+	guildId?: Snowflake;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="TypingStartEventPayload" />
+
+## Related Guides
+
+- [Bridge Architecture](/docs/concepts/bridge-architecture)
+- [Runtime Model](/docs/concepts/runtime-model)

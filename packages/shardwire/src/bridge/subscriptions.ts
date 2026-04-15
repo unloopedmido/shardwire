@@ -279,28 +279,24 @@ function eventMetadata(
 		}
 		case 'messageReactionAdd': {
 			const reactionPayload = payload as BotEventPayloadMap['messageReactionAdd'];
+			const emoji = reactionPayload.reaction.emoji.id ?? reactionPayload.reaction.emoji.name;
 			return {
 				...(reactionPayload.reaction.guildId ? { guildId: reactionPayload.reaction.guildId } : {}),
 				channelId: reactionPayload.reaction.channelId,
 				messageId: reactionPayload.reaction.messageId,
 				...(reactionPayload.reaction.user ? { userId: reactionPayload.reaction.user.id } : {}),
-				emoji:
-					reactionPayload.reaction.emoji.id ??
-					reactionPayload.reaction.emoji.name ??
-					undefined,
+				...(emoji ? { emoji } : {}),
 			};
 		}
 		case 'messageReactionRemove': {
 			const reactionPayload = payload as BotEventPayloadMap['messageReactionRemove'];
+			const emoji = reactionPayload.reaction.emoji.id ?? reactionPayload.reaction.emoji.name;
 			return {
 				...(reactionPayload.reaction.guildId ? { guildId: reactionPayload.reaction.guildId } : {}),
 				channelId: reactionPayload.reaction.channelId,
 				messageId: reactionPayload.reaction.messageId,
 				...(reactionPayload.reaction.user ? { userId: reactionPayload.reaction.user.id } : {}),
-				emoji:
-					reactionPayload.reaction.emoji.id ??
-					reactionPayload.reaction.emoji.name ??
-					undefined,
+				...(emoji ? { emoji } : {}),
 			};
 		}
 		case 'messageReactionRemoveAll': {
@@ -313,14 +309,12 @@ function eventMetadata(
 		}
 		case 'messageReactionRemoveEmoji': {
 			const reactionPayload = payload as BotEventPayloadMap['messageReactionRemoveEmoji'];
+			const emoji = reactionPayload.reaction.emoji.id ?? reactionPayload.reaction.emoji.name;
 			return {
 				...(reactionPayload.reaction.guildId ? { guildId: reactionPayload.reaction.guildId } : {}),
 				channelId: reactionPayload.reaction.channelId,
 				messageId: reactionPayload.reaction.messageId,
-				emoji:
-					reactionPayload.reaction.emoji.id ??
-					reactionPayload.reaction.emoji.name ??
-					undefined,
+				...(emoji ? { emoji } : {}),
 			};
 		}
 		case 'guildMemberAdd': {

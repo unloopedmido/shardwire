@@ -1,0 +1,33 @@
+---
+title: "BulkDeleteMessagesActionPayload"
+description: "Reference for `BulkDeleteMessagesActionPayload`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `BulkDeleteMessagesActionPayload`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface BulkDeleteMessagesActionPayload {
+	channelId: Snowflake;
+	messageIds: readonly Snowflake[];
+	/**
+	 * Mirrors discord.js `bulkDelete(..., filterOld)`.
+	 * Defaults to `true` (skip messages older than 14 days) when omitted.
+	 */
+	filterOld?: boolean;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="BulkDeleteMessagesActionPayload" />
+
+## Related Guides
+
+- [Capabilities & Scoped Secrets](/docs/concepts/capabilities-and-scopes)
+- [App Bridge](/docs/guides/app-bridge)

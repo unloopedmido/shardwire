@@ -1,0 +1,29 @@
+---
+title: "MessageReactionRemoveAllEventPayload"
+description: "Reference for `MessageReactionRemoveAllEventPayload`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `MessageReactionRemoveAllEventPayload`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface MessageReactionRemoveAllEventPayload extends EventEnvelopeBase {
+	channelId: Snowflake;
+	messageId: Snowflake;
+	guildId?: Snowflake;
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="MessageReactionRemoveAllEventPayload" />
+
+## Related Guides
+
+- [Bridge Architecture](/docs/concepts/bridge-architecture)
+- [Runtime Model](/docs/concepts/runtime-model)

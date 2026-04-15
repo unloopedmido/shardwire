@@ -759,10 +759,9 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
 				`Channel "${payload.channelId}" was not found or does not support bulk delete.`,
 			);
 		}
-		const deleted = await (channel as { bulkDelete: (ids: readonly Snowflake[], filterOld: boolean) => Promise<Map<string, unknown>> }).bulkDelete(
-			payload.messageIds,
-			payload.filterOld ?? true,
-		);
+		const deleted = await (
+			channel as { bulkDelete: (ids: readonly Snowflake[], filterOld: boolean) => Promise<Map<string, unknown>> }
+		).bulkDelete(payload.messageIds, payload.filterOld ?? true);
 		const deletedMessageIds = [...deleted.keys()];
 		return {
 			channelId: payload.channelId,
