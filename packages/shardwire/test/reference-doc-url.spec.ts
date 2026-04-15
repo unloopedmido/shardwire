@@ -8,7 +8,7 @@ import {
 
 describe('docsReferenceAbsoluteUrl', () => {
 	it('matches generated reference paths for representative exports', () => {
-		const origin = 'https://unloopedmido.github.io/shardwire';
+		const origin = 'https://shardwire.js.org';
 		expect(docsReferenceAbsoluteUrl('deferThenEditInteractionReply', origin)).toBe(
 			`${origin}/docs/reference/workflows/defer-then-edit-interaction-reply/`,
 		);

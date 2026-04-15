@@ -2,7 +2,7 @@
 	"name": "shardwire",
 	"version": "1.7.0",
 	"description": "Discord-first bridge between a bot process and external apps over WebSocket.",
-	"homepage": "https://unloopedmido.github.io/shardwire/",
+	"homepage": "https://shardwire.js.org/",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/unloopedmido/shardwire.git"
