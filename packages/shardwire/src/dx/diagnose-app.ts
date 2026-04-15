@@ -139,7 +139,6 @@ function negotiatedSubsetOfExpected(
  * “might rarely match” or other traffic heuristics.
  *
  * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/diagnose-shardwire-app/
- * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/diagnose-shardwire-app/
  */
 export function diagnoseShardwireApp(
 	manifest: ShardwireAppManifest,

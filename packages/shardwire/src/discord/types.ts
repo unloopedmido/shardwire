@@ -11,12 +11,10 @@ import { withErrorDocsLink } from '../utils/docs-links';
 
 /**
  * @see https://shardwire.js.org/docs/reference/bridge-apis/unsubscribe/
- * @see https://shardwire.js.org/docs/reference/bridge-apis/unsubscribe/
  */
 export type Unsubscribe = () => void;
 
 /**
- * @see https://shardwire.js.org/docs/reference/bridge-apis/shardwire-logger/
  * @see https://shardwire.js.org/docs/reference/bridge-apis/shardwire-logger/
  */
 export interface ShardwireLogger {
@@ -28,12 +26,10 @@ export interface ShardwireLogger {
 
 /**
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/bot-intent-name/
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/bot-intent-name/
  */
 export type BotIntentName = keyof typeof GatewayIntentBits;
 
 /**
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/bridge-user/
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/bridge-user/
  */
 export interface BridgeUser {
@@ -48,7 +44,6 @@ export interface BridgeUser {
 
 /**
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/bridge-attachment/
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/bridge-attachment/
  */
 export interface BridgeAttachment {
 	id: Snowflake;
@@ -60,7 +55,6 @@ export interface BridgeAttachment {
 
 /**
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/bridge-message-reference/
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/bridge-message-reference/
  */
 export interface BridgeMessageReference {
 	messageId?: Snowflake;
@@ -69,7 +63,6 @@ export interface BridgeMessageReference {
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/bridge-guild-member/
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/bridge-guild-member/
  */
 export interface BridgeGuildMember {
@@ -86,7 +79,6 @@ export interface BridgeGuildMember {
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/bridge-voice-state/
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/bridge-voice-state/
  */
 export interface BridgeVoiceState {
@@ -140,7 +132,6 @@ export interface BridgeChannel {
 
 /**
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/bridge-message/
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/bridge-message/
  */
 export interface BridgeMessage {
 	id: Snowflake;
@@ -164,7 +155,6 @@ export interface BridgeMessage {
 
 /**
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/bridge-deleted-message/
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/bridge-deleted-message/
  */
 export interface BridgeDeletedMessage {
 	id: Snowflake;
@@ -177,7 +167,6 @@ export interface BridgeDeletedMessage {
 
 /**
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/bridge-reaction-emoji/
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/bridge-reaction-emoji/
  */
 export interface BridgeReactionEmoji {
 	id?: Snowflake;
@@ -186,7 +175,6 @@ export interface BridgeReactionEmoji {
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/bridge-message-reaction/
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/bridge-message-reaction/
  */
 export interface BridgeMessageReaction {
@@ -198,7 +186,6 @@ export interface BridgeMessageReaction {
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/bridge-interaction-kind/
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/bridge-interaction-kind/
  */
 export type BridgeInteractionKind =
@@ -214,7 +201,6 @@ export type BridgeInteractionKind =
 	| 'unknown';
 
 /**
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/bridge-interaction/
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/bridge-interaction/
  */
 export interface BridgeInteraction {
@@ -239,7 +225,6 @@ export interface BridgeInteraction {
 
 /**
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/event-envelope-base/
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/event-envelope-base/
  */
 export interface EventEnvelopeBase {
 	receivedAt: number;
@@ -249,14 +234,12 @@ export interface EventEnvelopeBase {
 
 /**
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/ready-event-payload/
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/ready-event-payload/
  */
 export interface ReadyEventPayload extends EventEnvelopeBase {
 	user: BridgeUser;
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/interaction-create-event-payload/
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/interaction-create-event-payload/
  */
 export interface InteractionCreateEventPayload extends EventEnvelopeBase {
@@ -265,14 +248,12 @@ export interface InteractionCreateEventPayload extends EventEnvelopeBase {
 
 /**
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/message-create-event-payload/
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/message-create-event-payload/
  */
 export interface MessageCreateEventPayload extends EventEnvelopeBase {
 	message: BridgeMessage;
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/message-update-event-payload/
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/message-update-event-payload/
  */
 export interface MessageUpdateEventPayload extends EventEnvelopeBase {
@@ -282,14 +263,12 @@ export interface MessageUpdateEventPayload extends EventEnvelopeBase {
 
 /**
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/message-delete-event-payload/
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/message-delete-event-payload/
  */
 export interface MessageDeleteEventPayload extends EventEnvelopeBase {
 	message: BridgeDeletedMessage;
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/guild-member-add-event-payload/
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/guild-member-add-event-payload/
  */
 export interface GuildMemberAddEventPayload extends EventEnvelopeBase {
@@ -298,14 +277,12 @@ export interface GuildMemberAddEventPayload extends EventEnvelopeBase {
 
 /**
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/guild-member-remove-event-payload/
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/guild-member-remove-event-payload/
  */
 export interface GuildMemberRemoveEventPayload extends EventEnvelopeBase {
 	member: BridgeGuildMember;
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/guild-member-update-event-payload/
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/guild-member-update-event-payload/
  */
 export interface GuildMemberUpdateEventPayload extends EventEnvelopeBase {
@@ -315,14 +292,12 @@ export interface GuildMemberUpdateEventPayload extends EventEnvelopeBase {
 
 /**
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/guild-create-event-payload/
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/guild-create-event-payload/
  */
 export interface GuildCreateEventPayload extends EventEnvelopeBase {
 	guild: BridgeGuild;
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/guild-delete-event-payload/
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/guild-delete-event-payload/
  */
 export interface GuildDeleteEventPayload extends EventEnvelopeBase {
@@ -331,14 +306,12 @@ export interface GuildDeleteEventPayload extends EventEnvelopeBase {
 
 /**
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/thread-create-event-payload/
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/thread-create-event-payload/
  */
 export interface ThreadCreateEventPayload extends EventEnvelopeBase {
 	thread: BridgeThread;
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/thread-update-event-payload/
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/thread-update-event-payload/
  */
 export interface ThreadUpdateEventPayload extends EventEnvelopeBase {
@@ -348,14 +321,12 @@ export interface ThreadUpdateEventPayload extends EventEnvelopeBase {
 
 /**
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/thread-delete-event-payload/
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/thread-delete-event-payload/
  */
 export interface ThreadDeleteEventPayload extends EventEnvelopeBase {
 	thread: BridgeThread;
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/message-reaction-add-event-payload/
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/message-reaction-add-event-payload/
  */
 export interface MessageReactionAddEventPayload extends EventEnvelopeBase {
@@ -364,7 +335,6 @@ export interface MessageReactionAddEventPayload extends EventEnvelopeBase {
 
 /**
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/message-reaction-remove-event-payload/
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/message-reaction-remove-event-payload/
  */
 export interface MessageReactionRemoveEventPayload extends EventEnvelopeBase {
 	reaction: BridgeMessageReaction;
@@ -372,14 +342,12 @@ export interface MessageReactionRemoveEventPayload extends EventEnvelopeBase {
 
 /**
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/channel-create-event-payload/
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/channel-create-event-payload/
  */
 export interface ChannelCreateEventPayload extends EventEnvelopeBase {
 	channel: BridgeChannel;
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/channel-update-event-payload/
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/channel-update-event-payload/
  */
 export interface ChannelUpdateEventPayload extends EventEnvelopeBase {
@@ -389,14 +357,12 @@ export interface ChannelUpdateEventPayload extends EventEnvelopeBase {
 
 /**
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/channel-delete-event-payload/
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/channel-delete-event-payload/
  */
 export interface ChannelDeleteEventPayload extends EventEnvelopeBase {
 	channel: BridgeChannel;
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/message-bulk-delete-event-payload/
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/message-bulk-delete-event-payload/
  */
 export interface MessageBulkDeleteEventPayload extends EventEnvelopeBase {
@@ -411,7 +377,6 @@ export interface MessageBulkDeleteEventPayload extends EventEnvelopeBase {
 
 /**
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/voice-state-update-event-payload/
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/voice-state-update-event-payload/
  */
 export interface VoiceStateUpdateEventPayload extends EventEnvelopeBase {
 	oldState?: BridgeVoiceState;
@@ -419,7 +384,6 @@ export interface VoiceStateUpdateEventPayload extends EventEnvelopeBase {
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/bot-event-payload-map/
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/bot-event-payload-map/
  */
 export interface BotEventPayloadMap {
@@ -447,12 +411,10 @@ export interface BotEventPayloadMap {
 
 /**
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/bot-event-name/
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/bot-event-name/
  */
 export type BotEventName = keyof BotEventPayloadMap;
 
 /**
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/bridge-message-input/
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/bridge-message-input/
  */
 export interface BridgeMessageInput {
@@ -467,14 +429,12 @@ export interface BridgeMessageInput {
 
 /**
  * @see https://shardwire.js.org/docs/reference/action-models/send-message-action-payload/
- * @see https://shardwire.js.org/docs/reference/action-models/send-message-action-payload/
  */
 export interface SendMessageActionPayload extends BridgeMessageInput {
 	channelId: Snowflake;
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/action-models/edit-message-action-payload/
  * @see https://shardwire.js.org/docs/reference/action-models/edit-message-action-payload/
  */
 export interface EditMessageActionPayload extends BridgeMessageInput {
@@ -484,7 +444,6 @@ export interface EditMessageActionPayload extends BridgeMessageInput {
 
 /**
  * @see https://shardwire.js.org/docs/reference/action-models/delete-message-action-payload/
- * @see https://shardwire.js.org/docs/reference/action-models/delete-message-action-payload/
  */
 export interface DeleteMessageActionPayload {
 	channelId: Snowflake;
@@ -492,7 +451,6 @@ export interface DeleteMessageActionPayload {
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/action-models/reply-to-interaction-action-payload/
  * @see https://shardwire.js.org/docs/reference/action-models/reply-to-interaction-action-payload/
  */
 export interface ReplyToInteractionActionPayload extends BridgeMessageInput {
@@ -502,7 +460,6 @@ export interface ReplyToInteractionActionPayload extends BridgeMessageInput {
 
 /**
  * @see https://shardwire.js.org/docs/reference/action-models/defer-interaction-action-payload/
- * @see https://shardwire.js.org/docs/reference/action-models/defer-interaction-action-payload/
  */
 export interface DeferInteractionActionPayload {
 	interactionId: Snowflake;
@@ -510,7 +467,6 @@ export interface DeferInteractionActionPayload {
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/action-models/follow-up-interaction-action-payload/
  * @see https://shardwire.js.org/docs/reference/action-models/follow-up-interaction-action-payload/
  */
 export interface FollowUpInteractionActionPayload extends BridgeMessageInput {
@@ -520,14 +476,12 @@ export interface FollowUpInteractionActionPayload extends BridgeMessageInput {
 
 /**
  * @see https://shardwire.js.org/docs/reference/action-models/defer-update-interaction-action-payload/
- * @see https://shardwire.js.org/docs/reference/action-models/defer-update-interaction-action-payload/
  */
 export interface DeferUpdateInteractionActionPayload {
 	interactionId: Snowflake;
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/action-models/edit-interaction-reply-action-payload/
  * @see https://shardwire.js.org/docs/reference/action-models/edit-interaction-reply-action-payload/
  */
 export interface EditInteractionReplyActionPayload extends BridgeMessageInput {
@@ -536,7 +490,6 @@ export interface EditInteractionReplyActionPayload extends BridgeMessageInput {
 
 /**
  * @see https://shardwire.js.org/docs/reference/action-models/delete-interaction-reply-action-payload/
- * @see https://shardwire.js.org/docs/reference/action-models/delete-interaction-reply-action-payload/
  */
 export interface DeleteInteractionReplyActionPayload {
 	interactionId: Snowflake;
@@ -544,14 +497,12 @@ export interface DeleteInteractionReplyActionPayload {
 
 /**
  * @see https://shardwire.js.org/docs/reference/action-models/update-interaction-action-payload/
- * @see https://shardwire.js.org/docs/reference/action-models/update-interaction-action-payload/
  */
 export interface UpdateInteractionActionPayload extends BridgeMessageInput {
 	interactionId: Snowflake;
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/action-models/show-modal-action-payload/
  * @see https://shardwire.js.org/docs/reference/action-models/show-modal-action-payload/
  */
 export interface ShowModalActionPayload {
@@ -563,7 +514,6 @@ export interface ShowModalActionPayload {
 
 /**
  * @see https://shardwire.js.org/docs/reference/action-models/fetch-message-action-payload/
- * @see https://shardwire.js.org/docs/reference/action-models/fetch-message-action-payload/
  */
 export interface FetchMessageActionPayload {
 	channelId: Snowflake;
@@ -572,7 +522,6 @@ export interface FetchMessageActionPayload {
 
 /**
  * @see https://shardwire.js.org/docs/reference/action-models/fetch-member-action-payload/
- * @see https://shardwire.js.org/docs/reference/action-models/fetch-member-action-payload/
  */
 export interface FetchMemberActionPayload {
 	guildId: Snowflake;
@@ -580,7 +529,6 @@ export interface FetchMemberActionPayload {
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/action-models/ban-member-action-payload/
  * @see https://shardwire.js.org/docs/reference/action-models/ban-member-action-payload/
  */
 export interface BanMemberActionPayload {
@@ -592,7 +540,6 @@ export interface BanMemberActionPayload {
 
 /**
  * @see https://shardwire.js.org/docs/reference/action-models/kick-member-action-payload/
- * @see https://shardwire.js.org/docs/reference/action-models/kick-member-action-payload/
  */
 export interface KickMemberActionPayload {
 	guildId: Snowflake;
@@ -601,7 +548,6 @@ export interface KickMemberActionPayload {
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/action-models/add-member-role-action-payload/
  * @see https://shardwire.js.org/docs/reference/action-models/add-member-role-action-payload/
  */
 export interface AddMemberRoleActionPayload {
@@ -613,7 +559,6 @@ export interface AddMemberRoleActionPayload {
 
 /**
  * @see https://shardwire.js.org/docs/reference/action-models/remove-member-role-action-payload/
- * @see https://shardwire.js.org/docs/reference/action-models/remove-member-role-action-payload/
  */
 export interface RemoveMemberRoleActionPayload {
 	guildId: Snowflake;
@@ -624,7 +569,6 @@ export interface RemoveMemberRoleActionPayload {
 
 /**
  * @see https://shardwire.js.org/docs/reference/action-models/add-message-reaction-action-payload/
- * @see https://shardwire.js.org/docs/reference/action-models/add-message-reaction-action-payload/
  */
 export interface AddMessageReactionActionPayload {
 	channelId: Snowflake;
@@ -634,7 +578,6 @@ export interface AddMessageReactionActionPayload {
 
 /**
  * @see https://shardwire.js.org/docs/reference/action-models/remove-own-message-reaction-action-payload/
- * @see https://shardwire.js.org/docs/reference/action-models/remove-own-message-reaction-action-payload/
  */
 export interface RemoveOwnMessageReactionActionPayload {
 	channelId: Snowflake;
@@ -643,7 +586,6 @@ export interface RemoveOwnMessageReactionActionPayload {
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/action-models/timeout-member-action-payload/
  * @see https://shardwire.js.org/docs/reference/action-models/timeout-member-action-payload/
  */
 export interface TimeoutMemberActionPayload {
@@ -656,7 +598,6 @@ export interface TimeoutMemberActionPayload {
 
 /**
  * @see https://shardwire.js.org/docs/reference/action-models/remove-member-timeout-action-payload/
- * @see https://shardwire.js.org/docs/reference/action-models/remove-member-timeout-action-payload/
  */
 export interface RemoveMemberTimeoutActionPayload {
 	guildId: Snowflake;
@@ -665,7 +606,6 @@ export interface RemoveMemberTimeoutActionPayload {
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/action-models/create-channel-action-payload/
  * @see https://shardwire.js.org/docs/reference/action-models/create-channel-action-payload/
  */
 export interface CreateChannelActionPayload {
@@ -680,7 +620,6 @@ export interface CreateChannelActionPayload {
 
 /**
  * @see https://shardwire.js.org/docs/reference/action-models/edit-channel-action-payload/
- * @see https://shardwire.js.org/docs/reference/action-models/edit-channel-action-payload/
  */
 export interface EditChannelActionPayload {
 	channelId: Snowflake;
@@ -691,7 +630,6 @@ export interface EditChannelActionPayload {
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/action-models/delete-channel-action-payload/
  * @see https://shardwire.js.org/docs/reference/action-models/delete-channel-action-payload/
  */
 export interface DeleteChannelActionPayload {
@@ -714,7 +652,6 @@ export interface CreateThreadActionPayload {
 
 /**
  * @see https://shardwire.js.org/docs/reference/action-models/archive-thread-action-payload/
- * @see https://shardwire.js.org/docs/reference/action-models/archive-thread-action-payload/
  */
 export interface ArchiveThreadActionPayload {
 	threadId: Snowflake;
@@ -723,7 +660,6 @@ export interface ArchiveThreadActionPayload {
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/action-models/move-member-voice-action-payload/
  * @see https://shardwire.js.org/docs/reference/action-models/move-member-voice-action-payload/
  */
 export interface MoveMemberVoiceActionPayload {
@@ -735,7 +671,6 @@ export interface MoveMemberVoiceActionPayload {
 
 /**
  * @see https://shardwire.js.org/docs/reference/action-models/set-member-mute-action-payload/
- * @see https://shardwire.js.org/docs/reference/action-models/set-member-mute-action-payload/
  */
 export interface SetMemberMuteActionPayload {
 	guildId: Snowflake;
@@ -745,7 +680,6 @@ export interface SetMemberMuteActionPayload {
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/action-models/set-member-deaf-action-payload/
  * @see https://shardwire.js.org/docs/reference/action-models/set-member-deaf-action-payload/
  */
 export interface SetMemberDeafActionPayload {
@@ -757,7 +691,6 @@ export interface SetMemberDeafActionPayload {
 
 /**
  * @see https://shardwire.js.org/docs/reference/action-models/set-member-suppressed-action-payload/
- * @see https://shardwire.js.org/docs/reference/action-models/set-member-suppressed-action-payload/
  */
 export interface SetMemberSuppressedActionPayload {
 	guildId: Snowflake;
@@ -767,7 +700,6 @@ export interface SetMemberSuppressedActionPayload {
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/action-models/bot-action-payload-map/
  * @see https://shardwire.js.org/docs/reference/action-models/bot-action-payload-map/
  */
 export interface BotActionPayloadMap {
@@ -805,7 +737,6 @@ export interface BotActionPayloadMap {
 
 /**
  * @see https://shardwire.js.org/docs/reference/action-models/delete-message-action-result/
- * @see https://shardwire.js.org/docs/reference/action-models/delete-message-action-result/
  */
 export interface DeleteMessageActionResult {
 	deleted: true;
@@ -815,7 +746,6 @@ export interface DeleteMessageActionResult {
 
 /**
  * @see https://shardwire.js.org/docs/reference/action-models/defer-interaction-action-result/
- * @see https://shardwire.js.org/docs/reference/action-models/defer-interaction-action-result/
  */
 export interface DeferInteractionActionResult {
 	deferred: true;
@@ -823,7 +753,6 @@ export interface DeferInteractionActionResult {
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/action-models/defer-update-interaction-action-result/
  * @see https://shardwire.js.org/docs/reference/action-models/defer-update-interaction-action-result/
  */
 export interface DeferUpdateInteractionActionResult {
@@ -833,7 +762,6 @@ export interface DeferUpdateInteractionActionResult {
 
 /**
  * @see https://shardwire.js.org/docs/reference/action-models/delete-interaction-reply-action-result/
- * @see https://shardwire.js.org/docs/reference/action-models/delete-interaction-reply-action-result/
  */
 export interface DeleteInteractionReplyActionResult {
 	deleted: true;
@@ -841,7 +769,6 @@ export interface DeleteInteractionReplyActionResult {
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/action-models/show-modal-action-result/
  * @see https://shardwire.js.org/docs/reference/action-models/show-modal-action-result/
  */
 export interface ShowModalActionResult {
@@ -851,7 +778,6 @@ export interface ShowModalActionResult {
 
 /**
  * @see https://shardwire.js.org/docs/reference/action-models/member-moderation-action-result/
- * @see https://shardwire.js.org/docs/reference/action-models/member-moderation-action-result/
  */
 export interface MemberModerationActionResult {
 	guildId: Snowflake;
@@ -859,7 +785,6 @@ export interface MemberModerationActionResult {
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/action-models/message-reaction-action-result/
  * @see https://shardwire.js.org/docs/reference/action-models/message-reaction-action-result/
  */
 export interface MessageReactionActionResult {
@@ -870,7 +795,6 @@ export interface MessageReactionActionResult {
 
 /**
  * @see https://shardwire.js.org/docs/reference/action-models/delete-channel-action-result/
- * @see https://shardwire.js.org/docs/reference/action-models/delete-channel-action-result/
  */
 export interface DeleteChannelActionResult {
 	deleted: true;
@@ -878,7 +802,6 @@ export interface DeleteChannelActionResult {
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/action-models/bot-action-result-data-map/
  * @see https://shardwire.js.org/docs/reference/action-models/bot-action-result-data-map/
  */
 export interface BotActionResultDataMap {
@@ -916,12 +839,10 @@ export interface BotActionResultDataMap {
 
 /**
  * @see https://shardwire.js.org/docs/reference/action-models/bot-action-name/
- * @see https://shardwire.js.org/docs/reference/action-models/bot-action-name/
  */
 export type BotActionName = keyof BotActionPayloadMap;
 
 /**
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/bridge-capabilities/
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/bridge-capabilities/
  */
 export interface BridgeCapabilities {
@@ -930,7 +851,6 @@ export interface BridgeCapabilities {
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/event-subscription-filter/
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/event-subscription-filter/
  */
 export interface EventSubscriptionFilter {
@@ -976,12 +896,10 @@ export interface ShardwireCatalog {
 
 /**
  * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/capability-explanation-kind/
- * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/capability-explanation-kind/
  */
 export type CapabilityExplanationKind = 'event' | 'action';
 
 /**
- * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/capability-explanation-reason-code/
  * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/capability-explanation-reason-code/
  */
 export type CapabilityExplanationReasonCode = 'unknown_name' | 'not_negotiated' | 'allowed' | 'denied_by_bridge';
@@ -1004,12 +922,10 @@ export interface CapabilityExplanation {
 
 /**
  * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/preflight-issue-severity/
- * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/preflight-issue-severity/
  */
 export type PreflightIssueSeverity = 'error' | 'warning';
 
 /**
- * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/preflight-issue/
  * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/preflight-issue/
  */
 export interface PreflightIssue {
@@ -1021,7 +937,6 @@ export interface PreflightIssue {
 
 /**
  * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/preflight-report/
- * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/preflight-report/
  */
 export interface PreflightReport {
 	ok: boolean;
@@ -1031,7 +946,6 @@ export interface PreflightReport {
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/preflight-desired/
  * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/preflight-desired/
  */
 export interface PreflightDesired {
@@ -1043,7 +957,6 @@ export interface PreflightDesired {
  * Input to {@link defineShardwireApp}. **Keep this surface small** — only what the app needs from the bridge and
  * which subscription filter keys it may use. Put transport, secrets, bot intents, strict startup, and other policy in
  * `connectBotBridge` / `createBotBridge` / `app.ready` / env instead of growing the manifest into a config object.
- * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/shardwire-app-manifest-definition/
  * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/shardwire-app-manifest-definition/
  */
 export interface ShardwireAppManifestDefinition {
@@ -1073,12 +986,10 @@ export interface ShardwireAppManifest {
 
 /**
  * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/shardwire-app-diagnosis-severity/
- * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/shardwire-app-diagnosis-severity/
  */
 export type ShardwireAppDiagnosisSeverity = 'error' | 'warning' | 'info';
 
 /**
- * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/shardwire-app-diagnosis-category/
  * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/shardwire-app-diagnosis-category/
  */
 export type ShardwireAppDiagnosisCategory = 'intent' | 'secret_scope' | 'subscription' | 'action' | 'unused_capability';
@@ -1089,7 +1000,6 @@ export type ShardwireAppDiagnosisCategory = 'intent' | 'secret_scope' | 'subscri
  * **Filter semantics (no “suspicious” heuristics):**
  * - **`unsupported_filter_key`** — not a built-in key from `app.catalog().subscriptionFilters`.
  * - **`filter_key_absent_from_event_metadata`** — key is built-in, but the bridge’s subscription matcher never supplies it for this event name, so a filter on it **cannot** match any payload (structural impossibility). Narrow filters that merely match rarely (e.g. a specific `guildId`) are **not** flagged.
- * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/shardwire-app-diagnosis-issue-code/
  * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/shardwire-app-diagnosis-issue-code/
  */
 export type ShardwireAppDiagnosisIssueCode =
@@ -1109,7 +1019,6 @@ export type ShardwireAppDiagnosisIssueCode =
 
 /**
  * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/shardwire-app-diagnosis-issue/
- * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/shardwire-app-diagnosis-issue/
  */
 export interface ShardwireAppDiagnosisIssue {
 	severity: ShardwireAppDiagnosisSeverity;
@@ -1121,7 +1030,6 @@ export interface ShardwireAppDiagnosisIssue {
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/shardwire-app-diagnosis-report/
  * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/shardwire-app-diagnosis-report/
  */
 export interface ShardwireAppDiagnosisReport {
@@ -1168,7 +1076,6 @@ export interface DiagnoseShardwireAppOptions {
 
 /**
  * @see https://shardwire.js.org/docs/reference/errors-and-failures/shardwire-strict-startup-error/
- * @see https://shardwire.js.org/docs/reference/errors-and-failures/shardwire-strict-startup-error/
  */
 export class ShardwireStrictStartupError extends Error {
 	constructor(
@@ -1181,7 +1088,6 @@ export class ShardwireStrictStartupError extends Error {
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/bridge-apis/app-bridge-ready-options/
  * @see https://shardwire.js.org/docs/reference/bridge-apis/app-bridge-ready-options/
  */
 export interface AppBridgeReadyOptions {
@@ -1203,7 +1109,6 @@ export interface AppBridgeReadyOptions {
 
 /**
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/event-subscription/
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/event-subscription/
  */
 export interface EventSubscription<K extends BotEventName = BotEventName> {
 	name: K;
@@ -1211,7 +1116,6 @@ export interface EventSubscription<K extends BotEventName = BotEventName> {
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/bridge-apis/secret-permissions/
  * @see https://shardwire.js.org/docs/reference/bridge-apis/secret-permissions/
  */
 export interface SecretPermissions {
@@ -1221,7 +1125,6 @@ export interface SecretPermissions {
 
 /**
  * @see https://shardwire.js.org/docs/reference/bridge-apis/scoped-secret-config/
- * @see https://shardwire.js.org/docs/reference/bridge-apis/scoped-secret-config/
  */
 export interface ScopedSecretConfig {
 	id?: string;
@@ -1230,7 +1133,6 @@ export interface ScopedSecretConfig {
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/bridge-apis/bot-bridge-secret/
  * @see https://shardwire.js.org/docs/reference/bridge-apis/bot-bridge-secret/
  */
 export type BotBridgeSecret = string | ScopedSecretConfig;
@@ -1249,7 +1151,6 @@ export interface ActionErrorDetails {
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/bridge-apis/bot-bridge-options/
  * @see https://shardwire.js.org/docs/reference/bridge-apis/bot-bridge-options/
  */
 export interface BotBridgeOptions {
@@ -1282,7 +1183,6 @@ export interface BotBridgeOptions {
 
 /**
  * @see https://shardwire.js.org/docs/reference/bridge-apis/app-bridge-metrics-hooks/
- * @see https://shardwire.js.org/docs/reference/bridge-apis/app-bridge-metrics-hooks/
  */
 export interface AppBridgeMetricsHooks {
 	onActionComplete?: (meta: {
@@ -1299,7 +1199,6 @@ export interface AppBridgeMetricsHooks {
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/bridge-apis/app-bridge-options/
  * @see https://shardwire.js.org/docs/reference/bridge-apis/app-bridge-options/
  */
 export interface AppBridgeOptions {
@@ -1320,7 +1219,6 @@ export interface AppBridgeOptions {
 
 /**
  * @see https://shardwire.js.org/docs/reference/errors-and-failures/action-error/
- * @see https://shardwire.js.org/docs/reference/errors-and-failures/action-error/
  */
 export interface ActionError {
 	code:
@@ -1338,7 +1236,6 @@ export interface ActionError {
 
 /**
  * @see https://shardwire.js.org/docs/reference/errors-and-failures/action-success/
- * @see https://shardwire.js.org/docs/reference/errors-and-failures/action-success/
  */
 export interface ActionSuccess<T> {
 	ok: true;
@@ -1349,7 +1246,6 @@ export interface ActionSuccess<T> {
 
 /**
  * @see https://shardwire.js.org/docs/reference/errors-and-failures/action-failure/
- * @see https://shardwire.js.org/docs/reference/errors-and-failures/action-failure/
  */
 export interface ActionFailure {
 	ok: false;
@@ -1359,7 +1255,6 @@ export interface ActionFailure {
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/errors-and-failures/action-result/
  * @see https://shardwire.js.org/docs/reference/errors-and-failures/action-result/
  */
 export type ActionResult<T> = ActionSuccess<T> | ActionFailure;
@@ -1376,7 +1271,6 @@ export interface BridgeCapabilityErrorDetails {
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/errors-and-failures/bridge-capability-error/
  * @see https://shardwire.js.org/docs/reference/errors-and-failures/bridge-capability-error/
  */
 export class BridgeCapabilityError extends Error {
@@ -1395,12 +1289,10 @@ export class BridgeCapabilityError extends Error {
 
 /**
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/event-handler/
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/event-handler/
  */
 export type EventHandler<K extends BotEventName> = (payload: BotEventPayloadMap[K]) => void;
 
 /**
- * @see https://shardwire.js.org/docs/reference/action-models/app-bridge-action-invoke-options/
  * @see https://shardwire.js.org/docs/reference/action-models/app-bridge-action-invoke-options/
  */
 export type AppBridgeActionInvokeOptions = {
@@ -1412,7 +1304,6 @@ export type AppBridgeActionInvokeOptions = {
 
 /**
  * @see https://shardwire.js.org/docs/reference/action-models/app-bridge-actions/
- * @see https://shardwire.js.org/docs/reference/action-models/app-bridge-actions/
  */
 export type AppBridgeActions = {
 	[K in BotActionName]: (
@@ -1423,7 +1314,6 @@ export type AppBridgeActions = {
 
 /**
  * @see https://shardwire.js.org/docs/reference/bridge-apis/bot-bridge/
- * @see https://shardwire.js.org/docs/reference/bridge-apis/bot-bridge/
  */
 export interface BotBridge {
 	ready(): Promise<void>;
@@ -1432,7 +1322,6 @@ export interface BotBridge {
 }
 
 /**
- * @see https://shardwire.js.org/docs/reference/bridge-apis/app-bridge/
  * @see https://shardwire.js.org/docs/reference/bridge-apis/app-bridge/
  */
 export interface AppBridge {
