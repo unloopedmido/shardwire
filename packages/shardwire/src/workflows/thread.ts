@@ -11,7 +11,6 @@ import type {
  * Create a thread from a parent channel (optionally on a message), then send a message in that thread.
  *
  * @see https://shardwire.js.org/docs/reference/workflows/create-thread-then-send-message/
- * @see https://shardwire.js.org/docs/reference/workflows/create-thread-then-send-message/
  */
 export async function createThreadThenSendMessage(
 	app: Pick<AppBridge, 'actions'>,

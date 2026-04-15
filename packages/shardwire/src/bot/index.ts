@@ -15,7 +15,6 @@ import { assertBotBridgeOptions, normalizeSecrets, resolveCapabilitiesForSecret 
  * Create the bot-process bridge: Discord gateway/runtime plus a WebSocket server for app connections.
  *
  * @see https://shardwire.js.org/docs/reference/bridge-apis/create-bot-bridge/
- * @see https://shardwire.js.org/docs/reference/bridge-apis/create-bot-bridge/
  */
 export function createBotBridge(options: BotBridgeOptions): BotBridge {
 	const runtime = createDiscordJsRuntimeAdapter({
