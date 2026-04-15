@@ -137,8 +137,11 @@ Built-in events:
 - `messageBulkDelete`
 - `messageReactionAdd`
 - `messageReactionRemove`
+- `messageReactionRemoveAll`
+- `messageReactionRemoveEmoji`
 - `guildCreate`
 - `guildDelete`
+- `guildUpdate`
 - `guildMemberAdd`
 - `guildMemberRemove`
 - `guildMemberUpdate`
@@ -148,13 +151,19 @@ Built-in events:
 - `channelCreate`
 - `channelUpdate`
 - `channelDelete`
+- `typingStart`
+- `webhooksUpdate`
 - `voiceStateUpdate`
 
 Built-in actions:
 
 - `sendMessage`
+- `sendDirectMessage`
 - `editMessage`
 - `deleteMessage`
+- `pinMessage`
+- `unpinMessage`
+- `bulkDeleteMessages`
 - `replyToInteraction`
 - `deferInteraction`
 - `deferUpdateInteraction`
@@ -164,8 +173,12 @@ Built-in actions:
 - `updateInteraction`
 - `showModal`
 - `fetchMessage`
+- `fetchChannel`
+- `fetchThread`
+- `fetchGuild`
 - `fetchMember`
 - `banMember`
+- `unbanMember`
 - `kickMember`
 - `addMemberRole`
 - `removeMemberRole`
