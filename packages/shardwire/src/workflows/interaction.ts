@@ -12,7 +12,8 @@ import type {
  * Defer a slash/menu interaction, then edit the deferred reply.
  * Useful for long-running handlers that must acknowledge within Discord's window.
  *
- * @see https://unloopedmido.github.io/shardwire/docs/reference/workflows/defer-then-edit-interaction-reply/
+ * @see https://shardwire.js.org/docs/reference/workflows/defer-then-edit-interaction-reply/
+ * @see https://shardwire.js.org/docs/reference/workflows/defer-then-edit-interaction-reply/
  */
 export async function deferThenEditInteractionReply(
 	app: Pick<AppBridge, 'actions'>,
@@ -34,7 +35,8 @@ export async function deferThenEditInteractionReply(
 /**
  * Defer a component interaction with type `DEFER_UPDATE_MESSAGE`, then edit the reply.
  *
- * @see https://unloopedmido.github.io/shardwire/docs/reference/workflows/defer-update-then-edit-interaction-reply/
+ * @see https://shardwire.js.org/docs/reference/workflows/defer-update-then-edit-interaction-reply/
+ * @see https://shardwire.js.org/docs/reference/workflows/defer-update-then-edit-interaction-reply/
  */
 export async function deferUpdateThenEditInteractionReply(
 	app: Pick<AppBridge, 'actions'>,
