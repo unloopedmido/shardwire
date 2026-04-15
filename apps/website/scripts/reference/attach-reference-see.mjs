@@ -18,7 +18,7 @@ import { getReferenceCategoryId, slugify } from './routing.mjs';
 const REFERENCE_SEE_ORIGIN = 'https://shardwire.js.org';
 
 const GUIDE_SEE_LINE =
-  /^\s*\*\s@see\s+https:\/\/(?:unloopedmido\.github\.io\/shardwire|shardwire\.js\.org)\/(?!docs\/reference)[^\r\n]*\r?\n?/gm;
+  /^\s*\*\s@see\s+https:\/\/shardwire\.js\.org\/(?!docs\/reference)[^\r\n]*\r?\n?/gm;
 
 function referenceUrlForExport(name) {
   const category = getReferenceCategoryId(name);
