@@ -16,11 +16,15 @@ export interface EventSubscriptionFilter {
 	guildId?: Snowflake | readonly Snowflake[];
 	channelId?: Snowflake | readonly Snowflake[];
 	userId?: Snowflake | readonly Snowflake[];
+	messageId?: Snowflake | readonly Snowflake[];
+	interactionId?: Snowflake | readonly Snowflake[];
 	commandName?: string | readonly string[];
 	/** Matches `BridgeInteraction.customId` when present (components, modals). */
 	customId?: string | readonly string[];
 	/** Matches `BridgeInteraction.kind`. */
 	interactionKind?: BridgeInteractionKind | readonly BridgeInteractionKind[];
+	/** Matches reaction emoji by identifier/name/string form where available. */
+	emoji?: string | readonly string[];
 	/** Matches Discord `ChannelType` when present on the payload (messages, interactions, bulk delete). */
 	channelType?: number | readonly number[];
 	/** Matches `BridgeMessage.parentChannelId` / thread parent / channel parent when present. */

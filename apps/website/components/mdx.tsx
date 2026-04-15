@@ -1,18 +1,19 @@
 import defaultComponents from 'fumadocs-ui/mdx';
-import { createFileSystemGeneratorCache, createGenerator } from 'fumadocs-typescript';
-import { AutoTypeTable, type AutoTypeTableProps } from 'fumadocs-typescript/ui';
 import type { MDXComponents } from 'mdx/types';
-
-const generator = createGenerator({
-  cache: createFileSystemGeneratorCache('.next/fumadocs-typescript'),
-});
 
 export function getMDXComponents(components?: MDXComponents) {
   return {
     ...defaultComponents,
-    AutoTypeTable: (props: Partial<AutoTypeTableProps>) => (
-      <AutoTypeTable {...props} generator={generator} />
-    ),
+    // TODO: Replace this fallback with a client-only/dynamic AutoTypeTable integration
+    // once fumadocs-typescript UI is compatible with this Next server MDX build path.
+    AutoTypeTable: () =>
+      process.env.NODE_ENV === 'development' ? (
+        <p>
+          AutoTypeTable is temporarily disabled in this build. Run{' '}
+          <code>npm run -w website reference:build</code> and check CI to verify
+          availability.
+        </p>
+      ) : null,
     ...components,
   } satisfies MDXComponents;
 }

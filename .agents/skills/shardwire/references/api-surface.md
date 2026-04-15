@@ -42,8 +42,11 @@ If user-facing guidance is needed, link directly to website pages instead of rep
 - `messageBulkDelete`
 - `messageReactionAdd`
 - `messageReactionRemove`
+- `messageReactionRemoveAll`
+- `messageReactionRemoveEmoji`
 - `guildCreate`
 - `guildDelete`
+- `guildUpdate`
 - `guildMemberAdd`
 - `guildMemberRemove`
 - `guildMemberUpdate`
@@ -53,6 +56,8 @@ If user-facing guidance is needed, link directly to website pages instead of rep
 - `channelCreate`
 - `channelUpdate`
 - `channelDelete`
+- `typingStart`
+- `webhooksUpdate`
 - `voiceStateUpdate`
 
 ## Subscription filters
@@ -60,9 +65,12 @@ If user-facing guidance is needed, link directly to website pages instead of rep
 - `guildId`
 - `channelId`
 - `userId`
+- `messageId`
+- `interactionId`
 - `commandName` (for `interactionCreate`)
 - `customId` (for `interactionCreate`)
 - `interactionKind` (for `interactionCreate`)
+- `emoji`
 - `channelType`
 - `parentChannelId`
 - `threadId`
@@ -71,8 +79,12 @@ If user-facing guidance is needed, link directly to website pages instead of rep
 ## Built-in actions (`app.actions.*`)
 
 - `sendMessage`
+- `sendDirectMessage`
 - `editMessage`
 - `deleteMessage`
+- `pinMessage`
+- `unpinMessage`
+- `bulkDeleteMessages`
 - `replyToInteraction`
 - `deferInteraction`
 - `deferUpdateInteraction`
@@ -82,8 +94,12 @@ If user-facing guidance is needed, link directly to website pages instead of rep
 - `updateInteraction`
 - `showModal`
 - `fetchMessage`
+- `fetchChannel`
+- `fetchThread`
+- `fetchGuild`
 - `fetchMember`
 - `banMember`
+- `unbanMember`
 - `kickMember`
 - `addMemberRole`
 - `removeMemberRole`
@@ -115,9 +131,11 @@ Always branch on `result.ok` before using `data`.
 
 - `ready` and `interactionCreate`: no specific event intent requirement.
 - `messageCreate`, `messageUpdate`, `messageDelete`, `messageBulkDelete`: `GuildMessages`
-- `messageReactionAdd`, `messageReactionRemove`: `GuildMessageReactions`
+- `messageReactionAdd`, `messageReactionRemove`, `messageReactionRemoveAll`, `messageReactionRemoveEmoji`: `GuildMessageReactions`
 - `guildMemberAdd`, `guildMemberRemove`, `guildMemberUpdate`: `GuildMembers`
-- `guildCreate`, `guildDelete`, `threadCreate`, `threadUpdate`, `threadDelete`, `channelCreate`, `channelUpdate`, `channelDelete`: `Guilds`
+- `guildCreate`, `guildDelete`, `guildUpdate`, `threadCreate`, `threadUpdate`, `threadDelete`, `channelCreate`, `channelUpdate`, `channelDelete`: `Guilds`
+- `typingStart`: `GuildMessageTyping`
+- `webhooksUpdate`: `GuildWebhooks`
 - `voiceStateUpdate`: `GuildVoiceStates`
 
 ## Secret permissions model

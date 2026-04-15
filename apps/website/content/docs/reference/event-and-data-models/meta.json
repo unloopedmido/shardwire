@@ -33,11 +33,14 @@
     "guild-member-add-event-payload",
     "guild-member-remove-event-payload",
     "guild-member-update-event-payload",
+    "guild-update-event-payload",
     "interaction-create-event-payload",
     "message-bulk-delete-event-payload",
     "message-create-event-payload",
     "message-delete-event-payload",
     "message-reaction-add-event-payload",
+    "message-reaction-remove-all-event-payload",
+    "message-reaction-remove-emoji-event-payload",
     "message-reaction-remove-event-payload",
     "message-update-event-payload",
     "ready-event-payload",
@@ -46,6 +49,8 @@
     "thread-create-event-payload",
     "thread-delete-event-payload",
     "thread-update-event-payload",
-    "voice-state-update-event-payload"
+    "typing-start-event-payload",
+    "voice-state-update-event-payload",
+    "webhooks-update-event-payload"
   ]
 }

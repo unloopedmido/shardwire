@@ -19,6 +19,7 @@ import {
 	type MessageComponentInteraction,
 	type ReadonlyCollection,
 	type ThreadChannel,
+	type Typing,
 	type User,
 	type VoiceState,
 } from 'discord.js';
@@ -174,8 +175,12 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
 		});
 		this.actionHandlers = {
 			sendMessage: (payload) => this.sendMessage(payload),
+			sendDirectMessage: (payload) => this.sendDirectMessage(payload),
 			editMessage: (payload) => this.editMessage(payload),
 			deleteMessage: (payload) => this.deleteMessage(payload),
+			pinMessage: (payload) => this.pinMessage(payload),
+			unpinMessage: (payload) => this.unpinMessage(payload),
+			bulkDeleteMessages: (payload) => this.bulkDeleteMessages(payload),
 			replyToInteraction: (payload) => this.replyToInteraction(payload),
 			deferInteraction: (payload) => this.deferInteraction(payload),
 			deferUpdateInteraction: (payload) => this.deferUpdateInteraction(payload),
@@ -185,8 +190,12 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
 			updateInteraction: (payload) => this.updateInteraction(payload),
 			showModal: (payload) => this.showModal(payload),
 			fetchMessage: (payload) => this.fetchMessage(payload),
+			fetchChannel: (payload) => this.fetchChannel(payload),
+			fetchThread: (payload) => this.fetchThread(payload),
+			fetchGuild: (payload) => this.fetchGuild(payload),
 			fetchMember: (payload) => this.fetchMember(payload),
 			banMember: (payload) => this.banMember(payload),
+			unbanMember: (payload) => this.unbanMember(payload),
 			kickMember: (payload) => this.kickMember(payload),
 			addMemberRole: (payload) => this.addMemberRole(payload),
 			removeMemberRole: (payload) => this.removeMemberRole(payload),
@@ -377,6 +386,34 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
 					this.client.off(Events.MessageReactionRemove, listener);
 				};
 			}
+			case 'messageReactionRemoveAll': {
+				const listener = (message: Message | PartialMessage) => {
+					handler({
+						receivedAt: Date.now(),
+						...this.shardEnvelope(),
+						channelId: message.channelId,
+						messageId: message.id,
+						...(message.guildId ? { guildId: message.guildId } : {}),
+					} as BotEventPayloadMap[K]);
+				};
+				this.client.on(Events.MessageReactionRemoveAll, listener);
+				return () => {
+					this.client.off(Events.MessageReactionRemoveAll, listener);
+				};
+			}
+			case 'messageReactionRemoveEmoji': {
+				const listener = (reaction: MessageReaction | PartialMessageReaction) => {
+					handler({
+						receivedAt: Date.now(),
+						...this.shardEnvelope(),
+						reaction: serializeMessageReaction(reaction),
+					} as BotEventPayloadMap[K]);
+				};
+				this.client.on(Events.MessageReactionRemoveEmoji, listener);
+				return () => {
+					this.client.off(Events.MessageReactionRemoveEmoji, listener);
+				};
+			}
 			case 'guildMemberAdd': {
 				const listener = (member: GuildMember) => {
 					handler({
@@ -446,6 +483,20 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
 				this.client.on(Events.GuildDelete, listener);
 				return () => {
 					this.client.off(Events.GuildDelete, listener);
+				};
+			}
+			case 'guildUpdate': {
+				const listener = (oldGuild: Guild, newGuild: Guild) => {
+					handler({
+						receivedAt: Date.now(),
+						...this.shardEnvelope(),
+						oldGuild: serializeGuild(oldGuild),
+						guild: serializeGuild(newGuild),
+					} as BotEventPayloadMap[K]);
+				};
+				this.client.on(Events.GuildUpdate, listener);
+				return () => {
+					this.client.off(Events.GuildUpdate, listener);
 				};
 			}
 			case 'threadCreate': {
@@ -526,6 +577,36 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
 				this.client.on(Events.ChannelDelete, listener);
 				return () => {
 					this.client.off(Events.ChannelDelete, listener);
+				};
+			}
+			case 'typingStart': {
+				const listener = (typing: Typing) => {
+					handler({
+						receivedAt: Date.now(),
+						...this.shardEnvelope(),
+						channelId: typing.channel.id,
+						userId: typing.user.id,
+						startedAt: typing.startedTimestamp,
+						...(typing.guild ? { guildId: typing.guild.id } : {}),
+					} as BotEventPayloadMap[K]);
+				};
+				this.client.on(Events.TypingStart, listener);
+				return () => {
+					this.client.off(Events.TypingStart, listener);
+				};
+			}
+			case 'webhooksUpdate': {
+				const listener = (channel: { id: string; guildId: string }) => {
+					handler({
+						receivedAt: Date.now(),
+						...this.shardEnvelope(),
+						channelId: channel.id,
+						guildId: channel.guildId,
+					} as BotEventPayloadMap[K]);
+				};
+				this.client.on(Events.WebhooksUpdate, listener as never);
+				return () => {
+					this.client.off(Events.WebhooksUpdate, listener as never);
 				};
 			}
 			case 'voiceStateUpdate': {
@@ -623,6 +704,13 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
 		return serializeMessage(message);
 	}
 
+	private async sendDirectMessage(payload: BotActionPayloadMap['sendDirectMessage']) {
+		const user = await this.client.users.fetch(payload.userId);
+		const channel = await user.createDM();
+		const message = await channel.send(toSendOptions(payload));
+		return serializeMessage(message);
+	}
+
 	private async editMessage(payload: BotActionPayloadMap['editMessage']) {
 		const channel = await this.fetchMessageChannel(payload.channelId);
 		const message = await channel.messages.fetch(payload.messageId);
@@ -639,6 +727,47 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
 			channelId: payload.channelId,
 			messageId: payload.messageId,
 		} as const;
+	}
+
+	private async pinMessage(payload: BotActionPayloadMap['pinMessage']) {
+		const channel = await this.fetchMessageChannel(payload.channelId);
+		const message = await channel.messages.fetch(payload.messageId);
+		await message.pin(payload.reason);
+		return {
+			pinned: true,
+			channelId: payload.channelId,
+			messageId: payload.messageId,
+		} as const;
+	}
+
+	private async unpinMessage(payload: BotActionPayloadMap['unpinMessage']) {
+		const channel = await this.fetchMessageChannel(payload.channelId);
+		const message = await channel.messages.fetch(payload.messageId);
+		await message.unpin(payload.reason);
+		return {
+			pinned: false,
+			channelId: payload.channelId,
+			messageId: payload.messageId,
+		} as const;
+	}
+
+	private async bulkDeleteMessages(payload: BotActionPayloadMap['bulkDeleteMessages']) {
+		const channel = await this.client.channels.fetch(payload.channelId);
+		if (!channel || typeof (channel as { bulkDelete?: unknown }).bulkDelete !== 'function') {
+			throw new ActionExecutionError(
+				'NOT_FOUND',
+				`Channel "${payload.channelId}" was not found or does not support bulk delete.`,
+			);
+		}
+		const deleted = await (
+			channel as { bulkDelete: (ids: readonly Snowflake[], filterOld: boolean) => Promise<Map<string, unknown>> }
+		).bulkDelete(payload.messageIds, payload.filterOld ?? true);
+		const deletedMessageIds = [...deleted.keys()];
+		return {
+			channelId: payload.channelId,
+			deletedCount: deletedMessageIds.length,
+			deletedMessageIds,
+		};
 	}
 
 	private async replyToInteraction(payload: BotActionPayloadMap['replyToInteraction']) {
@@ -746,6 +875,27 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
 		return serializeMessage(message);
 	}
 
+	private async fetchChannel(payload: BotActionPayloadMap['fetchChannel']) {
+		const channel = await this.client.channels.fetch(payload.channelId);
+		if (!channel) {
+			throw new ActionExecutionError('NOT_FOUND', `Channel "${payload.channelId}" was not found.`);
+		}
+		return serializeChannel(channel);
+	}
+
+	private async fetchThread(payload: BotActionPayloadMap['fetchThread']) {
+		const raw = await this.client.channels.fetch(payload.threadId);
+		if (!raw || !raw.isThread()) {
+			throw new ActionExecutionError('NOT_FOUND', `Thread "${payload.threadId}" was not found.`);
+		}
+		return serializeThread(raw);
+	}
+
+	private async fetchGuild(payload: BotActionPayloadMap['fetchGuild']) {
+		const guild = await this.client.guilds.fetch(payload.guildId);
+		return serializeGuild(guild);
+	}
+
 	private async fetchMember(payload: BotActionPayloadMap['fetchMember']) {
 		const guild = await this.client.guilds.fetch(payload.guildId);
 		const member = await guild.members.fetch(payload.userId);
@@ -758,6 +908,15 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
 			...(payload.reason ? { reason: payload.reason } : {}),
 			...(payload.deleteMessageSeconds !== undefined ? { deleteMessageSeconds: payload.deleteMessageSeconds } : {}),
 		});
+		return {
+			guildId: payload.guildId,
+			userId: payload.userId,
+		};
+	}
+
+	private async unbanMember(payload: BotActionPayloadMap['unbanMember']) {
+		const guild = await this.client.guilds.fetch(payload.guildId);
+		await guild.members.unban(payload.userId, payload.reason);
 		return {
 			guildId: payload.guildId,
 			userId: payload.userId,

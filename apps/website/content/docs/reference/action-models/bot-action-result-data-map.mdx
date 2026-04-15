@@ -14,8 +14,12 @@ Reference for `BotActionResultDataMap`, exported as part of the public Shardwire
 ```ts
 export interface BotActionResultDataMap {
 	sendMessage: BridgeMessage;
+	sendDirectMessage: BridgeMessage;
 	editMessage: BridgeMessage;
 	deleteMessage: DeleteMessageActionResult;
+	pinMessage: PinMessageActionResult;
+	unpinMessage: UnpinMessageActionResult;
+	bulkDeleteMessages: BulkDeleteMessagesActionResult;
 	replyToInteraction: BridgeMessage;
 	deferInteraction: DeferInteractionActionResult;
 	deferUpdateInteraction: DeferUpdateInteractionActionResult;
@@ -25,8 +29,12 @@ export interface BotActionResultDataMap {
 	updateInteraction: BridgeMessage;
 	showModal: ShowModalActionResult;
 	fetchMessage: BridgeMessage;
+	fetchChannel: BridgeChannel;
+	fetchThread: BridgeThread;
+	fetchGuild: BridgeGuild;
 	fetchMember: BridgeGuildMember;
 	banMember: MemberModerationActionResult;
+	unbanMember: MemberModerationActionResult;
 	kickMember: MemberModerationActionResult;
 	addMemberRole: BridgeGuildMember;
 	removeMemberRole: BridgeGuildMember;
