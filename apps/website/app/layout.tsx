@@ -27,7 +27,7 @@ const display = Newsreader({
 });
 
 export const metadata: Metadata = {
-  /** Project site: https://unloopedmido.github.io/shardwire/ (Next `basePath` is `/shardwire` in production). */
+  /** Project site: https://shardwire.js.org/ */
   metadataBase: new URL(siteConfig.docsUrl),
   title: {
     default: 'Shardwire — Discord split-process bridge',
