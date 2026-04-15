@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import type { ComponentProps, ComponentType } from 'react';
+import type { ComponentType } from 'react';
+import type { TOCItemType } from 'fumadocs-core/toc';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
 import {
   DocsBody,
@@ -19,6 +20,57 @@ type DocsPageProps = {
   params: Promise<{ slug?: string[] }>;
 };
 
+type MDXComponent = ComponentType<{ components?: ReturnType<typeof getMDXComponents> }>;
+type DocsRuntimeData = {
+  body: MDXComponent;
+  toc?: TOCItemType[];
+  full?: boolean;
+  title: string;
+  description?: string;
+};
+
+function isMDXComponent(value: unknown): value is MDXComponent {
+  return typeof value === 'function';
+}
+
+function isDocsToc(value: unknown): value is TOCItemType[] {
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (item): item is TOCItemType =>
+        typeof item === 'object' &&
+        item !== null &&
+        'title' in item &&
+        'url' in item &&
+        'depth' in item &&
+        typeof item.url === 'string' &&
+        typeof item.depth === 'number',
+    )
+  );
+}
+
+function parseDocsRuntimeData(value: object): DocsRuntimeData | null {
+  if (!('body' in value) || !isMDXComponent(value.body)) {
+    return null;
+  }
+
+  if (!('title' in value) || typeof value.title !== 'string') {
+    return null;
+  }
+
+  const toc = 'toc' in value && isDocsToc(value.toc) ? value.toc : undefined;
+  const full = 'full' in value && typeof value.full === 'boolean' ? value.full : undefined;
+  const description = 'description' in value && typeof value.description === 'string' ? value.description : undefined;
+
+  return {
+    body: value.body,
+    title: value.title,
+    toc,
+    full,
+    description,
+  };
+}
+
 export default async function Page({ params }: DocsPageProps) {
   const { slug } = await params;
   const page = source.getPage(slug);
@@ -27,22 +79,19 @@ export default async function Page({ params }: DocsPageProps) {
     notFound();
   }
 
-  const pageData = page.data as Record<string, unknown>;
-  const body = pageData.body;
+  const docsData = parseDocsRuntimeData(page.data);
 
-  if (typeof body !== 'function') {
+  if (!docsData) {
     notFound();
   }
 
-  const MDX = body as ComponentType<{ components?: ReturnType<typeof getMDXComponents> }>;
-  const toc = Array.isArray(pageData.toc) ? (pageData.toc as ComponentProps<typeof DocsPage>['toc']) : undefined;
-  const full = typeof pageData.full === 'boolean' ? pageData.full : undefined;
+  const MDX = docsData.body;
 
   return (
-    <DocsPage toc={toc} full={full}>
+    <DocsPage toc={docsData.toc} full={docsData.full}>
       <DocsJsonLd page={page} />
-      <DocsTitle>{page.data.title}</DocsTitle>
-      <DocsDescription>{page.data.description}</DocsDescription>
+      <DocsTitle>{docsData.title}</DocsTitle>
+      <DocsDescription>{docsData.description}</DocsDescription>
       <ViewOptionsPopover githubUrl={docsRepositoryUrl(page.path)} />
       <DocsBody>
         <MDX
