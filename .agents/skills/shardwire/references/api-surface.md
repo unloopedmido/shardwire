@@ -1,7 +1,7 @@
 # Shardwire API Surface (Current)
 
-Website reference: `https://unloopedmido.github.io/shardwire/`
-Error reference: `https://unloopedmido.github.io/shardwire/docs/operations/troubleshooting/`
+Website reference: `https://shardwire.js.org/`
+Error reference: `https://shardwire.js.org/docs/operations/troubleshooting/`
 
 ## Public entry points
 
@@ -145,6 +145,6 @@ Use this during startup and troubleshooting.
 
 Many runtime/config errors include:
 
-`See: https://unloopedmido.github.io/shardwire/docs/operations/troubleshooting/#<anchor>`
+`See: https://shardwire.js.org/docs/operations/troubleshooting/#<anchor>`
 
 When this appears, route users to the exact anchor and provide concise remediation.

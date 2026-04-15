@@ -3,12 +3,11 @@ export const siteConfig = {
   description: 'Discord-first bridge for splitting gateway runtime from app logic.',
   githubUrl: 'https://github.com/unloopedmido/shardwire',
   npmUrl: 'https://www.npmjs.com/package/shardwire',
-  docsUrl: 'https://unloopedmido.github.io/shardwire/',
-  basePath: process.env.NODE_ENV === 'production' ? '/shardwire' : '',
+  docsUrl: 'https://shardwire.js.org/',
 };
 
 /**
- * Absolute public URL for a Next.js pathname (no `basePath` segment — e.g. `/docs/foo`, `/icon.png`).
+ * Absolute public URL for a Next.js pathname (e.g. `/docs/foo`, `/icon.png`).
  * Matches `trailingSlash: true` for HTML routes.
  */
 export function absoluteUrlFromPathname(pathname: string): string {
@@ -27,8 +26,7 @@ export const defaultOgImage = {
 } as const;
 
 export function withBasePath(pathname: string): string {
-  if (!pathname.startsWith('/')) return pathname;
-  return siteConfig.basePath.length > 0 ? `${siteConfig.basePath}${pathname}` : pathname;
+  return pathname;
 }
 
 export function docsRepositoryUrl(contentPath: string): string {

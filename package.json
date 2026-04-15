@@ -1,7 +1,7 @@
 {
 	"name": "shardwire-monorepo",
 	"private": true,
-	"homepage": "https://unloopedmido.github.io/shardwire/",
+	"homepage": "https://shardwire.js.org/",
 	"workspaces": [
 		"packages/*",
 		"apps/*"

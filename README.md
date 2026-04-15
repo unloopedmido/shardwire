@@ -14,7 +14,7 @@ Shardwire is a Discord-first bridge for running Discord gateway/runtime in one p
 
 ## Documentation
 
-[https://unloopedmido.github.io/shardwire/](https://unloopedmido.github.io/shardwire/)
+[https://shardwire.js.org/](https://shardwire.js.org/)
 
 ## Install
 

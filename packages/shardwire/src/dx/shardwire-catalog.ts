@@ -9,7 +9,7 @@ import type { ShardwireCatalog, ShardwireSubscriptionFilterKey } from '../discor
 /**
  * Returns the full static Shardwire catalog (not negotiated per-connection).
  *
- * @see https://unloopedmido.github.io/shardwire/docs/reference/contracts-and-diagnostics/get-shardwire-catalog/
+ * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/get-shardwire-catalog/
  */
 export function getShardwireCatalog(): ShardwireCatalog {
 	return {

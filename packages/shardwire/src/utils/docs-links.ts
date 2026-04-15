@@ -1,5 +1,5 @@
 /** Origin of the published Shardwire docs (no trailing slash). */
-export const SHARDWIRE_DOCS_ORIGIN = 'https://unloopedmido.github.io/shardwire' as const;
+export const SHARDWIRE_DOCS_ORIGIN = 'https://shardwire.js.org' as const;
 
 /**
  * Canonical documentation URLs for IDE `@see` tags and runtime links.

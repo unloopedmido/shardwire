@@ -7,6 +7,15 @@ This page lists **notable changes in the `shardwire` package** from **v1.0.0** t
 
 Release tags on GitHub: [`v1.0.0` … current](https://github.com/unloopedmido/shardwire/tags).
 
+## 1.7.1
+
+Patch release focused on docs-domain migration polish and publish readiness.
+
+- Removed legacy project-site `/shardwire` website base-path assumptions so deployment works from custom-domain root (`https://shardwire.js.org/`).
+- Updated canonical docs URL configuration and generated/runtime reference links to the custom domain.
+- Updated package and repository homepages/readmes to the new docs domain.
+- Updated the Shardwire skill and its reference notes to point to the custom-domain docs routes.
+
 ## 1.7.0
 
 Minor release focused on full voice-surface coverage and publish readiness polish.
@@ -37,9 +46,9 @@ Patch release: include package metadata in the npm tarball.
 Patch release focused on reliability and docs after the docs-site / monorepo migration.
 
 - Fixed reconnect behavior so exponential backoff no longer resets on socket open before auth succeeds.
-- Added stable troubleshooting links in runtime and config errors (`See: https://unloopedmido.github.io/shardwire/errors/#…`).
+- Added stable troubleshooting links in runtime and config errors (`See: https://shardwire.js.org/docs/operations/troubleshooting/#…`).
 - Added an **Errors** documentation section with anchor-based remediation for common failures.
-- Updated GitHub Pages configuration for project-site hosting (`/shardwire` base and HTTPS canonical URL).
+- Updated deployment configuration and canonical docs URL handling.
 - Hardened CI and publish workflows for the workspace layout and restored docs build checks in CI.
 - Aligned workspace formatting with workspace-local ignore rules for generated artifacts.
 
