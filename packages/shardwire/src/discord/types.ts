@@ -302,6 +302,14 @@ export interface GuildDeleteEventPayload extends EventEnvelopeBase {
 }
 
 /**
+ * @see https://shardwire.js.org/docs/reference/event-and-data-models/guild-update-event-payload/
+ */
+export interface GuildUpdateEventPayload extends EventEnvelopeBase {
+	oldGuild?: BridgeGuild;
+	guild: BridgeGuild;
+}
+
+/**
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/thread-create-event-payload/
  */
 export interface ThreadCreateEventPayload extends EventEnvelopeBase {
@@ -334,6 +342,22 @@ export interface MessageReactionAddEventPayload extends EventEnvelopeBase {
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/message-reaction-remove-event-payload/
  */
 export interface MessageReactionRemoveEventPayload extends EventEnvelopeBase {
+	reaction: BridgeMessageReaction;
+}
+
+/**
+ * @see https://shardwire.js.org/docs/reference/event-and-data-models/message-reaction-remove-all-event-payload/
+ */
+export interface MessageReactionRemoveAllEventPayload extends EventEnvelopeBase {
+	channelId: Snowflake;
+	messageId: Snowflake;
+	guildId?: Snowflake;
+}
+
+/**
+ * @see https://shardwire.js.org/docs/reference/event-and-data-models/message-reaction-remove-emoji-event-payload/
+ */
+export interface MessageReactionRemoveEmojiEventPayload extends EventEnvelopeBase {
 	reaction: BridgeMessageReaction;
 }
 
@@ -381,6 +405,24 @@ export interface VoiceStateUpdateEventPayload extends EventEnvelopeBase {
 }
 
 /**
+ * @see https://shardwire.js.org/docs/reference/event-and-data-models/typing-start-event-payload/
+ */
+export interface TypingStartEventPayload extends EventEnvelopeBase {
+	channelId: Snowflake;
+	userId: Snowflake;
+	startedAt: number;
+	guildId?: Snowflake;
+}
+
+/**
+ * @see https://shardwire.js.org/docs/reference/event-and-data-models/webhooks-update-event-payload/
+ */
+export interface WebhooksUpdateEventPayload extends EventEnvelopeBase {
+	channelId: Snowflake;
+	guildId: Snowflake;
+}
+
+/**
  * @see https://shardwire.js.org/docs/reference/event-and-data-models/bot-event-payload-map/
  */
 export interface BotEventPayloadMap {
@@ -392,8 +434,11 @@ export interface BotEventPayloadMap {
 	messageBulkDelete: MessageBulkDeleteEventPayload;
 	messageReactionAdd: MessageReactionAddEventPayload;
 	messageReactionRemove: MessageReactionRemoveEventPayload;
+	messageReactionRemoveAll: MessageReactionRemoveAllEventPayload;
+	messageReactionRemoveEmoji: MessageReactionRemoveEmojiEventPayload;
 	guildCreate: GuildCreateEventPayload;
 	guildDelete: GuildDeleteEventPayload;
+	guildUpdate: GuildUpdateEventPayload;
 	guildMemberAdd: GuildMemberAddEventPayload;
 	guildMemberRemove: GuildMemberRemoveEventPayload;
 	guildMemberUpdate: GuildMemberUpdateEventPayload;
@@ -403,6 +448,8 @@ export interface BotEventPayloadMap {
 	channelCreate: ChannelCreateEventPayload;
 	channelUpdate: ChannelUpdateEventPayload;
 	channelDelete: ChannelDeleteEventPayload;
+	typingStart: TypingStartEventPayload;
+	webhooksUpdate: WebhooksUpdateEventPayload;
 	voiceStateUpdate: VoiceStateUpdateEventPayload;
 }
 
@@ -432,6 +479,13 @@ export interface SendMessageActionPayload extends BridgeMessageInput {
 }
 
 /**
+ * @see https://shardwire.js.org/docs/reference/action-models/send-direct-message-action-payload/
+ */
+export interface SendDirectMessageActionPayload extends BridgeMessageInput {
+	userId: Snowflake;
+}
+
+/**
  * @see https://shardwire.js.org/docs/reference/action-models/edit-message-action-payload/
  */
 export interface EditMessageActionPayload extends BridgeMessageInput {
@@ -445,6 +499,37 @@ export interface EditMessageActionPayload extends BridgeMessageInput {
 export interface DeleteMessageActionPayload {
 	channelId: Snowflake;
 	messageId: Snowflake;
+}
+
+/**
+ * @see https://shardwire.js.org/docs/reference/action-models/pin-message-action-payload/
+ */
+export interface PinMessageActionPayload {
+	channelId: Snowflake;
+	messageId: Snowflake;
+	reason?: string;
+}
+
+/**
+ * @see https://shardwire.js.org/docs/reference/action-models/unpin-message-action-payload/
+ */
+export interface UnpinMessageActionPayload {
+	channelId: Snowflake;
+	messageId: Snowflake;
+	reason?: string;
+}
+
+/**
+ * @see https://shardwire.js.org/docs/reference/action-models/bulk-delete-messages-action-payload/
+ */
+export interface BulkDeleteMessagesActionPayload {
+	channelId: Snowflake;
+	messageIds: readonly Snowflake[];
+	/**
+	 * Mirrors discord.js `bulkDelete(..., filterOld)`.
+	 * Defaults to `true` (skip messages older than 14 days) when omitted.
+	 */
+	filterOld?: boolean;
 }
 
 /**
@@ -518,6 +603,27 @@ export interface FetchMessageActionPayload {
 }
 
 /**
+ * @see https://shardwire.js.org/docs/reference/action-models/fetch-channel-action-payload/
+ */
+export interface FetchChannelActionPayload {
+	channelId: Snowflake;
+}
+
+/**
+ * @see https://shardwire.js.org/docs/reference/action-models/fetch-thread-action-payload/
+ */
+export interface FetchThreadActionPayload {
+	threadId: Snowflake;
+}
+
+/**
+ * @see https://shardwire.js.org/docs/reference/action-models/fetch-guild-action-payload/
+ */
+export interface FetchGuildActionPayload {
+	guildId: Snowflake;
+}
+
+/**
  * @see https://shardwire.js.org/docs/reference/action-models/fetch-member-action-payload/
  */
 export interface FetchMemberActionPayload {
@@ -533,6 +639,15 @@ export interface BanMemberActionPayload {
 	userId: Snowflake;
 	reason?: string;
 	deleteMessageSeconds?: number;
+}
+
+/**
+ * @see https://shardwire.js.org/docs/reference/action-models/unban-member-action-payload/
+ */
+export interface UnbanMemberActionPayload {
+	guildId: Snowflake;
+	userId: Snowflake;
+	reason?: string;
 }
 
 /**
@@ -700,8 +815,12 @@ export interface SetMemberSuppressedActionPayload {
  */
 export interface BotActionPayloadMap {
 	sendMessage: SendMessageActionPayload;
+	sendDirectMessage: SendDirectMessageActionPayload;
 	editMessage: EditMessageActionPayload;
 	deleteMessage: DeleteMessageActionPayload;
+	pinMessage: PinMessageActionPayload;
+	unpinMessage: UnpinMessageActionPayload;
+	bulkDeleteMessages: BulkDeleteMessagesActionPayload;
 	replyToInteraction: ReplyToInteractionActionPayload;
 	deferInteraction: DeferInteractionActionPayload;
 	deferUpdateInteraction: DeferUpdateInteractionActionPayload;
@@ -711,8 +830,12 @@ export interface BotActionPayloadMap {
 	updateInteraction: UpdateInteractionActionPayload;
 	showModal: ShowModalActionPayload;
 	fetchMessage: FetchMessageActionPayload;
+	fetchChannel: FetchChannelActionPayload;
+	fetchThread: FetchThreadActionPayload;
+	fetchGuild: FetchGuildActionPayload;
 	fetchMember: FetchMemberActionPayload;
 	banMember: BanMemberActionPayload;
+	unbanMember: UnbanMemberActionPayload;
 	kickMember: KickMemberActionPayload;
 	addMemberRole: AddMemberRoleActionPayload;
 	removeMemberRole: RemoveMemberRoleActionPayload;
@@ -738,6 +861,33 @@ export interface DeleteMessageActionResult {
 	deleted: true;
 	channelId: Snowflake;
 	messageId: Snowflake;
+}
+
+/**
+ * @see https://shardwire.js.org/docs/reference/action-models/pin-message-action-result/
+ */
+export interface PinMessageActionResult {
+	pinned: true;
+	channelId: Snowflake;
+	messageId: Snowflake;
+}
+
+/**
+ * @see https://shardwire.js.org/docs/reference/action-models/unpin-message-action-result/
+ */
+export interface UnpinMessageActionResult {
+	pinned: false;
+	channelId: Snowflake;
+	messageId: Snowflake;
+}
+
+/**
+ * @see https://shardwire.js.org/docs/reference/action-models/bulk-delete-messages-action-result/
+ */
+export interface BulkDeleteMessagesActionResult {
+	channelId: Snowflake;
+	deletedCount: number;
+	deletedMessageIds: Snowflake[];
 }
 
 /**
@@ -802,8 +952,12 @@ export interface DeleteChannelActionResult {
  */
 export interface BotActionResultDataMap {
 	sendMessage: BridgeMessage;
+	sendDirectMessage: BridgeMessage;
 	editMessage: BridgeMessage;
 	deleteMessage: DeleteMessageActionResult;
+	pinMessage: PinMessageActionResult;
+	unpinMessage: UnpinMessageActionResult;
+	bulkDeleteMessages: BulkDeleteMessagesActionResult;
 	replyToInteraction: BridgeMessage;
 	deferInteraction: DeferInteractionActionResult;
 	deferUpdateInteraction: DeferUpdateInteractionActionResult;
@@ -813,8 +967,12 @@ export interface BotActionResultDataMap {
 	updateInteraction: BridgeMessage;
 	showModal: ShowModalActionResult;
 	fetchMessage: BridgeMessage;
+	fetchChannel: BridgeChannel;
+	fetchThread: BridgeThread;
+	fetchGuild: BridgeGuild;
 	fetchMember: BridgeGuildMember;
 	banMember: MemberModerationActionResult;
+	unbanMember: MemberModerationActionResult;
 	kickMember: MemberModerationActionResult;
 	addMemberRole: BridgeGuildMember;
 	removeMemberRole: BridgeGuildMember;
@@ -853,11 +1011,15 @@ export interface EventSubscriptionFilter {
 	guildId?: Snowflake | readonly Snowflake[];
 	channelId?: Snowflake | readonly Snowflake[];
 	userId?: Snowflake | readonly Snowflake[];
+	messageId?: Snowflake | readonly Snowflake[];
+	interactionId?: Snowflake | readonly Snowflake[];
 	commandName?: string | readonly string[];
 	/** Matches `BridgeInteraction.customId` when present (components, modals). */
 	customId?: string | readonly string[];
 	/** Matches `BridgeInteraction.kind`. */
 	interactionKind?: BridgeInteractionKind | readonly BridgeInteractionKind[];
+	/** Matches reaction emoji by identifier/name/string form where available. */
+	emoji?: string | readonly string[];
 	/** Matches Discord `ChannelType` when present on the payload (messages, interactions, bulk delete). */
 	channelType?: number | readonly number[];
 	/** Matches `BridgeMessage.parentChannelId` / thread parent / channel parent when present. */

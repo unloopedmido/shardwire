@@ -28,12 +28,18 @@ describe('event subscription filters', () => {
 				parentChannelId: ['a', 'b'],
 				threadId: ['thread-1'],
 				voiceChannelId: ['voice-1'],
+				messageId: ['m1'],
+				interactionId: ['ix-1'],
+				emoji: ['✅'],
 			}),
 		).toEqual({
 			channelType: [0, 11],
 			parentChannelId: ['a', 'b'],
 			threadId: ['thread-1'],
 			voiceChannelId: ['voice-1'],
+			messageId: ['m1'],
+			interactionId: ['ix-1'],
+			emoji: ['✅'],
 		});
 	});
 
@@ -134,6 +140,74 @@ describe('event subscription filters', () => {
 				},
 				customId: 'btn',
 			},
+		};
+		expect(matchesEventSubscription(sub, payload)).toBe(true);
+	});
+
+	it('matches interactionCreate by interactionId', () => {
+		const sub: EventSubscription<'interactionCreate'> = {
+			name: 'interactionCreate',
+			filter: { interactionId: 'ix-99' },
+		};
+		const payload: BotEventPayloadMap['interactionCreate'] = {
+			receivedAt: 1,
+			interaction: {
+				id: 'ix-99',
+				applicationId: 'app',
+				kind: 'command',
+				commandName: 'ping',
+				user: {
+					id: 'u1',
+					username: 'x',
+					discriminator: '0',
+					bot: false,
+					system: false,
+				},
+			},
+		};
+		expect(matchesEventSubscription(sub, payload)).toBe(true);
+	});
+
+	it('matches messageReactionAdd by emoji and messageId', () => {
+		const sub: EventSubscription<'messageReactionAdd'> = {
+			name: 'messageReactionAdd',
+			filter: { emoji: '✅', messageId: 'm-1' },
+		};
+		const payload: BotEventPayloadMap['messageReactionAdd'] = {
+			receivedAt: 1,
+			reaction: {
+				channelId: 'c1',
+				messageId: 'm-1',
+				emoji: { name: '✅' },
+			},
+		};
+		expect(matchesEventSubscription(sub, payload)).toBe(true);
+	});
+
+	it('matches typingStart by userId and channelId', () => {
+		const sub: EventSubscription<'typingStart'> = {
+			name: 'typingStart',
+			filter: { userId: 'u1', channelId: 'c1' },
+		};
+		const payload: BotEventPayloadMap['typingStart'] = {
+			receivedAt: 1,
+			channelId: 'c1',
+			userId: 'u1',
+			startedAt: Date.now(),
+			guildId: 'g1',
+		};
+		expect(matchesEventSubscription(sub, payload)).toBe(true);
+	});
+
+	it('matches webhooksUpdate by guildId and channelId', () => {
+		const sub: EventSubscription<'webhooksUpdate'> = {
+			name: 'webhooksUpdate',
+			filter: { guildId: 'g1', channelId: 'c2' },
+		};
+		const payload: BotEventPayloadMap['webhooksUpdate'] = {
+			receivedAt: 1,
+			guildId: 'g1',
+			channelId: 'c2',
 		};
 		expect(matchesEventSubscription(sub, payload)).toBe(true);
 	});
