@@ -24,6 +24,12 @@
 			"prompt": "I want to moderate voice from my app process. Show how to subscribe to voice updates for one channel and move/mute a member through Shardwire with safe result handling.",
 			"expected_output": "Uses app.on('voiceStateUpdate', ..., { voiceChannelId }) plus moveMemberVoice/setMemberMute with ActionResult ok/error branching and intent/scope reminders.",
 			"files": []
+		},
+		{
+			"id": 5,
+			"prompt": "I need to react moderation events by emoji and then bulk-delete spam. Show a Shardwire app flow using filters and safe action result handling.",
+			"expected_output": "Uses reaction subscriptions with `emoji` and/or `messageId` filters plus app.actions.bulkDeleteMessages with ActionResult ok/error branching and intent/scope checks.",
+			"files": []
 		}
 	]
 }

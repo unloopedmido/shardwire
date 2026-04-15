@@ -13,9 +13,12 @@ interface NormalizedEventSubscriptionFilter {
 	guildId?: string[];
 	channelId?: string[];
 	userId?: string[];
+	messageId?: string[];
+	interactionId?: string[];
 	commandName?: string[];
 	customId?: string[];
 	interactionKind?: BridgeInteractionKind[];
+	emoji?: string[];
 	channelType?: number[];
 	parentChannelId?: string[];
 	threadId?: string[];
@@ -70,9 +73,12 @@ export function normalizeEventSubscriptionFilter(
 	const guildIds = normalizeStringList(filter.guildId);
 	const channelIds = normalizeStringList(filter.channelId);
 	const userIds = normalizeStringList(filter.userId);
+	const messageIds = normalizeStringList(filter.messageId);
+	const interactionIds = normalizeStringList(filter.interactionId);
 	const commandNames = normalizeStringList(filter.commandName);
 	const customIds = normalizeStringList(filter.customId);
 	const interactionKinds = normalizeKindList(filter.interactionKind);
+	const emojis = normalizeStringList(filter.emoji);
 	const channelTypes = normalizeNumberList(filter.channelType);
 	const parentChannelIds = normalizeStringList(filter.parentChannelId);
 	const threadIds = normalizeStringList(filter.threadId);
@@ -87,6 +93,12 @@ export function normalizeEventSubscriptionFilter(
 	if (userIds) {
 		normalized.userId = userIds;
 	}
+	if (messageIds) {
+		normalized.messageId = messageIds;
+	}
+	if (interactionIds) {
+		normalized.interactionId = interactionIds;
+	}
 	if (commandNames) {
 		normalized.commandName = commandNames;
 	}
@@ -95,6 +107,9 @@ export function normalizeEventSubscriptionFilter(
 	}
 	if (interactionKinds) {
 		normalized.interactionKind = interactionKinds;
+	}
+	if (emojis) {
+		normalized.emoji = emojis;
 	}
 	if (channelTypes) {
 		normalized.channelType = channelTypes;
@@ -173,9 +188,12 @@ function eventMetadata(
 	guildId?: string;
 	channelId?: string;
 	userId?: string;
+	messageId?: string;
+	interactionId?: string;
 	commandName?: string;
 	customId?: string;
 	interactionKind?: BridgeInteractionKind;
+	emoji?: string;
 	channelType?: number;
 	parentChannelId?: string;
 	threadId?: string;
@@ -195,6 +213,7 @@ function eventMetadata(
 				...(ix.guildId ? { guildId: ix.guildId } : {}),
 				...(ix.channelId ? { channelId: ix.channelId } : {}),
 				userId: ix.user.id,
+				interactionId: ix.id,
 				...(ix.commandName ? { commandName: ix.commandName } : {}),
 				...(ix.customId ? { customId: ix.customId } : {}),
 				interactionKind: ix.kind,
@@ -210,6 +229,7 @@ function eventMetadata(
 			return {
 				...(msg.guildId ? { guildId: msg.guildId } : {}),
 				channelId: msg.channelId,
+				messageId: msg.id,
 				...(msg.author ? { userId: msg.author.id } : {}),
 				...(msg.channelType !== undefined ? { channelType: msg.channelType } : {}),
 				...(msg.parentChannelId ? { parentChannelId: msg.parentChannelId } : {}),
@@ -223,6 +243,7 @@ function eventMetadata(
 			return {
 				...(msg.guildId ? { guildId: msg.guildId } : {}),
 				channelId: msg.channelId,
+				messageId: msg.id,
 				...(msg.author ? { userId: msg.author.id } : {}),
 				...(msg.channelType !== undefined ? { channelType: msg.channelType } : {}),
 				...(msg.parentChannelId ? { parentChannelId: msg.parentChannelId } : {}),
@@ -236,6 +257,7 @@ function eventMetadata(
 			return {
 				...(msg.guildId ? { guildId: msg.guildId } : {}),
 				channelId: msg.channelId,
+				messageId: msg.id,
 				...(msg.channelType !== undefined ? { channelType: msg.channelType } : {}),
 				...(msg.parentChannelId ? { parentChannelId: msg.parentChannelId } : {}),
 				...(threadId ? { threadId } : {}),
@@ -257,18 +279,42 @@ function eventMetadata(
 		}
 		case 'messageReactionAdd': {
 			const reactionPayload = payload as BotEventPayloadMap['messageReactionAdd'];
+			const emoji = reactionPayload.reaction.emoji.id ?? reactionPayload.reaction.emoji.name;
 			return {
 				...(reactionPayload.reaction.guildId ? { guildId: reactionPayload.reaction.guildId } : {}),
 				channelId: reactionPayload.reaction.channelId,
+				messageId: reactionPayload.reaction.messageId,
 				...(reactionPayload.reaction.user ? { userId: reactionPayload.reaction.user.id } : {}),
+				...(emoji ? { emoji } : {}),
 			};
 		}
 		case 'messageReactionRemove': {
 			const reactionPayload = payload as BotEventPayloadMap['messageReactionRemove'];
+			const emoji = reactionPayload.reaction.emoji.id ?? reactionPayload.reaction.emoji.name;
 			return {
 				...(reactionPayload.reaction.guildId ? { guildId: reactionPayload.reaction.guildId } : {}),
 				channelId: reactionPayload.reaction.channelId,
+				messageId: reactionPayload.reaction.messageId,
 				...(reactionPayload.reaction.user ? { userId: reactionPayload.reaction.user.id } : {}),
+				...(emoji ? { emoji } : {}),
+			};
+		}
+		case 'messageReactionRemoveAll': {
+			const reactionPayload = payload as BotEventPayloadMap['messageReactionRemoveAll'];
+			return {
+				...(reactionPayload.guildId ? { guildId: reactionPayload.guildId } : {}),
+				channelId: reactionPayload.channelId,
+				messageId: reactionPayload.messageId,
+			};
+		}
+		case 'messageReactionRemoveEmoji': {
+			const reactionPayload = payload as BotEventPayloadMap['messageReactionRemoveEmoji'];
+			const emoji = reactionPayload.reaction.emoji.id ?? reactionPayload.reaction.emoji.name;
+			return {
+				...(reactionPayload.reaction.guildId ? { guildId: reactionPayload.reaction.guildId } : {}),
+				channelId: reactionPayload.reaction.channelId,
+				messageId: reactionPayload.reaction.messageId,
+				...(emoji ? { emoji } : {}),
 			};
 		}
 		case 'guildMemberAdd': {
@@ -293,7 +339,8 @@ function eventMetadata(
 			};
 		}
 		case 'guildCreate':
-		case 'guildDelete': {
+		case 'guildDelete':
+		case 'guildUpdate': {
 			const guildPayload = payload as BotEventPayloadMap['guildCreate'];
 			return {
 				guildId: guildPayload.guild.id,
@@ -325,6 +372,21 @@ function eventMetadata(
 				...(ch.parentId ? { parentChannelId: ch.parentId } : {}),
 			};
 		}
+		case 'typingStart': {
+			const typingPayload = payload as BotEventPayloadMap['typingStart'];
+			return {
+				...(typingPayload.guildId ? { guildId: typingPayload.guildId } : {}),
+				channelId: typingPayload.channelId,
+				userId: typingPayload.userId,
+			};
+		}
+		case 'webhooksUpdate': {
+			const webhookPayload = payload as BotEventPayloadMap['webhooksUpdate'];
+			return {
+				guildId: webhookPayload.guildId,
+				channelId: webhookPayload.channelId,
+			};
+		}
 		case 'voiceStateUpdate': {
 			const voicePayload = payload as BotEventPayloadMap['voiceStateUpdate'];
 			return {
@@ -350,9 +412,12 @@ export function matchesEventSubscription(subscription: EventSubscription, payloa
 		matchesField(metadata.guildId, normalized.filter.guildId) &&
 		matchesField(metadata.channelId, normalized.filter.channelId) &&
 		matchesField(metadata.userId, normalized.filter.userId) &&
+		matchesField(metadata.messageId, normalized.filter.messageId) &&
+		matchesField(metadata.interactionId, normalized.filter.interactionId) &&
 		matchesField(metadata.commandName, normalized.filter.commandName) &&
 		matchesField(metadata.customId, normalized.filter.customId) &&
 		matchesKind(metadata.interactionKind, normalized.filter.interactionKind) &&
+		matchesField(metadata.emoji, normalized.filter.emoji) &&
 		matchesNumberField(metadata.channelType, normalized.filter.channelType) &&
 		matchesField(metadata.parentChannelId, normalized.filter.parentChannelId) &&
 		matchesField(metadata.threadId, normalized.filter.threadId) &&

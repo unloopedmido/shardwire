@@ -7,6 +7,18 @@ This page lists **notable changes in the `shardwire` package** from **v1.0.0** t
 
 Release tags on GitHub: [`v1.0.0` … current](https://github.com/unloopedmido/shardwire/tags).
 
+## 1.8.0
+
+Minor release focused on broad Discord surface expansion and release polish.
+
+- Added built-in events: **`messageReactionRemoveAll`**, **`messageReactionRemoveEmoji`**, **`guildUpdate`**, **`typingStart`**, and **`webhooksUpdate`**.
+- Added built-in actions: **`sendDirectMessage`**, **`pinMessage`**, **`unpinMessage`**, **`bulkDeleteMessages`**, **`fetchChannel`**, **`fetchThread`**, **`fetchGuild`**, and **`unbanMember`**.
+- Added subscription filter keys: **`messageId`**, **`interactionId`**, and **`emoji`**.
+- Extended runtime, diagnostics metadata, app action bindings, and generated reference docs to cover the expanded catalog.
+- Bumped package version to **`1.8.0`** (semver minor for additive API surface).
+- Refreshed workspace dependencies to latest compatible versions and verified current GitHub Actions workflow major versions.
+- Updated Shardwire skill docs/references/evals to align with the new built-in event/action/filter catalog.
+
 ## 1.7.1
 
 Patch release focused on docs-domain migration polish and publish readiness.

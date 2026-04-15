@@ -78,7 +78,7 @@ Debug by comparing expected permissions with `app.capabilities()`.
 - Missing Discord intent on bot bridge.
 - Event not allowed by scoped secret.
 - Event name mismatch in `app.on(...)`.
-- Overly restrictive filter (wrong `guildId`/`channelId`/`userId`/`commandName`/`customId`/`interactionKind`/`voiceChannelId`).
+- Overly restrictive filter (wrong `guildId`/`channelId`/`userId`/`messageId`/`interactionId`/`commandName`/`customId`/`interactionKind`/`emoji`/`voiceChannelId`).
 - Use diagnostics APIs (`app.preflight`, `app.explainCapability`, `diagnoseShardwireApp`) before ad-hoc speculation.
 
 ### Action always fails
