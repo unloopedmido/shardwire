@@ -14,43 +14,43 @@ Shardwire is a Discord-first split-process bridge:
 
 ## Canonical docs source
 
-Primary site (GitHub Pages project root):
+Primary site (custom domain root):
 
-- `https://unloopedmido.github.io/shardwire/`
+- `https://shardwire.js.org/`
 
-All **documentation routes** live under **`/docs/`** on that host (Next.js `basePath` is `/shardwire`; Fumadocs content is under `/docs/...`).
+All **documentation routes** live under **`/docs/`** on that host.
 
 ### Top-level and guides
 
-- Docs home: `https://unloopedmido.github.io/shardwire/docs/`
-- Getting started: `https://unloopedmido.github.io/shardwire/docs/getting-started/`
-- Changelog: `https://unloopedmido.github.io/shardwire/docs/changelog/`
+- Docs home: `https://shardwire.js.org/docs/`
+- Getting started: `https://shardwire.js.org/docs/getting-started/`
+- Changelog: `https://shardwire.js.org/docs/changelog/`
 - **Concepts**
-  - Bridge architecture: `https://unloopedmido.github.io/shardwire/docs/concepts/bridge-architecture/`
-  - Capabilities & scopes: `https://unloopedmido.github.io/shardwire/docs/concepts/capabilities-and-scopes/`
-  - Runtime model: `https://unloopedmido.github.io/shardwire/docs/concepts/runtime-model/`
+  - Bridge architecture: `https://shardwire.js.org/docs/concepts/bridge-architecture/`
+  - Capabilities & scopes: `https://shardwire.js.org/docs/concepts/capabilities-and-scopes/`
+  - Runtime model: `https://shardwire.js.org/docs/concepts/runtime-model/`
 - **Guides**
-  - Bot bridge: `https://unloopedmido.github.io/shardwire/docs/guides/bot-bridge/`
-  - App bridge: `https://unloopedmido.github.io/shardwire/docs/guides/app-bridge/`
-  - Manifests: `https://unloopedmido.github.io/shardwire/docs/guides/manifests/`
-  - Strict startup: `https://unloopedmido.github.io/shardwire/docs/guides/strict-startup/`
-  - Workflows: `https://unloopedmido.github.io/shardwire/docs/guides/workflows/`
+  - Bot bridge: `https://shardwire.js.org/docs/guides/bot-bridge/`
+  - App bridge: `https://shardwire.js.org/docs/guides/app-bridge/`
+  - Manifests: `https://shardwire.js.org/docs/guides/manifests/`
+  - Strict startup: `https://shardwire.js.org/docs/guides/strict-startup/`
+  - Workflows: `https://shardwire.js.org/docs/guides/workflows/`
 - **Operations**
-  - Deployment: `https://unloopedmido.github.io/shardwire/docs/operations/deployment/`
-  - Diagnostics: `https://unloopedmido.github.io/shardwire/docs/operations/diagnostics/`
-  - Troubleshooting: `https://unloopedmido.github.io/shardwire/docs/operations/troubleshooting/`
+  - Deployment: `https://shardwire.js.org/docs/operations/deployment/`
+  - Diagnostics: `https://shardwire.js.org/docs/operations/diagnostics/`
+  - Troubleshooting: `https://shardwire.js.org/docs/operations/troubleshooting/`
 
 ### Generated API reference
 
-- Reference index: `https://unloopedmido.github.io/shardwire/docs/reference/`
-- Per-symbol pages: `https://unloopedmido.github.io/shardwire/docs/reference/<section>/<kebab-symbol>/`  
+- Reference index: `https://shardwire.js.org/docs/reference/`
+- Per-symbol pages: `https://shardwire.js.org/docs/reference/<section>/<kebab-symbol>/`  
   (sections include `bridge-apis`, `contracts-and-diagnostics`, `workflows`, `errors-and-failures`, `event-and-data-models`, `action-models`.)
 
 The reference is **generated** from `packages/shardwire/src/index.ts` (`npm run -w website reference:build`, also run as **website** `prebuild`). Public exports carry `@see` tags pointing at these URLs for IDE hovers.
 
 ### Runtime error links (`See: …`)
 
-Some errors append **`https://unloopedmido.github.io/shardwire/docs/operations/troubleshooting/#…`** (`withErrorDocsLink` / `docsErrorLink`; fragment ids are stable in the message even when the page has no matching heading anchor). Prefer that URL when helping users parse a pasted message; cross-link **Diagnostics** and **Reference → Errors & failures** when the issue is typed results or error classes rather than transport setup.
+Some errors append **`https://shardwire.js.org/docs/operations/troubleshooting/#…`** (`withErrorDocsLink` / `docsErrorLink`; fragment ids are stable in the message even when the page has no matching heading anchor). Prefer that URL when helping users parse a pasted message; cross-link **Diagnostics** and **Reference → Errors & failures** when the issue is typed results or error classes rather than transport setup.
 
 ## Optimize for
 
@@ -63,11 +63,11 @@ Some errors append **`https://unloopedmido.github.io/shardwire/docs/operations/t
 ## Mandatory operating rules
 
 1. **Website-first guidance**
-   - Prefer links under `https://unloopedmido.github.io/shardwire/docs/…` whenever giving docs or troubleshooting help.
+   - Prefer links under `https://shardwire.js.org/docs/…` whenever giving docs or troubleshooting help.
    - Do not use legacy patterns like `…/shardwire/getting-started/` (missing `/docs/`) or `apps/website/src/content/docs` (old layout).
 
 2. **Error-link aware troubleshooting**
-   - If an error message includes `See: https://unloopedmido.github.io/shardwire/docs/operations/troubleshooting/#...`, use that URL (and fragment) when helpful; cross-link **Operations → Diagnostics** and **Reference → Errors & failures** for capability and result-type context.
+   - If an error message includes `See: https://shardwire.js.org/docs/operations/troubleshooting/#...`, use that URL (and fragment) when helpful; cross-link **Operations → Diagnostics** and **Reference → Errors & failures** for capability and result-type context.
    - Explain root cause + fix, then include the same or an equivalent direct URL in your response.
 
 3. **Stay inside built-in API first**
@@ -201,7 +201,7 @@ When giving implementation help, prefer this structure:
 
 ## Error-link playbook
 
-If error includes `See: https://unloopedmido.github.io/shardwire/errors/#<anchor>`:
+If error includes `See: https://shardwire.js.org/docs/operations/troubleshooting/#<anchor>`:
 
 1. quote the canonical error message
 2. extract and return the exact anchor URL
