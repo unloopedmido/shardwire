@@ -97,7 +97,6 @@ export interface BridgeVoiceState {
 }
 
 /** Normalized guild snapshot for `guildCreate` / `guildDelete` events.  * @see https://shardwire.js.org/docs/reference/event-and-data-models/bridge-guild/
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/bridge-guild/
  */
 export interface BridgeGuild {
 	id: Snowflake;
@@ -107,7 +106,6 @@ export interface BridgeGuild {
 }
 
 /** Normalized thread channel snapshot for thread lifecycle events.  * @see https://shardwire.js.org/docs/reference/event-and-data-models/bridge-thread/
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/bridge-thread/
  */
 export interface BridgeThread {
 	id: Snowflake;
@@ -120,7 +118,6 @@ export interface BridgeThread {
 }
 
 /** Normalized non-thread channel snapshot for channel lifecycle events.  * @see https://shardwire.js.org/docs/reference/event-and-data-models/bridge-channel/
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/bridge-channel/
  */
 export interface BridgeChannel {
 	id: Snowflake;
@@ -638,7 +635,6 @@ export interface DeleteChannelActionPayload {
 }
 
 /** `autoArchiveDuration` is in minutes (Discord-supported values).  * @see https://shardwire.js.org/docs/reference/action-models/create-thread-action-payload/
- * @see https://shardwire.js.org/docs/reference/action-models/create-thread-action-payload/
  */
 export interface CreateThreadActionPayload {
 	parentChannelId: Snowflake;
@@ -873,12 +869,10 @@ export interface EventSubscriptionFilter {
 }
 
 /** Keys supported on `EventSubscriptionFilter` for `app.on(..., filter)`.  * @see https://shardwire.js.org/docs/reference/event-and-data-models/shardwire-subscription-filter-key/
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/shardwire-subscription-filter-key/
  */
 export type ShardwireSubscriptionFilterKey = keyof EventSubscriptionFilter;
 
 /** One built-in event and its gateway intent requirements (for `app.catalog()`).  * @see https://shardwire.js.org/docs/reference/event-and-data-models/shardwire-catalog-event/
- * @see https://shardwire.js.org/docs/reference/event-and-data-models/shardwire-catalog-event/
  */
 export interface ShardwireCatalogEvent {
 	name: BotEventName;
@@ -886,7 +880,6 @@ export interface ShardwireCatalogEvent {
 }
 
 /** Static discovery surface for built-in events, actions, and subscription filters.  * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/shardwire-catalog/
- * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/shardwire-catalog/
  */
 export interface ShardwireCatalog {
 	events: readonly ShardwireCatalogEvent[];
@@ -905,7 +898,6 @@ export type CapabilityExplanationKind = 'event' | 'action';
 export type CapabilityExplanationReasonCode = 'unknown_name' | 'not_negotiated' | 'allowed' | 'denied_by_bridge';
 
 /** Result of `app.explainCapability(...)`.  * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/capability-explanation/
- * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/capability-explanation/
  */
 export interface CapabilityExplanation {
 	kind: CapabilityExplanationKind;
@@ -975,7 +967,6 @@ export interface ShardwireAppManifestDefinition {
 }
 
 /** Normalized manifest returned by {@link defineShardwireApp} (same fields, `name` always resolved).  * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/shardwire-app-manifest/
- * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/shardwire-app-manifest/
  */
 export interface ShardwireAppManifest {
 	readonly name: string;
@@ -1047,7 +1038,6 @@ export interface ShardwireAppDiagnosisReport {
 }
 
 /** Options for {@link diagnoseShardwireApp}. Surplus negotiation uses `unused_negotiated_*` **warnings** only.  * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/diagnose-shardwire-app-options/
- * @see https://shardwire.js.org/docs/reference/contracts-and-diagnostics/diagnose-shardwire-app-options/
  */
 export interface DiagnoseShardwireAppOptions {
 	/** When set, issues `missing_intent` if the bot bridge intents omit requirements for manifest events. */
@@ -1138,7 +1128,6 @@ export interface ScopedSecretConfig {
 export type BotBridgeSecret = string | ScopedSecretConfig;
 
 /** Structured Discord / transport context for failed actions (machine-readable).  * @see https://shardwire.js.org/docs/reference/errors-and-failures/action-error-details/
- * @see https://shardwire.js.org/docs/reference/errors-and-failures/action-error-details/
  */
 export interface ActionErrorDetails {
 	discordStatus?: number;
@@ -1260,7 +1249,6 @@ export interface ActionFailure {
 export type ActionResult<T> = ActionSuccess<T> | ActionFailure;
 
 /** Structured context on `BridgeCapabilityError` and capability-related action failures.  * @see https://shardwire.js.org/docs/reference/errors-and-failures/bridge-capability-error-details/
- * @see https://shardwire.js.org/docs/reference/errors-and-failures/bridge-capability-error-details/
  */
 export interface BridgeCapabilityErrorDetails {
 	reasonCode: 'not_in_capabilities' | 'unknown_event' | 'unknown_action';
