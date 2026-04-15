@@ -1,7 +1,7 @@
 # Shardwire Integration Patterns
 
-Primary docs: `https://unloopedmido.github.io/shardwire/`
-Troubleshooting anchors: `https://unloopedmido.github.io/shardwire/docs/operations/troubleshooting/`
+Primary docs: `https://shardwire.js.org/`
+Troubleshooting anchors: `https://shardwire.js.org/docs/operations/troubleshooting/`
 
 ## Canonical two-process setup
 
@@ -71,7 +71,7 @@ Debug by comparing expected permissions with `app.capabilities()`.
 - URL missing `/shardwire` suffix.
 - Using non-loopback `ws://` instead of `wss://`.
 - Wrong secret value or mismatched secret id/value pair.
-- If message includes `See: .../errors/#...`, use that exact anchor as source of truth.
+- If message includes `See: .../docs/operations/troubleshooting/#...`, use that exact anchor as source of truth.
 
 ### Event handler never fires
 
