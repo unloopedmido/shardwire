@@ -27,15 +27,19 @@ export default async function Page({ params }: DocsPageProps) {
     notFound();
   }
 
-  const pageData = page.data as typeof page.data & {
-    body: ComponentType<{ components?: ReturnType<typeof getMDXComponents> }>;
-    toc?: ComponentProps<typeof DocsPage>['toc'];
-    full?: boolean;
-  };
-  const MDX = pageData.body;
+  const pageData = page.data as Record<string, unknown>;
+  const body = pageData.body;
+
+  if (typeof body !== 'function') {
+    notFound();
+  }
+
+  const MDX = body as ComponentType<{ components?: ReturnType<typeof getMDXComponents> }>;
+  const toc = Array.isArray(pageData.toc) ? (pageData.toc as ComponentProps<typeof DocsPage>['toc']) : undefined;
+  const full = typeof pageData.full === 'boolean' ? pageData.full : undefined;
 
   return (
-    <DocsPage toc={pageData.toc} full={pageData.full}>
+    <DocsPage toc={toc} full={full}>
       <DocsJsonLd page={page} />
       <DocsTitle>{page.data.title}</DocsTitle>
       <DocsDescription>{page.data.description}</DocsDescription>
