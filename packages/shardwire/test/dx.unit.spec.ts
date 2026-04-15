@@ -12,12 +12,21 @@ describe('DX catalog', () => {
 		expect(cat.actions).toContain('sendMessage');
 		expect(cat.events.some((e) => e.name === 'messageCreate')).toBe(true);
 		expect(cat.events.some((e) => e.name === 'voiceStateUpdate')).toBe(true);
+		expect(cat.events.some((e) => e.name === 'guildUpdate')).toBe(true);
+		expect(cat.events.some((e) => e.name === 'typingStart')).toBe(true);
 		const msgCreate = cat.events.find((e) => e.name === 'messageCreate');
 		expect(msgCreate?.requiredIntents).toEqual(['GuildMessages']);
 		expect(cat.subscriptionFilters).toContain('guildId');
 		expect(cat.subscriptionFilters).toContain('threadId');
 		expect(cat.subscriptionFilters).toContain('voiceChannelId');
+		expect(cat.subscriptionFilters).toContain('messageId');
+		expect(cat.subscriptionFilters).toContain('interactionId');
+		expect(cat.subscriptionFilters).toContain('emoji');
 		expect(cat.actions).toContain('moveMemberVoice');
+		expect(cat.actions).toContain('sendDirectMessage');
+		expect(cat.actions).toContain('bulkDeleteMessages');
+		expect(cat.actions).toContain('fetchGuild');
+		expect(cat.actions).toContain('unbanMember');
 	});
 });
 
