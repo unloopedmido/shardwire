@@ -1,35 +1,104 @@
-# Shardwire + React (Vite)
+<div align="center">
 
-A **browser app** process using **`@shardwire/react`** and a **Node bot** process using **`createBotBridge`**, matching the [minimal-bridge](../minimal-bridge) behavior (`!ping` / `/hello`) but with a small dashboard UI.
+# React + Vite Shardwire dashboard example
 
-## Environment variables
+### Browser UI (`@shardwire/react`) talking to a Node bot process through the Shardwire bridge.
 
-| Variable | Where | Purpose |
-| --- | --- | --- |
-| `DISCORD_TOKEN` | Bot (`.env`) | Discord bot token |
-| `SHARDWIRE_SECRET` | Bot (`.env`) | Shared bridge secret |
-| `VITE_SHARDWIRE_SECRET` | Vite / browser (`.env`) | **Must match** `SHARDWIRE_SECRET` |
-| `VITE_SHARDWIRE_URL` | Optional | Defaults to `ws://127.0.0.1:3001/shardwire` |
-| `DISCORD_APPLICATION_ID`, `DISCORD_GUILD_ID` | Optional | For `npm run register` (guild `/hello`) |
+[React package](https://www.npmjs.com/package/@shardwire/react) · [Docs](https://shardwire.js.org/docs/)
 
-## Expected logs (healthy)
+</div>
 
-1. **Terminal A — `npm run bot`:** `bot bridge ready`
-2. **Terminal B — `npm run dev`:** Vite dev server URL; open it in a browser. The page shows **Status: ready** and JSON **capabilities** when the app bridge connects.
+---
 
-## Setup
+> [!IMPORTANT]
+> **Monorepo path:** depends on `file:../../packages/shardwire` and `file:../../packages/react`. Clone the full repository, then install **in this folder**.
+>
+> **Browser exposure:** Vite injects `VITE_*` env vars into client code. Only put bridge URL and scoped secrets here that you are willing to ship to browsers—follow the main docs on secret scopes and capabilities.
+>
+> **Two processes:** Vite dev server plus the bot/bridge process.
 
-1. From the **monorepo root**: `npm install` and `npm run pkg:build` (builds `shardwire` and `@shardwire/react`).
-2. From **`examples/react-vite-dashboard`**: `npm install`.
-3. Copy `.env.example` to `.env`. Set **`SHARDWIRE_SECRET`** and the same value for **`VITE_SHARDWIRE_SECRET`**. Set **`DISCORD_TOKEN`**.
-4. Optional: set **`DISCORD_APPLICATION_ID`** and **`DISCORD_GUILD_ID`**, then **`npm run register`** once for `/hello`.
-5. Terminal A: **`npm run bot`**
-6. Terminal B: **`npm run dev`** — open the printed local URL.
+```bash
+cd examples/react-vite-dashboard
+npm install
+```
 
-## If something fails
+---
 
-- **`ECONNREFUSED` / connection errors:** [Connection and authentication](https://shardwire.js.org/docs/troubleshooting#connection-and-auth-errors) — bot running, URL path `/shardwire`, **`VITE_SHARDWIRE_SECRET` === `SHARDWIRE_SECRET`**.
-- **Strict startup / manifest:** [Strict startup failed](https://shardwire.js.org/docs/troubleshooting#strict-startup-failed) — bot intents must include `Guilds`, `GuildMessages`, `GuildMembers`, `MessageContent` for this example.
-- **Vite pulls discord.js / zlib:** [Vite and zlib-sync](https://shardwire.js.org/docs/troubleshooting#vite-and-zlib-sync) — import app code only from **`shardwire/client`** and **`@shardwire/react`** (this example does).
+## The Problem
 
-Docs: [Getting started](https://shardwire.js.org/docs/getting-started/) · [Troubleshooting](https://shardwire.js.org/docs/troubleshooting/).
+Dashboards want live Discord-backed state, but the browser must not hold a bot token. This example shows **Vite + React** on the app side and **Node + discord.js** on the bot side, joined by Shardwire.
+
+---
+
+## See It Work
+
+```text
+$ npm install
+$ cp .env.example .env   # includes VITE_* and bot-side variables
+$ npm run register
+$ npm run bot      # terminal A — bridge + Discord session
+$ npm run dev      # terminal B — Vite on http://localhost:5173 (default)
+```
+
+Open the dev URL, confirm the UI reaches the bridge, then trigger the interaction implemented in the example sources.
+
+---
+
+## Install
+
+```bash
+git clone https://github.com/unloopedmido/shardwire.git
+cd shardwire/examples/react-vite-dashboard
+npm install
+```
+
+Requires **Node.js 22+**.
+
+<details>
+<summary><b>Details</b> — scripts</summary>
+
+| Script | Purpose |
+| --- | --- |
+| `npm run bot` | Bot + bridge (`bot/bot.js`) |
+| `npm run dev` | Vite dev server for the React app |
+| `npm run build` / `npm run preview` | Production bundle and static preview |
+| `npm run register` | Slash command registration |
+
+</details>
+
+---
+
+## Getting Started
+
+1. Fill `.env` with Discord credentials and bridge settings; set `VITE_*` values for the client bundle.
+2. Keep bot and Vite running concurrently during development.
+3. Read [@shardwire/react README](https://github.com/unloopedmido/shardwire/tree/main/packages/react) and the site docs when extending hooks usage.
+
+---
+
+## How It Works
+
+The bot process mirrors the minimal example: host the bridge next to discord.js. The Vite app wraps React in `ShardwireProvider` and uses hooks to observe connection state and send actions.
+
+<details>
+<summary><b>Details</b> — deployment note</summary>
+
+Production hosting splits into **static UI** (CDN or static host) and **always-on bot** elsewhere. This example does not include TLS termination or reverse-proxy configuration—treat that as infrastructure you layer on.
+
+</details>
+
+---
+
+## FAQ
+
+**Why both `shardwire` and `@shardwire/react`?** React hooks depend on the core client types and behavior; install both as this `package.json` does.
+
+---
+
+## Contributing
+
+Keep the example easy to skim; propose larger demos as separate examples or docs stories in the main repo.
+
+## License
+
+MIT — same as the parent project.

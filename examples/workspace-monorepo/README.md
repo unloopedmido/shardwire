@@ -1,34 +1,107 @@
-# Shardwire npm workspaces example
+<div align="center">
 
-Two packages in one repo — **`packages/bot`** (Discord + bridge server) and **`packages/app`** (app process) — sharing a **single workspace root `.env`**. Use this when you want bot and app as separate deployable units without duplicating secrets across folders.
+# Workspace Shardwire example
 
-## Environment variables
+### npm workspaces split into `packages/bot` and `packages/app` with shared tooling—closer to how larger teams lay out repos.
 
-All variables live in **`.env` at `examples/workspace-monorepo/.env`** (copy from `.env.example`).
+[How it works](https://shardwire.js.org/docs/concepts/how-it-works/)
 
-| Variable | Purpose |
+</div>
+
+---
+
+> [!IMPORTANT]
+> **Monorepo-in-monorepo:** this example defines its own npm workspaces under `packages/bot` and `packages/app`. Run commands from **this example’s root**, not only from the repository root.
+>
+> **Local `shardwire`:** workspace packages depend on the parent `packages/shardwire` build via `file:` paths configured inside the nested workspaces—clone the full Shardwire repo and run `npm install` here so links resolve.
+>
+> **Secrets:** copy `.env.example` to `.env` at this example root and fill Discord + bridge values before running.
+
+```bash
+cd examples/workspace-monorepo
+npm install
+```
+
+---
+
+## The Problem
+
+Single-folder demos hide how you **split packages**, share TypeScript config, and run two entrypoints with workspace scripts. This layout mirrors a small production monorepo while staying small enough to read in one sitting.
+
+---
+
+## See It Work
+
+```text
+$ npm install
+$ cp .env.example .env
+# edit .env — DISCORD_TOKEN, SHARDWIRE_SECRET, optional application/guild ids
+$ npm run register
+$ npm run bot    # terminal A — delegates to bot workspace
+$ npm run app    # terminal B — delegates to app workspace
+```
+
+---
+
+## Install
+
+```bash
+git clone https://github.com/unloopedmido/shardwire.git
+cd shardwire/examples/workspace-monorepo
+npm install
+```
+
+Requires **Node.js 22+**.
+
+<details>
+<summary><b>Details</b> — scripts map to workspaces</summary>
+
+Root `package.json` scripts forward into named workspaces:
+
+| Script | Delegates to |
 | --- | --- |
-| `DISCORD_TOKEN` | Discord bot token (bot package) |
-| `SHARDWIRE_SECRET` | Shared secret (both packages) |
-| `SHARDWIRE_URL` | Optional app-side bridge URL (defaults to `ws://127.0.0.1:3001/shardwire`) |
-| `DISCORD_APPLICATION_ID`, `DISCORD_GUILD_ID` | Optional — for `npm run register` (guild `/hello`) |
+| `npm run bot` | `@example/shardwire-workspace-bot` `start` |
+| `npm run app` | `@example/shardwire-workspace-app` `start` |
+| `npm run register` | bot workspace `register` |
 
-## Expected logs (healthy)
+Open each workspace’s `package.json` for exact command definitions.
 
-1. **Terminal A — `npm run bot`** (from `examples/workspace-monorepo`): `bot bridge ready`
-2. **Terminal B — `npm run app`:** `app bridge ready` then a **capabilities** object
+</details>
 
-## Setup
+---
 
-1. From the **monorepo root**: `npm install` and `npm run pkg:build`.
-2. From **`examples/workspace-monorepo`**: `npm install` (installs workspace packages and links local `shardwire`).
-3. Copy `.env.example` to `.env` at the **workspace example root** and fill in secrets.
-4. Optional: **`npm run register`** once if you configured application + guild IDs.
-5. **`npm run bot`** in one terminal, **`npm run app`** in another.
+## Getting Started
 
-## If something fails
+1. Install at the example root so nested workspaces link correctly.
+2. Copy `.env.example` to `.env` at the example root (both workspaces load from the same file layout used in the sources).
+3. Compare structure with the **workspace** template produced by `npm create shardwire@latest`.
 
-- **Missing env:** Both scripts load the workspace **root** `.env` (three levels up from each `src/` file). Run **`npm run bot`** / **`npm run app`** from **`examples/workspace-monorepo`** so the shared `.env` path resolves.
-- **Connection / auth:** [Troubleshooting → Connection and authentication](https://shardwire.js.org/docs/troubleshooting#connection-and-auth-errors)
+---
 
-Docs: [Getting started](https://shardwire.js.org/docs/getting-started/) · [How it works](https://shardwire.js.org/docs/concepts/how-it-works/).
+## How It Works
+
+The bot workspace owns Discord + bridge startup. The app workspace runs a Node client that connects to the bridge URL exposed by the bot. Shared types and versions flow through normal workspace dependency edges.
+
+<details>
+<summary><b>Details</b> — adapting</summary>
+
+- Replace example scope names (`@example/...`) when you fork into a private repository.
+- Point `shardwire` to npm semver ranges instead of `file:` once you leave the Shardwire development tree.
+
+</details>
+
+---
+
+## FAQ
+
+**Do I need npm workspaces for Shardwire?** No—this is one layout option. Single-package examples exist under `examples/minimal-bridge`.
+
+---
+
+## Contributing
+
+Structural changes should preserve clarity for readers navigating two packages; discuss larger renames in a PR description.
+
+## License
+
+MIT — same as the parent project.

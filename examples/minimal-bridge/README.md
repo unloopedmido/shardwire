@@ -1,38 +1,104 @@
-# Minimal Shardwire bridge
+<div align="center">
 
-Two tiny scripts: a **bot** process (`createBotBridge`) and an **app** process (`connectBotBridge`). The app replies **`pong`** to **`!ping`** and responds to the **`/hello`** slash command (after you register it once).
+# Minimal Shardwire bridge example
 
-## Environment variables
+### Smallest Node bot + Node app pair wired through `shardwire`—for reading the protocol without UI noise.
 
-| Variable | Required | Purpose |
-| --- | --- | --- |
-| `DISCORD_TOKEN` | Yes | Discord bot token |
-| `SHARDWIRE_SECRET` | Yes | Shared secret (must match bot and app) |
-| `SHARDWIRE_URL` | No | App-side bridge URL (defaults to `ws://127.0.0.1:3001/shardwire` in `src/app.js`) |
-| `DISCORD_APPLICATION_ID`, `DISCORD_GUILD_ID` | For `/hello` | Used by `npm run register` only |
+[Concepts](https://shardwire.js.org/docs/concepts/how-it-works/) · [Getting started](https://shardwire.js.org/docs/getting-started/)
 
-## Expected logs (healthy)
+</div>
 
-- **Terminal A — `npm run bot`:** `bot bridge ready`
-- **Terminal B — `npm run app`:** `app bridge ready` then a line starting with `capabilities` (JSON-like object)
+---
 
-## Setup
+> [!IMPORTANT]
+> **Monorepo path:** this example uses `file:../../packages/shardwire`. Install **from this directory** after cloning the full [`shardwire`](https://github.com/unloopedmido/shardwire) repository.
+>
+> **Network:** connects to Discord and opens the bridge WebSocket as configured in source and `.env`.
+>
+> **Secrets:** never commit a real `.env`.
 
-1. From the **monorepo root**, run `npm install` and `npm run pkg:build` so `shardwire` is built.
-2. From **`examples/minimal-bridge`**, run `npm install` to link the local `shardwire` package.
-3. Copy `.env.example` to `.env` and set `DISCORD_TOKEN` and `SHARDWIRE_SECRET`.
-4. For **`/hello`**, set **`DISCORD_APPLICATION_ID`** and **`DISCORD_GUILD_ID`**, then run **`npm run register`** once.
-5. Terminal A: `npm run bot` — wait for `bot bridge ready`.
-6. Terminal B: `npm run app` — wait for `app bridge ready`.
+```bash
+cd examples/minimal-bridge
+npm install
+```
 
-## If something fails
+---
 
-- **Connection refused / cannot connect:** [Connection and authentication](https://shardwire.js.org/docs/troubleshooting#connection-and-auth-errors) — bot must be running first; check URL and that **`SHARDWIRE_SECRET` matches** in both processes.
-- **WebSocket / Node version:** [Node.js 22+ and WebSocket](https://shardwire.js.org/docs/troubleshooting#nodejs-below-22-connectbotbridge-requires-globalthiswebsocket)
+## The Problem
 
-Docs: [Getting started](https://shardwire.js.org/docs/getting-started/) · [First slash command](https://shardwire.js.org/docs/tutorial/first-interaction/) · [Troubleshooting](https://shardwire.js.org/docs/troubleshooting/).
+Reading package docs without a runnable baseline leaves gaps: how commands are registered, which env vars are required, and how the two processes start. This folder is the **shortest end-to-end slice** of Shardwire in plain JavaScript.
 
-## Other official examples
+---
 
-- [React + Vite dashboard](../react-vite-dashboard/) — browser app with `@shardwire/react`
-- [npm workspaces](../workspace-monorepo/) — `packages/bot` + `packages/app` with one root `.env`
+## See It Work
+
+```text
+$ npm install
+$ cp .env.example .env   # fill values per comments inside the example
+$ npm run register
+$ npm run bot    # terminal A
+$ npm run app    # terminal B
+```
+
+Watch the app process connect to the bridge and handle the interaction defined in `src/`.
+
+---
+
+## Install
+
+```bash
+git clone https://github.com/unloopedmido/shardwire.git
+cd shardwire/examples/minimal-bridge
+npm install
+```
+
+Requires **Node.js 22+**.
+
+<details>
+<summary><b>Details</b> — scripts</summary>
+
+| Script | Purpose |
+| --- | --- |
+| `npm run bot` | Bot process + bridge (`src/bot.js`) |
+| `npm run app` | App client (`src/app.js`) |
+| `npm run register` | Slash command registration helper |
+
+</details>
+
+---
+
+## Getting Started
+
+1. Copy `.env.example` to `.env` and set Discord + bridge values.
+2. Run `npm run register` whenever command definitions change.
+3. Compare files under `src/` with the [tutorial](https://shardwire.js.org/docs/tutorial/first-interaction/) if you extend the example.
+
+---
+
+## How It Works
+
+`src/bot.js` hosts the bridge alongside a `discord.js` client. `src/app.js` connects with `shardwire/client` using the URL and secret from the environment.
+
+<details>
+<summary><b>Details</b> — troubleshooting</summary>
+
+- If the app cannot connect, verify host/port and `http` vs `https`/`ws` vs `wss` alignment, then verify `SHARDWIRE_SECRET` matches both sides.
+- See [Troubleshooting](https://shardwire.js.org/docs/troubleshooting/) for annotated error flows.
+
+</details>
+
+---
+
+## FAQ
+
+**Can I copy this out of the monorepo?** Yes—switch `shardwire` in `package.json` from `file:` to a published semver range and adjust paths.
+
+---
+
+## Contributing
+
+Changes should stay **minimal**—open a PR in the main repository with a short note if you expand scope beyond pedagogy.
+
+## License
+
+MIT — same as the parent project.

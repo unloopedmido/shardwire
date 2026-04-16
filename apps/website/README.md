@@ -1,33 +1,106 @@
-# Shardwire Website
+<div align="center">
 
-This app is the Shardwire docs site, rebuilt on:
+# Shardwire documentation site
 
-- Next.js App Router
-- Fumadocs MDX + Fumadocs Core + Fumadocs UI
-- static export for GitHub Pages
+### Next.js + Fumadocs app that builds the public docs at [shardwire.js.org](https://shardwire.js.org/).
 
-## Local Development
+</div>
 
-From the monorepo root:
+---
+
+> [!IMPORTANT]
+> **Private package:** not published to npm; exists to build and preview documentation from the monorepo.
+>
+> **Build:** runs reference generation scripts (`predev` / `prebuild`) that read TypeScript sources from workspace packages. Requires a full monorepo install at the root.
+>
+> **Network:** `next dev` and `serve` bind locally by default; no extra outbound telemetry is added by these scripts.
 
 ```bash
+# from repository root
 npm install
 npm run docs:dev
 ```
 
-The reference section is generated from `packages/shardwire/src/index.ts` before dev and build.
+---
 
-## Important Paths
+## The Problem
 
-- content docs: `content/docs`
-- generated reference docs: `content/docs/reference`
-- Fumadocs source config: `source.config.ts`
-- shared source loader: `lib/source.ts`
-- reference generator: `scripts/reference/generate.mjs`
+Library READMEs cannot carry every guide, generated reference page, and troubleshooting flow. This app is the **canonical documentation surface** for Shardwire: concepts, tutorials, API tables, and changelog hubs.
 
-## Verification
+---
+
+## See It Work
+
+```text
+$ cd /path/to/shardwire
+$ npm install
+$ npm run docs:dev
+# open the URL printed by Next.js (default http://localhost:3000)
+```
+
+---
+
+## Install
+
+Work from the **monorepo root** so workspace dependencies resolve:
 
 ```bash
-npm run -w website test
-npm run -w website build
+npm install
 ```
+
+Then use root scripts (defined in the root `package.json`):
+
+| Command | Purpose |
+| --- | --- |
+| `npm run docs:dev` | Development server with reference rebuild on start |
+| `npm run docs:build` | Production build (static export configuration per Next setup) |
+| `npm run docs:preview` | Serve the built `out/` directory |
+
+<details>
+<summary><b>Details</b> — package-local scripts</summary>
+
+From `apps/website` you can also run `npm run dev`, `npm run build`, or `npm test` directly; prefer the root aliases when you want consistent paths from a single checkout.
+
+Reference markdown is generated via `npm run reference:build` (wired into `predev` and `prebuild`).
+
+</details>
+
+---
+
+## Getting Started
+
+1. Install once at the repo root.
+2. Run `npm run docs:dev`.
+3. Edit content under the site’s content directories (see Fumadocs layout in this app) and TypeScript sources in `packages/*` for API changes.
+
+---
+
+## How It Works
+
+Next.js hosts the UI; Fumadocs provides navigation, search, and MDX processing; local scripts generate structured reference data from the TypeScript packages so docs stay aligned with types.
+
+<details>
+<summary><b>Details</b> — contributing doc changes</summary>
+
+- Prefer linking readers to **stable URLs** on `shardwire.js.org` from external README files.
+- When you change public APIs, update guides and run `npm run docs:build` to catch generation failures before merging.
+
+</details>
+
+---
+
+## FAQ
+
+**Why `--webpack` in scripts?** The package scripts pin a bundler mode compatible with the current Next + toolchain mix; follow local `package.json` when upgrading Next.
+
+**Where is the user-facing site?** Deployed separately from this README; source lives here in `apps/website`.
+
+---
+
+## Contributing
+
+Use the main [GitHub repository](https://github.com/unloopedmido/shardwire). Doc-only PRs should still run `npm run docs:build` from the root when reference generation is involved.
+
+## License
+
+MIT — inherits project license; this package is not distributed standalone.

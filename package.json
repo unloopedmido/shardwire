@@ -1,6 +1,7 @@
 {
 	"name": "shardwire-monorepo",
 	"private": true,
+	"license": "MIT",
 	"engines": {
 		"node": ">=22.0.0"
 	},

@@ -1,6 +1,7 @@
 {
 	"name": "@example/shardwire-workspace-app",
 	"private": true,
+	"license": "MIT",
 	"type": "module",
 	"scripts": {
 		"start": "node src/app.js"

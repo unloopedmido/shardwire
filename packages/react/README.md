@@ -1,130 +1,122 @@
-# @shardwire/react
+<div align="center">
 
-Optional React helpers for app processes that connect to a Shardwire bot bridge (dashboards, remote controllers).
+# `@shardwire/react`
 
-This package **does not** ship React as a runtime dependency of `shardwire` core. Install alongside `react` and `shardwire`.
+### React hooks that connect a UI to a Shardwire app bridge—without re-implementing connection state every time.
+
+[npm](https://www.npmjs.com/package/@shardwire/react) · [Documentation](https://shardwire.js.org/docs/) · [React changelog](https://shardwire.js.org/docs/changelog/react/)
+
+</div>
+
+---
+
+> [!IMPORTANT]
+> **Depends on:** `react` (peer, 18+) and the `shardwire` package for types and client behavior used under the hood.
+>
+> **Network:** whatever your app bridge endpoint is (WebSocket to the bot-side server). No separate analytics channel is added by this package.
+>
+> **Uninstall:** `npm uninstall @shardwire/react` (and `shardwire` if nothing else needs it).
+
+```bash
+npm install @shardwire/react shardwire
+```
+
+---
+
+## The Problem
+
+Once the bridge exists, every dashboard still needs the same boring glue: hold a client reference, subscribe to connection lifecycle, surface errors to the UI, and avoid double-connecting during React strict mode or hot reload.
+
+This package is **optional sugar** on top of `shardwire/client` for React apps. If you have written data-fetching hooks before, the ergonomics will feel familiar; the novelty is that the wire protocol is Shardwire-shaped instead of REST.
+
+---
+
+## See It Work
+
+```tsx
+import { ShardwireProvider, useShardwire } from "@shardwire/react";
+
+function Root() {
+  return (
+    <ShardwireProvider
+      options={{
+        url: import.meta.env.VITE_SHARDWIRE_URL,
+        secret: import.meta.env.VITE_SHARDWIRE_SECRET,
+      }}
+    >
+      <Dashboard />
+    </ShardwireProvider>
+  );
+}
+
+function Dashboard() {
+  const connection = useShardwire();
+  if (connection.status === "connecting") return <p>Connecting…</p>;
+  if (connection.status === "error") return <p>Failed: {connection.error.message}</p>;
+  if (connection.status === "ready") return <p>Connected</p>;
+  return null;
+}
+```
+
+Exact hook names and config fields follow the current API—see the reference linked above if this snippet drifts.
+
+---
 
 ## Install
 
 ```bash
-npm install @shardwire/react react
+npm install @shardwire/react shardwire
 ```
 
-`@shardwire/react` depends on a compatible **`shardwire`** release (`^2.0.0`). Add **`shardwire`** explicitly if you want to pin it or import types and helpers directly (for example `defineShardwireApp` from `shardwire/client`).
+Requires **Node.js 22+** for development tooling; browser targets follow your bundler’s supported React version.
 
-## API
+<details>
+<summary><b>Details</b> — package shape</summary>
 
-- **`useShardwireConnection(options, ready?)`** — `connectBotBridge` on mount, `await app.ready(...)`, `close` on unmount. Returns a **discriminated `ShardwireConnection`**: `connecting`, `ready` (includes **`capabilities`**), or `error`. Reconnects when serialized connection fields change (see below); **`logger`** identity is ignored for that purpose — remount or use a parent `key` to swap loggers.
-- **`ShardwireProvider`** + **`useShardwire()`** — same connection as above, exposed through React context so child components do not thread `app` through props. `useShardwire()` throws if used outside a provider; use **`useShardwireConnection`** for hook-only trees.
-- **`useShardwireListener(app, { event, onEvent, filter?, enabled? })`** — built-in event subscription with a stable handler ref. **Filter objects are fingerprinted** so inline `{ guildId }` objects do not resubscribe every render.
+- **ESM + CJS** builds published under `dist/`.
+- **`sideEffects: false`** for friendlier tree-shaking.
+- **Peer:** `react >= 18`.
 
-Curated **TypeScript types** are re-exported from this package (`AppBridge`, `AppBridgeOptions`, `BotEventName`, …) so you can import types from `@shardwire/react` alongside hooks.
+For conceptual background, read [How it works](https://shardwire.js.org/docs/concepts/how-it-works/) first; this package assumes you already run a Shardwire bridge on the bot side.
 
-## Example (provider)
+</details>
 
-```tsx
-import { useMemo } from 'react';
-import { defineShardwireApp } from 'shardwire/client';
-import {
-	ShardwireProvider,
-	useShardwire,
-	useShardwireListener,
-} from '@shardwire/react';
+---
 
-const manifest = defineShardwireApp({
-	name: 'dashboard',
-	events: ['voiceStateUpdate'],
-	actions: ['moveMemberVoice'],
-});
+## Getting Started
 
-export function App() {
-	const options = useMemo(
-		() => ({
-			url: import.meta.env.VITE_SHARDWIRE_URL,
-			secret: import.meta.env.VITE_SHARDWIRE_SECRET,
-			appName: manifest.name,
-		}),
-		[],
-	);
+1. Confirm your bot exposes a bridge and you have URL + secret available to the **browser-safe** surface you intend to use (see main docs for capability and secret scoping guidance).
+2. Wrap your tree in `ShardwireProvider` (or the pattern shown in the current docs).
+3. Use the documented hooks to send actions and read connection state.
 
-	return (
-		<ShardwireProvider
-			options={options}
-			ready={{
-				strict: true,
-				manifest,
-				botIntents: ['Guilds', 'GuildVoiceStates'],
-			}}
-		>
-			<Controller />
-		</ShardwireProvider>
-	);
-}
+---
 
-function Controller() {
-	const sw = useShardwire();
+## How It Works
 
-	useShardwireListener(sw.status === 'ready' ? sw.app : null, {
-		event: 'voiceStateUpdate',
-		onEvent: (p) => {
-			console.log('voice', p.state.guildId);
-		},
-		enabled: sw.status === 'ready',
-	});
+The hooks manage **client lifecycle** and **subscription** to Shardwire session state. They are thin wrappers over the same client types you would use from plain TypeScript—use this package when React is already in the stack.
 
-	if (sw.status === 'error') return <pre>{sw.error.message}</pre>;
-	if (sw.status === 'connecting') return <p>Connecting…</p>;
+<details>
+<summary><b>Details</b> — reference material</summary>
 
-	return <pre>{JSON.stringify(sw.capabilities, null, 2)}</pre>;
-}
-```
+- [API reference — React / client sections](https://shardwire.js.org/docs/reference/)
+- [Troubleshooting](https://shardwire.js.org/docs/troubleshooting/) for bridge connectivity issues that show up as hook errors
 
-## Example (hooks only)
+</details>
 
-```tsx
-import { useMemo } from 'react';
-import { defineShardwireApp } from 'shardwire/client';
-import { useShardwireConnection, useShardwireListener } from '@shardwire/react';
+---
 
-const manifest = defineShardwireApp({
-	name: 'dashboard',
-	events: ['voiceStateUpdate'],
-	actions: ['moveMemberVoice'],
-});
+## FAQ
 
-export function Controller() {
-	const options = useMemo(
-		() => ({
-			url: process.env.NEXT_PUBLIC_SHARDWIRE_URL!,
-			secret: process.env.NEXT_PUBLIC_SHARDWIRE_SECRET!,
-			appName: manifest.name,
-		}),
-		[],
-	);
+**Can I use Shardwire without React?** Yes. This package is optional; Node apps import `shardwire/client` directly.
 
-	const sw = useShardwireConnection(options, {
-		strict: true,
-		manifest,
-		botIntents: ['Guilds', 'GuildVoiceStates'],
-	});
+**Does this run in React Server Components?** Treat Shardwire as a **client** concern: put providers and hooks in client components per your framework’s boundaries.
 
-	useShardwireListener(sw.status === 'ready' ? sw.app : null, {
-		event: 'voiceStateUpdate',
-		onEvent: (p) => console.log(p.state.guildId),
-		enabled: sw.status === 'ready',
-	});
+---
 
-	if (sw.status === 'error') return <pre>{sw.error.message}</pre>;
-	if (sw.status === 'connecting') return <p>Connecting…</p>;
+## Contributing
 
-	return <pre>{JSON.stringify(sw.capabilities, null, 2)}</pre>;
-}
-```
+Repository: [github.com/unloopedmido/shardwire](https://github.com/unloopedmido/shardwire) (`packages/react`). Run `npm test` and `npm run typecheck` in this workspace package.
 
-## Docs
+## License
 
-- [**React cookbook**](https://shardwire.js.org/docs/guides/react-cookbook/) — strict manifests, reconnect behavior, filters with `useShardwireListener`
-
-## Scope
-
-Hooks wrap **built-in** Shardwire events/actions only. For app-specific RPC or shared player state, use a **second channel** (HTTP/Redis/WebSocket) next to Shardwire — see [**How it works**](https://shardwire.js.org/docs/concepts/how-it-works/) for the bridge model and [**Reference**](https://shardwire.js.org/docs/reference/) for the supported surface.
+MIT.

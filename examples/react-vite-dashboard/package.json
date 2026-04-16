@@ -1,6 +1,7 @@
 {
 	"name": "shardwire-react-vite-example",
 	"private": true,
+	"license": "MIT",
 	"type": "module",
 	"engines": {
 		"node": ">=22.0.0"

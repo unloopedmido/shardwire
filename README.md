@@ -1,66 +1,160 @@
+<div align="center">
+
 # Shardwire
 
-[![npm version](https://img.shields.io/npm/v/shardwire)](https://www.npmjs.com/package/shardwire)
-[![npm downloads](https://img.shields.io/npm/dm/shardwire)](https://www.npmjs.com/package/shardwire)
-[![Node.js](https://img.shields.io/badge/node-%3E%3D22.0.0-339933)](https://nodejs.org/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+### Keep the Discord gateway in one process and your product logic in another—without shipping your bot token to every client.
 
-Shardwire is a Discord-first bridge for running Discord gateway/runtime in one process while app logic runs in another.
+[Documentation](https://shardwire.js.org/docs/) · [API reference](https://shardwire.js.org/docs/reference/) · [Issues](https://github.com/unloopedmido/shardwire/issues)
 
-## Repository layout
+</div>
 
-| Path | Role |
-| --- | --- |
-| [`packages/shardwire`](./packages/shardwire/) | Core library: `createBotBridge`, `connectBotBridge`, diagnostics |
-| [`packages/react`](./packages/react/) | Optional `@shardwire/react` hooks for browser app processes |
-| [`packages/create-shardwire`](./packages/create-shardwire/) | `npm create shardwire` scaffold (published separately) |
-| [`apps/website`](./apps/website/) | Documentation site ([shardwire.js.org](https://shardwire.js.org/)) |
-| [`examples/minimal-bridge`](./examples/minimal-bridge/) | Smallest Node bot + app sample |
-| [`examples/react-vite-dashboard`](./examples/react-vite-dashboard/) | Vite + React + `@shardwire/react` |
-| [`examples/workspace-monorepo`](./examples/workspace-monorepo/) | npm workspaces: `packages/bot` + `packages/app` |
+---
 
-## Documentation
+> [!IMPORTANT]
+> **What touches your machine:** cloning this repo only adds source. Running examples or the docs app installs npm dependencies under each workspace. Published packages (`shardwire`, `@shardwire/react`, `create-shardwire`) are installed from npm like any other dependency.
+>
+> **Network:** a running bot talks to Discord; the app connects to the bridge over WebSocket. `create-shardwire` may fetch package metadata during install (normal npm behavior).
+>
+> **Secrets:** you configure Discord tokens, application IDs, and a shared bridge secret in `.env` (or your host’s secret store)—examples use names like `SHARDWIRE_SECRET`; never commit real tokens.
+>
+> **Reversibility:** stop processes and remove the clone. Uninstall published packages with `npm uninstall <name>` in the project that added them.
 
-[https://shardwire.js.org/](https://shardwire.js.org/)
+```bash
+npm create shardwire@latest
+```
+
+---
+
+## The Problem
+
+Discord bots often grow until one long-lived process is doing everything: gateway traffic, business rules, admin dashboards, and automation. That coupling makes deployments brittle and pushes sensitive capabilities (and sometimes credentials) into places they should not live.
+
+If you have already split “API server + worker” or “control plane + data plane,” the idea will feel familiar. **What Shardwire adds is a small, opinionated bridge:** a bot-side WebSocket server and a typed client so a separate app process can subscribe to events and send actions with a shared secret—not with your bot user’s full power in the browser.
+
+---
+
+## See It Work
+
+From the monorepo root after install:
+
+```text
+$ cd examples/minimal-bridge
+$ npm install
+$ cp .env.example .env   # fill DISCORD_TOKEN, SHARDWIRE_SECRET, optional ids and SHARDWIRE_URL
+$ npm run register       # register slash commands (once)
+$ npm run bot            # terminal A: bot + bridge
+$ npm run app            # terminal B: app client
+```
+
+You should see the app connect to the bridge and handle traffic defined in the example sources. Adjust URLs and secrets if you change the default listen address.
+
+---
 
 ## Install
 
+**Start a new project (recommended):**
+
+```bash
+npm create shardwire@latest
+```
+
+**Use the libraries in an existing Node or bundler project:**
+
 ```bash
 npm install shardwire
+# optional dashboards / React controllers
+npm install @shardwire/react
 ```
 
-Quick scaffold (uses npm packages, not this monorepo):
+Requires **Node.js 22+** (see `engines` in each package).
 
-```bash
-npm create shardwire
-```
+<details>
+<summary><b>Details</b> — work on this monorepo locally</summary>
 
-## Local development (monorepo root)
+Clone the repository, then from the repo root:
 
 ```bash
 npm install
-npm run pkg:verify
-npm run docs:dev
 ```
 
-- **`pkg:verify`** — lint, test, and build `shardwire` + `@shardwire/react`
-- **`docs:dev`** — run the docs site locally
-- Examples under **`examples/`** use `file:../../packages/shardwire` — run **`npm run pkg:build`** before **`npm install`** inside an example
+Useful root scripts:
 
-## Conceptual flow
+| Script | Purpose |
+| --- | --- |
+| `npm run build` | Build `shardwire`, `@shardwire/react`, and the docs site |
+| `npm run verify` | Lint, tests, typecheck, and builds across published packages and the scaffold |
+| `npm run docs:dev` | Next.js docs + reference dev server |
+| `npm run docs:build` / `docs:preview` | Static export build and local preview |
 
-1. Start bot side with `createBotBridge(...)`
-2. Connect app side with `connectBotBridge(...)`
-3. Subscribe to events and invoke built-in actions
+Examples under `examples/` use `file:` dependencies back to `packages/*` so you can iterate without publishing.
 
-For manifests, strict startup, diagnostics, scoped secrets, deployment, and troubleshooting, use the docs site.
+</details>
 
-## Security
+---
 
-- Use `wss://` for non-loopback deployments.
-- Keep app permissions narrow with scoped secrets.
-- Report vulnerabilities privately to [cored.developments@gmail.com](mailto:cored.developments@gmail.com).
+## Getting Started
+
+1. **Skim concepts** — [How it works](https://shardwire.js.org/docs/concepts/how-it-works/) (bot vs app, secrets, capabilities).
+2. **Scaffold or copy an example** — `npm create shardwire@latest` or pick `examples/minimal-bridge`, `examples/react-vite-dashboard`, or `examples/workspace-monorepo`.
+3. **Configure environment** — `.env` with Discord credentials and a shared bridge secret (for example `SHARDWIRE_SECRET`) that matches on both sides.
+4. **Register commands** (if your template uses slash commands) — `npm run register` in the template or example.
+5. **Run bot and app** — two processes in development; production layout is your choice (see [Keeping it alive](https://shardwire.js.org/docs/guides/keeping-it-alive/)).
+
+---
+
+## How It Works
+
+The **bot process** owns the Discord gateway session and hosts a **bridge server**. The **app process** uses `shardwire/client` (or `@shardwire/react` in the browser) to connect over WebSocket, authenticate with the shared secret, and exchange typed events and actions.
+
+<details>
+<summary><b>Details</b> — repository layout</summary>
+
+| Path | Role |
+| --- | --- |
+| `packages/shardwire` | Core bridge + Node client (`shardwire`, `shardwire/client`) |
+| `packages/react` | Optional React hooks for app-side UIs |
+| `packages/create-shardwire` | Interactive project scaffold |
+| `apps/website` | Public documentation site (Fumadocs + Next.js) |
+| `examples/*` | Runnable references wired to local `file:` packages |
+
+Source of truth for APIs and guides is the published documentation, not this file alone.
+
+</details>
+
+---
+
+## Reference
+
+- [Getting started](https://shardwire.js.org/docs/getting-started/)
+- [Tutorial — first interaction](https://shardwire.js.org/docs/tutorial/first-interaction/)
+- [Troubleshooting](https://shardwire.js.org/docs/troubleshooting/)
+- [Changelog hub](https://shardwire.js.org/docs/changelog/)
+
+<details>
+<summary><b>Details</b> — license and contributing</summary>
+
+This monorepo is **MIT** licensed (`LICENSE` at the root; `packages/shardwire` ships its own copy for npm).
+
+Contributions: open an issue or PR on [GitHub](https://github.com/unloopedmido/shardwire). Run `npm run verify` before submitting substantive changes.
+
+</details>
+
+---
+
+## FAQ
+
+**Do I have to use React?** No. `@shardwire/react` is optional; Node-only apps use `shardwire` and `shardwire/client`.
+
+**Can the app run in the browser?** Yes for the client side of the bridge; the bot must stay on a server you control. Read the docs for secret handling and deployment constraints.
+
+**Where is the changelog?** [Documentation changelog hub](https://shardwire.js.org/docs/changelog/) with per-package sections.
+
+---
+
+## Contributing
+
+See the expanded Contributing note in **Reference → Details**, and use `npm run verify` from the repo root.
 
 ## License
 
-MIT - see [`LICENSE`](./LICENSE).
+MIT — see `LICENSE`.
