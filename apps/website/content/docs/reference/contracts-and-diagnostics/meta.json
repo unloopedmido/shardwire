@@ -8,6 +8,8 @@
     "define-shardwire-app",
     "diagnose-shardwire-app",
     "diagnose-shardwire-app-options",
+    "format-shardwire-diagnosis",
+    "format-shardwire-diagnosis-options",
     "generate-secret-scope",
     "get-shardwire-catalog",
     "preflight-desired",

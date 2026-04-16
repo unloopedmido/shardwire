@@ -25,9 +25,11 @@ export function getReferenceCategoryId(name) {
     name === 'defineShardwireApp' ||
     name === 'generateSecretScope' ||
     name === 'diagnoseShardwireApp' ||
+    name === 'formatShardwireDiagnosis' ||
     name === 'getShardwireCatalog' ||
     name.startsWith('ShardwireApp') ||
     name.startsWith('DiagnoseShardwire') ||
+    name.startsWith('FormatShardwire') ||
     name.startsWith('CapabilityExplanation') ||
     name.startsWith('Preflight') ||
     name === 'ShardwireCatalog'
