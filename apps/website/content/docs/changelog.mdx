@@ -15,6 +15,12 @@ This tab covers the **`shardwire`** npm package from **v1.0.0** onward. Earlier 
 
 npm: [`shardwire`](https://www.npmjs.com/package/shardwire)
 
+## 1.9.3
+
+Patch release for **Vite / browser** action calls.
+
+- **Request IDs:** `createRequestId` / `createConnectionId` now use **`globalThis.crypto.randomUUID`** or **`getRandomValues`** only — no **`node:crypto`** import — so **`shardwire/client`** bundles no longer pull Node’s **`crypto`** module (fixes Vite externalize / resolve warnings and broken **`app.actions.*`** in the browser).
+
 ## 1.9.2
 
 Patch release for **browser and Vite** app bridges.
@@ -176,6 +182,10 @@ Patch release focused on reliability and docs after the docs-site / monorepo mig
 This tab covers the **`@shardwire/react`** npm package. It versions **independently** from **`shardwire`**; see **`dependencies`** / **`peerDependencies`** in `package.json` on each release for the **`shardwire`** range and **`react`** peer.
 
 npm: [`@shardwire/react`](https://www.npmjs.com/package/@shardwire/react)
+
+## 0.1.4
+
+- **Dependency:** **`shardwire`** `^1.9.3` (browser-safe request IDs; see **`shardwire` 1.9.3** changelog).
 
 ## 0.1.3
 
