@@ -1,7 +1,7 @@
 interface Waiter {
 	resolve: (release: () => void) => void;
 	reject: (error: Error) => void;
-	timeout: NodeJS.Timeout;
+	timeout: ReturnType<typeof setTimeout>;
 }
 
 /**

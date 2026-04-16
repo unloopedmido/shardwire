@@ -45,7 +45,7 @@ import { withErrorDocsLink } from '../utils/docs-links';
 interface PendingRequest {
 	resolve: (value: ActionResult<unknown>) => void;
 	reject: (error: AppRequestError) => void;
-	timer: NodeJS.Timeout;
+	timer: ReturnType<typeof setTimeout>;
 }
 
 class AppRequestError extends Error {
@@ -111,11 +111,11 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
 	let currentConnectionId: string | null = null;
 	let currentCapabilities: BridgeCapabilities = { events: [], actions: [] };
 	let reconnectAttempts = 0;
-	let reconnectTimer: NodeJS.Timeout | null = null;
+	let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 	let connectPromise: Promise<void> | null = null;
 	let connectResolve: (() => void) | null = null;
 	let connectReject: ((error: Error) => void) | null = null;
-	let authTimeoutTimer: NodeJS.Timeout | null = null;
+	let authTimeoutTimer: ReturnType<typeof setTimeout> | null = null;
 	let capabilityError: BridgeCapabilityError | null = null;
 
 	const pendingRequests = new Map<string, PendingRequest>();

@@ -40,6 +40,21 @@ Bundlers pre-bundle the main `shardwire` entry, which includes the bot runtime (
 import { connectBotBridge, defineShardwireApp } from 'shardwire/client';
 ```
 
-Keep `createBotBridge` imports on `shardwire` in **Node-only** bot processes. `@shardwire/react` resolves `shardwire/client` internally from `shardwire` **1.9.1+**.
+Keep `createBotBridge` imports on `shardwire` in **Node-only** bot processes. `@shardwire/react` resolves `shardwire/client` internally; use **`shardwire` ≥ 1.9.2** with **`@shardwire/react`** current releases.
+
+## Browser or Vite: `WebSocket is not a constructor`
+
+The app bridge uses the **standard `globalThis.WebSocket` constructor** (same as browsers and Node.js 22+). It does **not** use the npm `ws` package in the browser; bundling `ws` for the client often yields a non-constructor shim and errors like `import_browser.WebSocket is not a constructor`.
+
+**Fix:** use **`shardwire` ≥ 1.9.2** (or newer) so the client build omits `ws` for `connectBotBridge`. No app code changes are required beyond upgrading.
+
+## Node.js below 22: `connectBotBridge requires globalThis.WebSocket`
+
+On Node **18–21**, `globalThis.WebSocket` may be missing. Before calling `connectBotBridge`, install `ws` and assign:
+
+```ts
+import { WebSocket } from 'ws';
+Object.assign(globalThis, { WebSocket });
+```
 
 Treat troubleshooting as a capability audit first, not a transport guess.

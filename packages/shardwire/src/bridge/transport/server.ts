@@ -71,7 +71,7 @@ export class BridgeTransportServer {
 	private readonly logger: Required<ShardwireLogger>;
 	private readonly heartbeatMs: number;
 	private readonly authTimeoutMs = 5000;
-	private readonly interval: NodeJS.Timeout;
+	private readonly interval: ReturnType<typeof setInterval>;
 	private readonly connections = new Map<WebSocket, BridgeConnectionState>();
 	private readonly stickyEvents = new Map<BotEventName, BotEventPayloadMap[BotEventName]>();
 	private readonly actionSemaphore: AsyncSemaphore;
