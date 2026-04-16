@@ -1,4 +1,4 @@
-import { GatewayIntentBits } from 'discord.js';
+import { GatewayIntentBits } from 'discord-api-types/v10';
 import type { BotActionName, BotEventName, BotIntentName } from './types';
 
 export const BOT_EVENT_NAMES = [

@@ -7,8 +7,10 @@ The app bridge is the consumer side of the system.
 
 ## Base connection
 
+In **Vite / browser** app bundles, import from `shardwire/client` so the bot runtime (`discord.js`) is not pulled in (see [Troubleshooting](/docs/operations/troubleshooting/#vite-and-zlib-sync)). In Node app scripts, `shardwire` is fine.
+
 ```ts
-import { connectBotBridge } from 'shardwire';
+import { connectBotBridge } from 'shardwire/client';
 
 const app = connectBotBridge({
 	url: 'ws://127.0.0.1:3001/shardwire',

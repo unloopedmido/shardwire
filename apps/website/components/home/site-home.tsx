@@ -19,7 +19,7 @@ const bridge = createBotBridge({
 
 await bridge.ready();`;
 
-const appCode = `import { connectBotBridge } from 'shardwire';
+const appCode = `import { connectBotBridge } from 'shardwire/client';
 
 // 2. App process: WebSocket client + typed subscriptions
 const app = connectBotBridge({

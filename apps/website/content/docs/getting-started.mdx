@@ -78,8 +78,10 @@ console.log('bot bridge ready');
 
 ## App process
 
+Use **`shardwire/client`** for the app bridge so browser bundlers (for example Vite) do not pull in the bot runtime. Node-only scripts may also import from **`shardwire/client`**; the bot process still imports **`createBotBridge`** from **`shardwire`**.
+
 ```ts
-import { connectBotBridge } from 'shardwire';
+import { connectBotBridge } from 'shardwire/client';
 
 const app = connectBotBridge({
 	url: 'ws://127.0.0.1:3001/shardwire',

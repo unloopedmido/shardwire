@@ -1,4 +1,4 @@
-import type { AppBridge, BotEventName, BotEventPayloadMap, EventSubscriptionFilter } from 'shardwire';
+import type { AppBridge, BotEventName, BotEventPayloadMap, EventSubscriptionFilter } from 'shardwire/client';
 import { useEffect, useRef } from 'react';
 
 /**
