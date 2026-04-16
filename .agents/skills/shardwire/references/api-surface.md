@@ -13,8 +13,10 @@ import {
 	deferThenEditInteractionReply,
 	defineShardwireApp,
 	diagnoseShardwireApp,
+	formatShardwireDiagnosis,
 	generateSecretScope,
 	getShardwireCatalog,
+	type FormatShardwireDiagnosisOptions,
 } from 'shardwire';
 ```
 
@@ -28,6 +30,7 @@ If user-facing guidance is needed, link directly to website pages instead of rep
 - `defineShardwireApp(definition)` - small manifest: **`events`**, **`actions`**, optional **`filters`**, optional **`name`** (default `shardwire-app`); not for transport/secrets/intents/startup policy.
 - `generateSecretScope(manifest)` - minimum `SecretPermissions` lists for scoped secrets.
 - `diagnoseShardwireApp(manifest, negotiated, options?)` - manifest vs negotiation; filter **errors**: `unsupported_filter_key`, `filter_key_absent_from_event_metadata` (bridge metadata never includes that key for the event — not “low match” heuristics); `unused_negotiated_*` **warnings** only; **`expectedScope`** opt-in for **`scope_broader_than_expected`** errors.
+- `formatShardwireDiagnosis(report, options?)` - stable, human-readable string from a diagnosis report (strict-startup errors, CI preflight, deploy logs). Options include **`title`**, **`omitScopeSummary`**, etc. (`FormatShardwireDiagnosisOptions`).
 - `deferThenEditInteractionReply`, `deferUpdateThenEditInteractionReply`, `createThreadThenSendMessage` - workflow helpers.
 - `BridgeCapabilityError` - capability/permission related error type (optional `details`).
 - `ShardwireStrictStartupError` - thrown from `app.ready({ strict: true, ... })` with `report` payload.
@@ -158,6 +161,16 @@ Use this during startup and troubleshooting.
 - `app.catalog()` — same surface as `getShardwireCatalog()`.
 - `app.explainCapability({ kind: 'event' | 'action', name })` — built-in vs negotiated allow/deny.
 - `app.preflight(desired?)` — diagnostics (`issues[]`); call before `app.on(...)` to validate planned `events` / `actions` only.
+
+## React app processes (`@shardwire/react`)
+
+Optional workspace package for dashboards and controllers (v1.9.0+). **Does not** declare `react` as a dependency of core `shardwire` — install `react`, `shardwire`, and `@shardwire/react`.
+
+- `useShardwireBridge(options, ready?)` — connect on mount, `await ready(...)`, close on unmount; memoize `options` when stable.
+- `useShardwireCapabilities(app, isReady)` — negotiated caps when connected.
+- `useShardwireEvent(app, event, handler, filter?, enabled?)` — subscription with a stable handler ref.
+
+Repo entry: `packages/react/README.md`. For app-specific RPC or shared state beside Shardwire, see **Concepts → Custom domain contracts**.
 
 ## Error links convention
 

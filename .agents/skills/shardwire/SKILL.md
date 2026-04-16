@@ -1,6 +1,6 @@
 ---
 name: shardwire
-description: Use this skill whenever a user mentions Shardwire, Discord bot/app bridging, `createBotBridge`, `connectBotBridge`, secret scopes, capabilities, strict startup, diagnostics, troubleshooting, or split-process Discord architectures. Always use it for Shardwire docs/tasks, and prioritize the live website docs URL for guidance, links, and user-facing references.
+description: Use this skill whenever a user mentions Shardwire, Discord bot/app bridging, `createBotBridge`, `connectBotBridge`, `formatShardwireDiagnosis`, `@shardwire/react`, secret scopes, capabilities, strict startup, diagnostics, troubleshooting, or split-process Discord architectures. Always use it for Shardwire docs/tasks, and prioritize the live website docs URL for guidance, links, and user-facing references.
 ---
 
 # Shardwire Skill
@@ -29,14 +29,23 @@ All **documentation routes** live under **`/docs/`** on that host.
   - Bridge architecture: `https://shardwire.js.org/docs/concepts/bridge-architecture/`
   - Capabilities & scopes: `https://shardwire.js.org/docs/concepts/capabilities-and-scopes/`
   - Runtime model: `https://shardwire.js.org/docs/concepts/runtime-model/`
+  - Product boundaries: `https://shardwire.js.org/docs/concepts/product-boundaries/`
+  - Custom domain contracts (spike): `https://shardwire.js.org/docs/concepts/custom-domain-contracts/`
 - **Guides**
+  - Incremental adoption: `https://shardwire.js.org/docs/guides/incremental-adoption/`
   - Bot bridge: `https://shardwire.js.org/docs/guides/bot-bridge/`
   - App bridge: `https://shardwire.js.org/docs/guides/app-bridge/`
   - Manifests: `https://shardwire.js.org/docs/guides/manifests/`
   - Strict startup: `https://shardwire.js.org/docs/guides/strict-startup/`
   - Workflows: `https://shardwire.js.org/docs/guides/workflows/`
+  - Recipes: moderation worker `https://shardwire.js.org/docs/guides/recipe-moderation-worker/`, interactions worker `https://shardwire.js.org/docs/guides/recipe-interactions-worker/`, analytics listener `https://shardwire.js.org/docs/guides/recipe-analytics-listener/`, music controller `https://shardwire.js.org/docs/guides/recipe-music-controller/`
+  - Slash command sync: `https://shardwire.js.org/docs/guides/slash-command-sync/`
 - **Operations**
   - Deployment: `https://shardwire.js.org/docs/operations/deployment/`
+  - CI contract validation: `https://shardwire.js.org/docs/operations/ci-contract-validation/`
+  - Secret cookbook: `https://shardwire.js.org/docs/operations/secret-cookbook/`
+  - Remote bridge (wss): `https://shardwire.js.org/docs/operations/remote-bridge/`
+  - Observability: `https://shardwire.js.org/docs/operations/observability/`
   - Diagnostics: `https://shardwire.js.org/docs/operations/diagnostics/`
   - Troubleshooting: `https://shardwire.js.org/docs/operations/troubleshooting/`
 
@@ -47,6 +56,11 @@ All **documentation routes** live under **`/docs/`** on that host.
   (sections include `bridge-apis`, `contracts-and-diagnostics`, `workflows`, `errors-and-failures`, `event-and-data-models`, `action-models`.)
 
 The reference is **generated** from `packages/shardwire/src/index.ts` (`npm run -w website reference:build`, also run as **website** `prebuild`). Public exports carry `@see` tags pointing at these URLs for IDE hovers.
+
+### v1.9.0+ ergonomics
+
+- **`formatShardwireDiagnosis(report, options?)`** — human-readable text from a `diagnoseShardwireApp` report (CI logs, deploy logs, strict-startup failures). Reference: `https://shardwire.js.org/docs/reference/contracts-and-diagnostics/format-shardwire-diagnosis/`
+- **`@shardwire/react`** (workspace package) — optional hooks around **`connectBotBridge`**: `useShardwireBridge`, `useShardwireCapabilities`, `useShardwireEvent`. Source and examples: `packages/react/README.md`; does not bundle React — install `react`, `shardwire`, and `@shardwire/react` together.
 
 ### Runtime error links (`See: …`)
 
@@ -72,9 +86,10 @@ Some errors append **`https://shardwire.js.org/docs/operations/troubleshooting/#
 
 3. **Stay inside built-in API first**
    - Use `createBotBridge(...)` on bot side.
-   - Use `connectBotBridge(...)` on app side.
+   - Use `connectBotBridge(...)` on app side (or **`@shardwire/react`** hooks in React app processes).
    - Use `app.on(...)` and `app.actions.*`.
-   - Use `defineShardwireApp(...)`, `generateSecretScope(...)`, `diagnoseShardwireApp(...)`, `app.preflight(...)`, `app.explainCapability(...)` before custom systems.
+   - Use `getShardwireCatalog()` / `app.catalog()` for static event/action/filter names before hard-coding strings.
+   - Use `defineShardwireApp(...)`, `generateSecretScope(...)`, `diagnoseShardwireApp(...)`, `formatShardwireDiagnosis(...)` (for readable diagnosis output), `app.preflight(...)`, `app.explainCapability(...)` before custom systems.
 
 4. **Preserve Discord-first framing**
    - Shardwire is not a generic websocket bus.
@@ -110,6 +125,7 @@ Follow this sequence unless user scope is narrower:
    - secret scope allows events/actions
    - subscriptions and filters are valid
    - confirm with `app.capabilities()` and diagnostics APIs
+   - when surfacing diagnosis to humans or CI, print or log **`formatShardwireDiagnosis(report, { title?: string, ... })`** (see **Operations → CI contract validation** and **Diagnostics**)
 
 5. Close with docs routing:
    - include relevant **`/docs/...`** page URL(s)
@@ -208,7 +224,7 @@ When giving implementation help, prefer this structure:
 1. Brief diagnosis or plan (1-3 bullets)
 2. Bot process snippet (`createBotBridge`)
 3. App process snippet (`connectBotBridge`, subscriptions/actions)
-4. Validation (`capabilities`, `preflight`, `diagnose`)
+4. Validation (`capabilities`, `preflight`, `diagnose`, optional `formatShardwireDiagnosis` for logs)
 5. Direct docs links (`/docs/...` and `/docs/reference/...` when citing API)
 6. Verification checklist
 
@@ -250,7 +266,7 @@ When user asks to edit/add docs:
 
 ## Monorepo commands (docs + package)
 
-- Full check: `npm run verify` (root) — **`shardwire` verify** + **website** production build (includes `reference:build`).
+- Full check: `npm run verify` (root) — **`shardwire` verify**, **`@shardwire/react`** typecheck/build, then **website** production build (includes `reference:build`).
 - Docs site only: `npm run docs:build` or `npm run -w website build`.
 - Reference MDX only: `npm run -w website reference:build` (runs `attach-reference-see` after generate; refreshes `@see` URLs in **`packages/shardwire`** sources).
 

@@ -64,6 +64,10 @@ secrets: [
 
 Debug by comparing expected permissions with `app.capabilities()`.
 
+## Diagnosis for humans and CI (v1.9.0+)
+
+After `diagnoseShardwireApp(...)` or when handling `ShardwireStrictStartupError`’s embedded report, use **`formatShardwireDiagnosis(report, { title: '…' })`** so failures are readable in GitHub Actions, systemd journals, or support threads. Pair with **Operations → CI contract validation** and **Diagnostics** on the docs site.
+
 ## Common failure patterns
 
 ### App cannot connect
@@ -79,7 +83,7 @@ Debug by comparing expected permissions with `app.capabilities()`.
 - Event not allowed by scoped secret.
 - Event name mismatch in `app.on(...)`.
 - Overly restrictive filter (wrong `guildId`/`channelId`/`userId`/`messageId`/`interactionId`/`commandName`/`customId`/`interactionKind`/`emoji`/`voiceChannelId`).
-- Use diagnostics APIs (`app.preflight`, `app.explainCapability`, `diagnoseShardwireApp`) before ad-hoc speculation.
+- Use diagnostics APIs (`app.preflight`, `app.explainCapability`, `diagnoseShardwireApp`, `formatShardwireDiagnosis`) before ad-hoc speculation.
 
 ### Action always fails
 
@@ -93,6 +97,7 @@ Debug by comparing expected permissions with `app.capabilities()`.
 When helping users:
 
 - Prefer concrete "bot snippet + app snippet + run steps".
+- For React dashboards/controllers, point to **`@shardwire/react`** (`packages/react/README.md`) and **Guides → Incremental adoption** / **Concepts → Custom domain contracts** when they need a second channel beyond built-ins.
 - Ask for only missing, high-impact context.
 - Validate intents/scopes before proposing deeper refactors.
 - Keep advice centered on built-in events/actions unless requirements clearly exceed current surface.
