@@ -123,15 +123,21 @@ export function SiteHome() {
               </div>
             </TerminalWindow>
             
-            <div className="mt-auto pt-8">
-              <Link 
-                href="/docs/getting-started" 
+            <div className="mt-auto pt-8 flex flex-col gap-3">
+              <Link
+                href="/docs/tutorial/lesson-0-overview"
                 className="inline-flex items-center text-sm font-medium text-[color:var(--site-foreground)] hover:text-[color:var(--color-fd-muted-foreground)] transition-colors"
               >
-                Read the getting started guide 
+                Start the tutorial
                 <svg className="ml-2 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
+              </Link>
+              <Link
+                href="/docs/getting-started"
+                className="text-sm text-[color:var(--color-fd-muted-foreground)] hover:text-[color:var(--site-foreground)] transition-colors"
+              >
+                Or jump to Getting Started
               </Link>
             </div>
           </div>
@@ -142,7 +148,7 @@ export function SiteHome() {
               <span className="text-[color:var(--color-fd-muted-foreground)]">02.</span> Reference
             </h2>
             <p className="text-sm text-[color:var(--color-fd-muted-foreground)] mb-6">
-              Full API surfaces generated directly from TypeScript source code. Browse the bridge architecture, transports, and strictly-typed events.
+              Full API surfaces generated directly from TypeScript source code. Browse bridge APIs, transports, and strictly-typed events.
             </p>
             <div className="mt-auto">
               <Link 

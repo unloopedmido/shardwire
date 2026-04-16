@@ -10,7 +10,7 @@ Shardwire’s split is a **process boundary**, not a requirement to delete your 
 - **Bot process:** `createBotBridge()` owns the Discord client, intents, and bridge server. It stays the only place that touches `DISCORD_TOKEN` for gateway traffic.
 - **App process(es):** `connectBotBridge()` over `ws://` (local) or `wss://` (remote), each with a **manifest**, **strict startup** where appropriate, and a **scoped secret** when more than one consumer exists.
 
-Read [Bridge architecture](/docs/concepts/bridge-architecture) if you have not internalized that split yet.
+Read [How Shardwire works](/docs/concepts/how-shardwire-works) if you have not internalized that split yet.
 
 ## Stage A — Events-only sidecar (lowest risk)
 

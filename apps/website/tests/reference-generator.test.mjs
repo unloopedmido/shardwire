@@ -81,10 +81,12 @@ test('generateReferenceDocs writes grouped reference pages from root exports', a
 
   const meta = JSON.parse(await readFile(path.join(docsRoot, 'meta.json'), 'utf8'));
   assert.deepEqual(meta.pages.slice(0, 3), ['index', 'bridge-apis', 'contracts-and-diagnostics']);
+  assert.equal(meta.defaultOpen, false);
 
   const bridgeCategory = JSON.parse(
     await readFile(path.join(docsRoot, 'bridge-apis', 'meta.json'), 'utf8'),
   );
+  assert.equal(bridgeCategory.defaultOpen, false);
   assert.ok(bridgeCategory.pages.includes('create-bot-bridge'));
   assert.ok(bridgeCategory.pages.includes('bot-bridge-options'));
 

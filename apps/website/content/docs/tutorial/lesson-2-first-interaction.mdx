@@ -1,0 +1,49 @@
+---
+title: 'Lesson 2 — First interaction'
+description: 'Subscribe to a message event and send a reply from the app process, checking the typed action result.'
+---
+
+The [`examples/minimal-bridge`](https://github.com/unloopedmido/shardwire/tree/main/examples/minimal-bridge) app script already replies **`pong`** when someone sends **`!ping`** in a channel your bot can see.
+
+<Steps>
+
+<Step>
+Keep **terminal A** running (`npm run bot`).
+</Step>
+
+<Step>
+Restart **terminal B** (`npm run app`) after saving `src/app.js` if you changed it.
+</Step>
+
+<Step>
+In Discord, mention or invite the bot to a server and channel where it has **Read Messages** / **Send Messages** (and **Read Message Content** if required for your server tier).
+</Step>
+
+<Step>
+Send `!ping` in that channel. You should see `pong` from the bot and log lines in the app terminal.
+</Step>
+
+</Steps>
+
+## The important pattern
+
+Always treat actions as typed calls that can fail in normal ways. Branch on `result.ok`:
+
+```ts
+const result = await app.actions.sendMessage({
+  channelId: message.channelId,
+  content: 'pong',
+});
+
+if (!result.ok) {
+  console.error(result.error.code, result.error.message);
+}
+```
+
+<Callout type="warn" title="If `!ping` does nothing">
+
+See [Lesson 3](/docs/tutorial/lesson-3-when-nothing-happens) — usually intents, permissions, or capability scope.
+
+</Callout>
+
+Next: [Lesson 3 — When nothing happens](/docs/tutorial/lesson-3-when-nothing-happens).

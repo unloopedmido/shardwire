@@ -2,11 +2,13 @@
   "title": "Documentation",
   "pages": [
     "index",
+    "tutorial",
     "getting-started",
     "changelog",
     "concepts",
     "guides",
     "operations",
+    "advanced",
     "reference"
   ]
 }

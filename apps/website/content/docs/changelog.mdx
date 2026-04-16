@@ -1,11 +1,19 @@
 ---
 title: Changelog
-description: Notable Shardwire releases from v1.0.0 onward — API additions, behavior changes, and operational updates.
+description: Release notes by package — core shardwire and optional @shardwire/react.
 ---
 
-This page lists **notable changes in the `shardwire` package** from **v1.0.0** through the current release. Earlier pre–1.0 history lived in the legacy generic bridge API and is intentionally omitted here.
+Pick a package below. Each tab has its own version history.
 
-Release tags on GitHub: [`v1.0.0` … current](https://github.com/unloopedmido/shardwire/tags).
+Release tags (monorepo): [`v1.0.0` … current](https://github.com/unloopedmido/shardwire/tags).
+
+<Tabs items={['shardwire', '@shardwire/react']}>
+
+<Tab value="shardwire">
+
+This tab covers the **`shardwire`** npm package from **v1.0.0** onward. Earlier pre–1.0 history lived in the legacy generic bridge API and is intentionally omitted here.
+
+npm: [`shardwire`](https://www.npmjs.com/package/shardwire)
 
 ## 1.9.0
 
@@ -13,9 +21,7 @@ Minor release focused on adoption documentation, diagnostics ergonomics, and an 
 
 - Added **`formatShardwireDiagnosis(report, options?)`** and **`FormatShardwireDiagnosisOptions`** for readable diagnosis output (CI logs, deploy logs, strict-startup failures).
 - Regenerated reference docs for the new formatter symbols.
-- Documentation: [incremental adoption](/docs/guides/incremental-adoption), golden [recipes](/docs/guides/recipe-moderation-worker) (moderation, interactions, analytics, music controller), [CI contract validation](/docs/operations/ci-contract-validation), [secret cookbook](/docs/operations/secret-cookbook), [remote bridge (wss)](/docs/operations/remote-bridge), [observability](/docs/operations/observability), [slash command registration](/docs/guides/slash-command-sync), [product boundaries](/docs/concepts/product-boundaries), and [custom domain contracts (spike)](/docs/concepts/custom-domain-contracts).
-- Added optional workspace package **`@shardwire/react`** with hooks around **`connectBotBridge`** (`useShardwireBridge`, `useShardwireCapabilities`, `useShardwireEvent`).
-- Root **`verify`** / **`build`** scripts now typecheck and build **`@shardwire/react`** after **`shardwire`**.
+- Documentation: [incremental adoption](/docs/guides/incremental-adoption), golden [recipes](/docs/guides/recipe-moderation-worker) (moderation, interactions, analytics, music controller), [CI contract validation](/docs/operations/ci-contract-validation), [secret cookbook](/docs/operations/secret-cookbook), [remote bridge (wss)](/docs/operations/remote-bridge), [observability](/docs/operations/observability), [slash command registration](/docs/guides/slash-command-sync), [product boundaries](/docs/advanced/product-boundaries), and [custom domain contracts (spike)](/docs/advanced/custom-domain-contracts).
 - TypeScript: set **`ignoreDeprecations`** to **`"6.0"`** in **`packages/shardwire/tsconfig.json`** so declaration emit stays stable on TypeScript 6.x.
 
 ## 1.8.0
@@ -147,3 +153,23 @@ Patch release focused on reliability and docs after the docs-site / monorepo mig
 - Removed Discord interaction callback tokens from serialized **`BridgeInteraction`** payloads sent to apps.
 - Tightened secret handling to reject duplicate configured secret values and ambiguous value-only authentication matches.
 - Replaced package examples, tests, and skill metadata to match the Discord-first direction.
+
+</Tab>
+
+<Tab value="@shardwire/react">
+
+This tab covers the **`@shardwire/react`** npm package. It versions **independently** from **`shardwire`**; check **`peerDependencies`** on each release for the required **`shardwire`** range.
+
+npm: [`@shardwire/react`](https://www.npmjs.com/package/@shardwire/react)
+
+## 0.1.0
+
+Initial public release of optional React hooks for app-side bridges.
+
+- **`useShardwireBridge`**, **`useShardwireCapabilities`**, and **`useShardwireEvent`** — thin hooks around **`connectBotBridge`** for dashboards and controllers.
+- **Peer dependencies:** **`react`** `>= 18`, **`shardwire`** `>= 1.9.0` (neither is bundled).
+- Published from `packages/react` with ESM + CJS builds and TypeScript declarations.
+
+</Tab>
+
+</Tabs>

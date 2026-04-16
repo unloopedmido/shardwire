@@ -1,5 +1,6 @@
 {
   "title": "Event & Data Models",
+  "defaultOpen": false,
   "pages": [
     "index",
     "bot-event-name",

@@ -60,4 +60,4 @@ export function Controller() {
 
 ## Scope
 
-Hooks wrap **built-in** Shardwire events/actions only. For app-specific RPC or shared player state, use a **second channel** (HTTP/Redis/WebSocket) next to Shardwire — see [Custom domain contracts (spike)](https://shardwire.js.org/docs/concepts/custom-domain-contracts/).
+Hooks wrap **built-in** Shardwire events/actions only. For app-specific RPC or shared player state, use a **second channel** (HTTP/Redis/WebSocket) next to Shardwire — see [Custom domain contracts (spike)](https://shardwire.js.org/docs/advanced/custom-domain-contracts/).

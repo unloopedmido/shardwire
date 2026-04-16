@@ -5,7 +5,7 @@ description: 'Architecture notes on app-defined RPC/events alongside Shardwire: 
 
 This page is a **spike / ADR-style** note for maintainers and advanced integrators. It answers: _“Could Shardwire carry my own `music.play` actions like built-in Discord actions?”_
 
-**Current charter:** Shardwire is a **Discord-first bridge**—negotiation, manifests, scoped secrets, strict startup, and diagnostics are all **Discord-catalog-shaped** ([Product boundaries](/docs/concepts/product-boundaries), [Capabilities & scoped secrets](/docs/concepts/capabilities-and-scopes)).
+**Current charter:** Shardwire is a **Discord-first bridge**—negotiation, manifests, scoped secrets, strict startup, and diagnostics are all **Discord-catalog-shaped** ([Product boundaries](/docs/advanced/product-boundaries), [Capabilities & scoped secrets](/docs/concepts/capabilities-and-scopes)).
 
 ## Proposal (external)
 
@@ -41,6 +41,5 @@ A minimal, charter-safe subset might look like: **documented envelopes** carried
 
 ## Related
 
-- [Bridge architecture](/docs/concepts/bridge-architecture)
-- [Runtime model](/docs/concepts/runtime-model)
+- [How Shardwire works](/docs/concepts/how-shardwire-works)
 - Optional `@shardwire/react` companion package in this repository (`packages/react`) for dashboard-facing hooks

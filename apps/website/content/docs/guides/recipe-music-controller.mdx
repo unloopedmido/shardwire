@@ -12,8 +12,8 @@ This recipe keeps that separation explicit: **Shardwire = Discord**, **your HTTP
 
 ## Architecture
 
-```mermaid
-flowchart LR
+<Mermaid
+  chart={`flowchart LR
   subgraph bot [Bot process]
     BR[createBotBridge]
     LJ[Lavalink or audio runtime]
@@ -29,8 +29,8 @@ flowchart LR
   BR --> SW
   SW -->|"Discord events and actions"| UI
   UI <-->|"queue player state"| API
-  API <-->|"optional"| LJ
-```
+  API <-->|"optional"| LJ`}
+/>
 
 ## Shardwire manifest (Discord slice only)
 
@@ -93,7 +93,7 @@ const options = useMemo(
 // );
 ```
 
-Player position, queue, and “now playing” should come from **`fetch('/api/player/...')`** or a small WebSocket **you** own—see [Custom domain contracts (spike)](/docs/concepts/custom-domain-contracts) for why not to tunnel those through Shardwire core.
+Player position, queue, and “now playing” should come from **`fetch('/api/player/...')`** or a small WebSocket **you** own—see [Custom domain contracts (spike)](/docs/advanced/custom-domain-contracts) for why not to tunnel those through Shardwire core.
 
 ## Related
 

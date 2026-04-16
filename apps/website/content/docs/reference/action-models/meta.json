@@ -1,5 +1,6 @@
 {
   "title": "Action Models",
+  "defaultOpen": false,
   "pages": [
     "index",
     "add-member-role-action-payload",

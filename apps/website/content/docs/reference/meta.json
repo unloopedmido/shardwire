@@ -1,5 +1,6 @@
 {
   "title": "Reference",
+  "defaultOpen": false,
   "pages": [
     "index",
     "bridge-apis",

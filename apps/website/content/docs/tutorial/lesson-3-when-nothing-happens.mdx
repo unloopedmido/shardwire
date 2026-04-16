@@ -1,0 +1,36 @@
+---
+title: 'Lesson 3 — When nothing happens'
+description: 'Treat “connected but quiet” as a capability audit: intents, secrets, subscriptions, and negotiated surface.'
+---
+
+Most confusing failures are **not** random WebSocket bugs. They are **mismatched expectations** between what your bot can emit, what your secret allows, and what your app subscribed to.
+
+## 1. Handlers never run
+
+Work through this list in order:
+
+1. **`app.capabilities().events`** — is the event you subscribed to actually listed?
+2. **Bot intents** on `createBotBridge` — missing intents silently remove events from negotiation ([Bot bridge](/docs/guides/bot-bridge)).
+3. **Scoped secrets** — if you narrowed `allow.events`, the event must be permitted for that secret ([Capabilities & scoped secrets](/docs/concepts/capabilities-and-scopes)).
+4. **Subscription name** — typo in `app.on('messageCreate', …)`?
+
+## 2. Actions return `ok: false`
+
+1. Branch on `result.ok` and log `result.error.code` ([App bridge](/docs/guides/app-bridge)).
+2. Confirm the action appears in negotiated capabilities (not just your local wish list).
+
+## 3. Strict startup surprises
+
+<Callout type="error" title="Register handlers before `ready({ strict: true })`">
+
+If you call `app.on(...)` **after** `await app.ready({ strict: true, … })`, strict startup cannot see those subscriptions and startup may fail or your contract will not match reality. Register handlers first, then call `ready`.
+
+</Callout>
+
+See [Strict startup](/docs/guides/strict-startup) and [Incremental adoption](/docs/guides/incremental-adoption) when you add manifests.
+
+## 4. Still stuck
+
+Use [Troubleshooting](/docs/operations/troubleshooting) and [Diagnostics](/docs/operations/diagnostics) — treat it as a **capability audit first**, then transport.
+
+You now have a working local bridge. When you ship beyond loopback, continue with [Deployment](/docs/operations/deployment) and [Remote bridge (wss)](/docs/operations/remote-bridge).

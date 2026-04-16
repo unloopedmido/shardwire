@@ -1,0 +1,39 @@
+---
+title: 'Lesson 0 — What you are building'
+description: 'Two small Node programs: one holds your Discord bot, the other runs your first app logic over a WebSocket.'
+---
+
+You will run **two processes**:
+
+1. **Bot process** — connects to Discord and hosts a small WebSocket server (`createBotBridge`).
+2. **App process** — connects to that server (`connectBotBridge`) and reacts to Discord events without owning the bot token’s gateway session.
+
+<Callout type="info" title="Prerequisites">
+
+You should be comfortable with **Node.js**, **npm**, and **environment variables**. If you are brand new to JavaScript, learn the basics first (for example [javascript.info](https://javascript.info/)), then come back.
+
+</Callout>
+
+## The moving parts
+
+<Mermaid
+  chart={`flowchart LR
+  Discord[Discord_gateway]
+  BotProc[Bot_process_createBotBridge]
+  Wire[WebSocket_shardwire]
+  AppProc[App_process_connectBotBridge]
+  Discord --> BotProc
+  BotProc --> Wire
+  Wire --> AppProc`}
+/>
+
+- The **bot process** is the only place that should use `DISCORD_TOKEN` for the gateway.
+- The **app process** uses a shared **`SHARDWIRE_SECRET`** to authenticate to your bridge, not your Discord token.
+
+## What you will have after the next lessons
+
+- Both processes running locally.
+- A message in Discord that makes your app process log or reply.
+- A short checklist for the usual “it connected but nothing happens” issues.
+
+Next: [Lesson 1 — Run the bridge locally](/docs/tutorial/lesson-1-run-locally).
