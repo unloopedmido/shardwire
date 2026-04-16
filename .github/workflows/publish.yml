@@ -8,6 +8,7 @@ on:
     paths:
       - packages/shardwire/package.json
       - packages/react/package.json
+      - .github/workflows/publish.yml
 
 concurrency:
   group: npm-publish-package-json
@@ -32,62 +33,70 @@ jobs:
         run: |
           set -euo pipefail
           NEW=$(node -p "require('./packages/shardwire/package.json').version")
+          TAG="v${NEW}"
           if ! git rev-parse HEAD~1 >/dev/null 2>&1; then
             echo "publish=false" >> "$GITHUB_OUTPUT"
             echo "No parent commit; skipping shardwire."
             exit 0
           fi
           if ! git cat-file -e HEAD~1:packages/shardwire/package.json 2>/dev/null; then
-            echo "publish=false" >> "$GITHUB_OUTPUT"
-            echo "Parent commit has no packages/shardwire/package.json; skipping shardwire."
-            exit 0
+            REASON="packages/shardwire/package.json newly added on HEAD"
+          else
+            OLD=$(git show HEAD~1:packages/shardwire/package.json | node -p "JSON.parse(require('fs').readFileSync(0,'utf8')).version")
+            if [ "$OLD" != "$NEW" ]; then
+              REASON="shardwire package.json version ${OLD} -> ${NEW}"
+            elif git ls-remote --tags origin "refs/tags/${TAG}" | grep -q .; then
+              echo "publish=false" >> "$GITHUB_OUTPUT"
+              echo "shardwire package.json version unchanged ($NEW) and tag ${TAG} exists on remote; skipping."
+              exit 0
+            else
+              REASON="shardwire package.json version unchanged ($NEW) but tag ${TAG} missing on remote (initial publish or retry)"
+            fi
           fi
-          OLD=$(git show HEAD~1:packages/shardwire/package.json | node -p "JSON.parse(require('fs').readFileSync(0,'utf8')).version")
-          if [ "$OLD" = "$NEW" ]; then
-            echo "publish=false" >> "$GITHUB_OUTPUT"
-            echo "shardwire package.json version unchanged ($NEW); skipping."
-            exit 0
-          fi
-          TAG="v${NEW}"
           if git ls-remote --tags origin "refs/tags/${TAG}" | grep -q .; then
             echo "publish=false" >> "$GITHUB_OUTPUT"
-            echo "Tag ${TAG} already exists on remote; skipping shardwire."
+            echo "Tag ${TAG} already exists on remote; skipping shardwire (${REASON})."
             exit 0
           fi
           echo "publish=true" >> "$GITHUB_OUTPUT"
           echo "version=${NEW}" >> "$GITHUB_OUTPUT"
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "reason=${REASON}" >> "$GITHUB_OUTPUT"
 
       - name: Detect @shardwire/react version bump
         id: react
         run: |
           set -euo pipefail
           NEW=$(node -p "require('./packages/react/package.json').version")
+          TAG="react-v${NEW}"
           if ! git rev-parse HEAD~1 >/dev/null 2>&1; then
             echo "publish=false" >> "$GITHUB_OUTPUT"
             echo "No parent commit; skipping react."
             exit 0
           fi
           if ! git cat-file -e HEAD~1:packages/react/package.json 2>/dev/null; then
-            echo "publish=false" >> "$GITHUB_OUTPUT"
-            echo "Parent commit has no packages/react/package.json; skipping react."
-            exit 0
+            REASON="packages/react/package.json newly added on HEAD"
+          else
+            OLD=$(git show HEAD~1:packages/react/package.json | node -p "JSON.parse(require('fs').readFileSync(0,'utf8')).version")
+            if [ "$OLD" != "$NEW" ]; then
+              REASON="@shardwire/react package.json version ${OLD} -> ${NEW}"
+            elif git ls-remote --tags origin "refs/tags/${TAG}" | grep -q .; then
+              echo "publish=false" >> "$GITHUB_OUTPUT"
+              echo "@shardwire/react package.json version unchanged ($NEW) and tag ${TAG} exists on remote; skipping."
+              exit 0
+            else
+              REASON="@shardwire/react package.json version unchanged ($NEW) but tag ${TAG} missing on remote (initial publish or retry)"
+            fi
           fi
-          OLD=$(git show HEAD~1:packages/react/package.json | node -p "JSON.parse(require('fs').readFileSync(0,'utf8')).version")
-          if [ "$OLD" = "$NEW" ]; then
-            echo "publish=false" >> "$GITHUB_OUTPUT"
-            echo "@shardwire/react package.json version unchanged ($NEW); skipping."
-            exit 0
-          fi
-          TAG="react-v${NEW}"
           if git ls-remote --tags origin "refs/tags/${TAG}" | grep -q .; then
             echo "publish=false" >> "$GITHUB_OUTPUT"
-            echo "Tag ${TAG} already exists on remote; skipping react."
+            echo "Tag ${TAG} already exists on remote; skipping react (${REASON})."
             exit 0
           fi
           echo "publish=true" >> "$GITHUB_OUTPUT"
           echo "version=${NEW}" >> "$GITHUB_OUTPUT"
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "reason=${REASON}" >> "$GITHUB_OUTPUT"
 
       - name: Set up Node.js
         if: steps.shardwire.outputs.publish == 'true' || steps.react.outputs.publish == 'true'
