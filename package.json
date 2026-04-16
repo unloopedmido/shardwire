@@ -14,6 +14,6 @@
 		"docs:preview": "npm run -w website preview",
 		"pkg:build": "npm run -w shardwire build",
 		"pkg:test": "npm run -w shardwire test",
-		"pkg:verify": "npm run -w shardwire verify"
+		"pkg:verify": "npm run -w shardwire verify && npm run -w @shardwire/react typecheck && npm run -w @shardwire/react build"
 	}
 }
