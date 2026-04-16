@@ -40,27 +40,22 @@ Bundlers pre-bundle the main `shardwire` entry, which includes the bot runtime (
 import { connectBotBridge, defineShardwireApp } from 'shardwire/client';
 ```
 
-Keep `createBotBridge` imports on `shardwire` in **Node-only** bot processes. `@shardwire/react` resolves `shardwire/client` via its **`shardwire`** dependency; use **`shardwire` ≥ 1.9.3** when you need recent browser/Vite fixes (`zlib-sync`, **`WebSocket`**, **`crypto`** / request IDs).
+Keep `createBotBridge` imports on `shardwire` in **Node-only** bot processes. `@shardwire/react` resolves `shardwire/client` via its **`shardwire`** dependency; use **`shardwire` ≥ 2.0.0** on **Node.js 22+** when you need current browser/Vite fixes (`zlib-sync`, **`WebSocket`**, **`crypto`** / request IDs).
 
 ## Vite and `crypto` / `node:crypto`
 
 Older client bundles imported **`node:crypto`** for UUIDs used by **`app.actions.*`**, which makes Vite warn or treat **`crypto`** as external and can break actions in the browser.
 
-**Fix:** upgrade to **`shardwire` ≥ 1.9.3**, which uses **`globalThis.crypto`** only. On **Node.js 18–19** app processes without **`globalThis.crypto`**, assign **`globalThis.crypto`** from **`node:crypto`**’s **`webcrypto`** before connecting (see test setup **`setup-crypto.ts`** in this repo for the pattern).
+**Fix:** upgrade to **`shardwire` ≥ 2.0.0**, which uses **`globalThis.crypto`** only and declares **Node.js 22+** in **`engines`**. Upgrade Node if you still see missing **`globalThis.crypto`** errors.
 
 ## Browser or Vite: `WebSocket is not a constructor`
 
 The app bridge uses the **standard `globalThis.WebSocket` constructor** (same as browsers and Node.js 22+). It does **not** use the npm `ws` package in the browser; bundling `ws` for the client often yields a non-constructor shim and errors like `import_browser.WebSocket is not a constructor`.
 
-**Fix:** use **`shardwire` ≥ 1.9.2** (ideally **≥ 1.9.3** with other Vite fixes) so the client build omits `ws` for `connectBotBridge`. No app code changes are required beyond upgrading.
+**Fix:** use **`shardwire` ≥ 2.0.0** so the client build omits `ws` for `connectBotBridge` and matches supported **Node.js 22+**. No app code changes are required beyond upgrading Node and the package.
 
 ## Node.js below 22: `connectBotBridge requires globalThis.WebSocket`
 
-On Node **18–21**, `globalThis.WebSocket` may be missing. Before calling `connectBotBridge`, install `ws` and assign:
-
-```ts
-import { WebSocket } from 'ws';
-Object.assign(globalThis, { WebSocket });
-```
+**Shardwire requires Node.js 22+** for app processes: **`globalThis.WebSocket`** is part of the supported runtime contract (same as modern browsers). Upgrade Node to **22 or newer**; polyfilling **`WebSocket`** on older Node versions is not supported.
 
 Treat troubleshooting as a capability audit first, not a transport guess.

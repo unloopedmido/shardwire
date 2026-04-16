@@ -1,6 +1,6 @@
 /**
  * App bridge sockets use the standard WHATWG `WebSocket` (browser, Node.js 22+).
- * On older Node versions, assign `globalThis.WebSocket` from the `ws` package before calling `connectBotBridge`, or register a Vitest setup that does the same.
+ * Node.js **22+** provides `globalThis.WebSocket`; older Node versions are unsupported for `connectBotBridge`.
  */
 
 export interface WebSocketLike {
@@ -24,9 +24,7 @@ class StandardWebSocketAdapter implements WebSocketLike {
 	constructor(url: string) {
 		const Ctor = globalThis.WebSocket;
 		if (typeof Ctor !== 'function') {
-			throw new Error(
-				'Shardwire connectBotBridge requires globalThis.WebSocket (browser, Node.js 22+, or assign globalThis.WebSocket from the `ws` package before connecting).',
-			);
+			throw new Error('Shardwire connectBotBridge requires globalThis.WebSocket (browser or Node.js 22+).');
 		}
 		this.inner = new Ctor(url);
 		this.inner.addEventListener('open', () => {

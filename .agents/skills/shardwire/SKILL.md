@@ -60,6 +60,7 @@ The reference is **generated** from `packages/shardwire/src/index.ts` (`npm run 
 
 ### v1.9.0+ ergonomics
 
+- **Node.js 22+** is required for supported **`shardwire`** / **`@shardwire/react`** releases (**`engines`** as of **`shardwire` 2.0.0**).
 - **`formatShardwireDiagnosis(report, options?)`** — human-readable text from a `diagnoseShardwireApp` report (CI logs, deploy logs, strict-startup failures). Reference: `https://shardwire.js.org/docs/reference/contracts-and-diagnostics/format-shardwire-diagnosis/`
 - **`@shardwire/react`** (workspace package) — optional hooks around **`connectBotBridge`**: `useShardwireBridge`, `useShardwireCapabilities`, `useShardwireEvent`. Hooks resolve **`shardwire/client`** (not the root export) so Vite/browser bundles avoid **`discord.js`** / **`zlib-sync`**, native **`WebSocket`**, and **`node:crypto`** (request IDs use **`globalThis.crypto`**). Source and examples: `packages/react/README.md`; does not bundle React — install **`react`** and **`@shardwire/react`** together (`@shardwire/react` pulls in compatible **`shardwire`**; add **`shardwire`** explicitly if you pin or import it directly).
 
@@ -108,7 +109,7 @@ Follow this sequence unless user scope is narrower:
    - docs/content request
 
 2. Gather minimum context:
-   - Node runtime (`>=18.18`)
+   - Node runtime (`>=22.0.0`)
    - topology (loopback vs remote)
    - env vars (`DISCORD_TOKEN`, secrets)
    - intended events/actions

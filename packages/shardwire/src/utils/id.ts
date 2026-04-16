@@ -13,7 +13,7 @@ function randomUuid(): string {
 		return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 	}
 	throw new Error(
-		'Shardwire requires Web Crypto (`globalThis.crypto.randomUUID` or `getRandomValues`). Use Node.js 20+, a modern browser, or polyfill `globalThis.crypto` before loading Shardwire.',
+		'Shardwire requires Web Crypto (`globalThis.crypto.randomUUID` or `getRandomValues`). Use Node.js 22+, a modern browser, or polyfill `globalThis.crypto` before loading Shardwire.',
 	);
 }
 
