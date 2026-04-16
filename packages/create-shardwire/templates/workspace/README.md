@@ -4,6 +4,14 @@
 
 ### npm workspaces with separate `packages/bot` and `packages/app` trees sharing one Shardwire dependency graph.
 
+[![License: MIT](https://img.shields.io/badge/license-MIT-326ce5?style=flat-square)](https://opensource.org/licenses/MIT)
+[![Node](https://img.shields.io/badge/node-%E2%89%A522-339933?style=flat-square&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![npm workspaces](https://img.shields.io/badge/npm-workspaces-cb3837?style=flat-square&logo=npm&logoColor=white)](https://docs.npmjs.com/cli/using-npm/workspaces)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Shardwire docs](https://img.shields.io/badge/Shardwire-docs-6b46c1?style=flat-square)](https://shardwire.js.org/docs/)
+
+<br />
+
 [Documentation](https://shardwire.js.org/docs/) · [How it works](https://shardwire.js.org/docs/concepts/how-it-works/)
 
 </div>

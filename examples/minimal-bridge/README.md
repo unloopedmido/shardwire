@@ -4,6 +4,13 @@
 
 ### Smallest Node bot + Node app pair wired through `shardwire`—for reading the protocol without UI noise.
 
+[![Monorepo](https://img.shields.io/badge/monorepo-unloopedmido%2Fshardwire-181717?style=flat-square&logo=github)](https://github.com/unloopedmido/shardwire)
+[![License: MIT](https://img.shields.io/badge/license-MIT-326ce5?style=flat-square)](https://github.com/unloopedmido/shardwire/blob/main/LICENSE)
+[![Node](https://img.shields.io/badge/node-%E2%89%A522-339933?style=flat-square&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![shardwire on npm](https://img.shields.io/npm/v/shardwire?label=shardwire&logo=npm&color=cb3837&style=flat-square)](https://www.npmjs.com/package/shardwire)
+
+<br />
+
 [Concepts](https://shardwire.js.org/docs/concepts/how-it-works/) · [Getting started](https://shardwire.js.org/docs/getting-started/)
 
 </div>

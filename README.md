@@ -4,6 +4,15 @@
 
 ### Keep the Discord gateway in one process and your product logic in another—without shipping your bot token to every client.
 
+[![npm: shardwire](https://img.shields.io/npm/v/shardwire?label=shardwire&logo=npm&color=cb3837&style=flat-square)](https://www.npmjs.com/package/shardwire)
+[![npm: @shardwire/react](https://img.shields.io/npm/v/%40shardwire%2Freact?label=%40shardwire%2Freact&logo=npm&color=cb3837&style=flat-square)](https://www.npmjs.com/package/@shardwire/react)
+[![npm: create-shardwire](https://img.shields.io/npm/v/create-shardwire?label=create-shardwire&logo=npm&color=cb3837&style=flat-square)](https://www.npmjs.com/package/create-shardwire)
+[![License: MIT](https://img.shields.io/badge/license-MIT-326ce5?style=flat-square)](./LICENSE)
+[![Node](https://img.shields.io/badge/node-%E2%89%A522-339933?style=flat-square&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![CI](https://img.shields.io/github/actions/workflow/status/unloopedmido/shardwire/ci.yml?branch=main&logo=github&label=ci&style=flat-square)](https://github.com/unloopedmido/shardwire/actions/workflows/ci.yml)
+
+<br />
+
 [Documentation](https://shardwire.js.org/docs/) · [API reference](https://shardwire.js.org/docs/reference/) · [Issues](https://github.com/unloopedmido/shardwire/issues)
 
 </div>

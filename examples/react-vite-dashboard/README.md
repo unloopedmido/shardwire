@@ -4,6 +4,14 @@
 
 ### Browser UI (`@shardwire/react`) talking to a Node bot process through the Shardwire bridge.
 
+[![Monorepo](https://img.shields.io/badge/monorepo-unloopedmido%2Fshardwire-181717?style=flat-square&logo=github)](https://github.com/unloopedmido/shardwire)
+[![License: MIT](https://img.shields.io/badge/license-MIT-326ce5?style=flat-square)](https://github.com/unloopedmido/shardwire/blob/main/LICENSE)
+[![Node](https://img.shields.io/badge/node-%E2%89%A522-339933?style=flat-square&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![Vite](https://img.shields.io/badge/Vite-646cff?style=flat-square&logo=vite&logoColor=white)](https://vite.dev/)
+[![@shardwire/react on npm](https://img.shields.io/npm/v/%40shardwire%2Freact?label=%40shardwire%2Freact&logo=npm&color=cb3837&style=flat-square)](https://www.npmjs.com/package/@shardwire/react)
+
+<br />
+
 [React package](https://www.npmjs.com/package/@shardwire/react) · [Docs](https://shardwire.js.org/docs/)
 
 </div>

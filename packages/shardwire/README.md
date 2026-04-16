@@ -4,6 +4,13 @@
 
 ### Typed bridge between a Discord.js bot process and separate app code over WebSocket.
 
+[![npm](https://img.shields.io/npm/v/shardwire?logo=npm&color=cb3837&style=flat-square)](https://www.npmjs.com/package/shardwire)
+[![npm downloads](https://img.shields.io/npm/dm/shardwire?logo=npm&color=cb3837&style=flat-square)](https://www.npmjs.com/package/shardwire)
+[![License: MIT](https://img.shields.io/npm/l/shardwire?style=flat-square&label=license)](https://github.com/unloopedmido/shardwire/blob/main/LICENSE)
+[![Node](https://img.shields.io/node/v/shardwire?style=flat-square&logo=node.js&label=node)](https://nodejs.org/)
+
+<br />
+
 [npm](https://www.npmjs.com/package/shardwire) · [Documentation](https://shardwire.js.org/docs/) · [Reference](https://shardwire.js.org/docs/reference/)
 
 </div>

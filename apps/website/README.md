@@ -4,6 +4,12 @@
 
 ### Next.js + Fumadocs app that builds the public docs at [shardwire.js.org](https://shardwire.js.org/).
 
+[![Live docs](https://img.shields.io/badge/docs-shardwire.js.org-6b46c1?style=flat-square)](https://shardwire.js.org/docs/)
+[![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![Fumadocs](https://img.shields.io/badge/Fumadocs-171717?style=flat-square)](https://fumadocs.dev/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-326ce5?style=flat-square)](./LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/unloopedmido/shardwire/ci.yml?branch=main&logo=github&label=ci&style=flat-square)](https://github.com/unloopedmido/shardwire/actions/workflows/ci.yml)
+
 </div>
 
 ---

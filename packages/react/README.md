@@ -4,6 +4,14 @@
 
 ### React hooks that connect a UI to a Shardwire app bridge—without re-implementing connection state every time.
 
+[![npm](https://img.shields.io/npm/v/%40shardwire%2Freact?logo=npm&color=cb3837&style=flat-square)](https://www.npmjs.com/package/@shardwire/react)
+[![npm downloads](https://img.shields.io/npm/dm/%40shardwire%2Freact?logo=npm&color=cb3837&style=flat-square)](https://www.npmjs.com/package/@shardwire/react)
+[![License: MIT](https://img.shields.io/npm/l/%40shardwire%2Freact?style=flat-square&label=license)](https://github.com/unloopedmido/shardwire/blob/main/LICENSE)
+[![Node](https://img.shields.io/node/v/%40shardwire%2Freact?style=flat-square&logo=node.js&label=node)](https://nodejs.org/)
+[![React peer](https://img.shields.io/badge/react-%E2%89%A518-61dafb?style=flat-square&logo=react&logoColor=black)](https://react.dev/)
+
+<br />
+
 [npm](https://www.npmjs.com/package/@shardwire/react) · [Documentation](https://shardwire.js.org/docs/) · [React changelog](https://shardwire.js.org/docs/changelog/react/)
 
 </div>

@@ -4,6 +4,13 @@
 
 ### npm workspaces split into `packages/bot` and `packages/app` with shared tooling—closer to how larger teams lay out repos.
 
+[![Monorepo](https://img.shields.io/badge/monorepo-unloopedmido%2Fshardwire-181717?style=flat-square&logo=github)](https://github.com/unloopedmido/shardwire)
+[![License: MIT](https://img.shields.io/badge/license-MIT-326ce5?style=flat-square)](https://github.com/unloopedmido/shardwire/blob/main/LICENSE)
+[![Node](https://img.shields.io/badge/node-%E2%89%A522-339933?style=flat-square&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![npm workspaces](https://img.shields.io/badge/npm-workspaces-cb3837?style=flat-square&logo=npm&logoColor=white)](https://docs.npmjs.com/cli/using-npm/workspaces)
+
+<br />
+
 [How it works](https://shardwire.js.org/docs/concepts/how-it-works/)
 
 </div>

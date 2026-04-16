@@ -4,6 +4,14 @@
 
 ### Vite-powered React UI talking to a Node bot through `@shardwire/react` and `shardwire`.
 
+[![License: MIT](https://img.shields.io/badge/license-MIT-326ce5?style=flat-square)](https://opensource.org/licenses/MIT)
+[![Node](https://img.shields.io/badge/node-%E2%89%A522-339933?style=flat-square&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![React](https://img.shields.io/badge/React-61dafb?style=flat-square&logo=react&logoColor=black)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-646cff?style=flat-square&logo=vite&logoColor=white)](https://vite.dev/)
+[![Shardwire docs](https://img.shields.io/badge/Shardwire-docs-6b46c1?style=flat-square)](https://shardwire.js.org/docs/)
+
+<br />
+
 [Documentation](https://shardwire.js.org/docs/) · [@shardwire/react on npm](https://www.npmjs.com/package/@shardwire/react)
 
 </div>
