@@ -1,6 +1,6 @@
 # @shardwire/react
 
-Optional React hooks for app processes that connect to a Shardwire bot bridge (dashboards, remote controllers).
+Optional React helpers for app processes that connect to a Shardwire bot bridge (dashboards, remote controllers).
 
 This package **does not** ship React as a runtime dependency of `shardwire` core. Install alongside `react` and `shardwire`.
 
@@ -10,53 +10,114 @@ This package **does not** ship React as a runtime dependency of `shardwire` core
 npm install @shardwire/react react
 ```
 
-`@shardwire/react` depends on a compatible **`shardwire`** release (`^2.0.0`). Add **`shardwire`** explicitly if you want to pin it or already import it directly (for example `defineShardwireApp` from `shardwire/client`).
+`@shardwire/react` depends on a compatible **`shardwire`** release (`^2.0.0`). Add **`shardwire`** explicitly if you want to pin it or import types and helpers directly (for example `defineShardwireApp` from `shardwire/client`).
 
-## Hooks
+## API
 
-- **`useShardwireBridge(options, ready?)`** — `connectBotBridge` on mount, `await ready(...)`, `close` on unmount. Memoize `options` (same URL/secret) to avoid unnecessary reconnects.
-- **`useShardwireCapabilities(app, isReady)`** — returns `app.capabilities()` when ready.
-- **`useShardwireEvent(app, event, handler, filter?, enabled?)`** — stable subscription using a handler ref.
+- **`useShardwireConnection(options, ready?)`** — `connectBotBridge` on mount, `await app.ready(...)`, `close` on unmount. Returns a **discriminated `ShardwireConnection`**: `connecting`, `ready` (includes **`capabilities`**), or `error`. Reconnects when serialized connection fields change (see below); **`logger`** identity is ignored for that purpose — remount or use a parent `key` to swap loggers.
+- **`ShardwireProvider`** + **`useShardwire()`** — same connection as above, exposed through React context so child components do not thread `app` through props. `useShardwire()` throws if used outside a provider; use **`useShardwireConnection`** for hook-only trees.
+- **`useShardwireListener(app, { event, onEvent, filter?, enabled? })`** — built-in event subscription with a stable handler ref. **Filter objects are fingerprinted** so inline `{ guildId }` objects do not resubscribe every render.
 
-## Example
+Curated **TypeScript types** are re-exported from this package (`AppBridge`, `AppBridgeOptions`, `BotEventName`, …) so you can import types from `@shardwire/react` alongside hooks.
+
+## Example (provider)
 
 ```tsx
 import { useMemo } from 'react';
 import { defineShardwireApp } from 'shardwire/client';
-import { useShardwireBridge, useShardwireCapabilities, useShardwireEvent } from '@shardwire/react';
+import {
+	ShardwireProvider,
+	useShardwire,
+	useShardwireListener,
+} from '@shardwire/react';
 
 const manifest = defineShardwireApp({
-  name: 'dashboard',
-  events: ['voiceStateUpdate'],
-  actions: ['moveMemberVoice'],
+	name: 'dashboard',
+	events: ['voiceStateUpdate'],
+	actions: ['moveMemberVoice'],
+});
+
+export function App() {
+	const options = useMemo(
+		() => ({
+			url: import.meta.env.VITE_SHARDWIRE_URL,
+			secret: import.meta.env.VITE_SHARDWIRE_SECRET,
+			appName: manifest.name,
+		}),
+		[],
+	);
+
+	return (
+		<ShardwireProvider
+			options={options}
+			ready={{
+				strict: true,
+				manifest,
+				botIntents: ['Guilds', 'GuildVoiceStates'],
+			}}
+		>
+			<Controller />
+		</ShardwireProvider>
+	);
+}
+
+function Controller() {
+	const sw = useShardwire();
+
+	useShardwireListener(sw.status === 'ready' ? sw.app : null, {
+		event: 'voiceStateUpdate',
+		onEvent: (p) => {
+			console.log('voice', p.state.guildId);
+		},
+		enabled: sw.status === 'ready',
+	});
+
+	if (sw.status === 'error') return <pre>{sw.error.message}</pre>;
+	if (sw.status === 'connecting') return <p>Connecting…</p>;
+
+	return <pre>{JSON.stringify(sw.capabilities, null, 2)}</pre>;
+}
+```
+
+## Example (hooks only)
+
+```tsx
+import { useMemo } from 'react';
+import { defineShardwireApp } from 'shardwire/client';
+import { useShardwireConnection, useShardwireListener } from '@shardwire/react';
+
+const manifest = defineShardwireApp({
+	name: 'dashboard',
+	events: ['voiceStateUpdate'],
+	actions: ['moveMemberVoice'],
 });
 
 export function Controller() {
-  const options = useMemo(
-    () => ({
-      url: process.env.NEXT_PUBLIC_SHARDWIRE_URL!,
-      secret: process.env.NEXT_PUBLIC_SHARDWIRE_SECRET!,
-      appName: manifest.name,
-    }),
-    [],
-  );
+	const options = useMemo(
+		() => ({
+			url: process.env.NEXT_PUBLIC_SHARDWIRE_URL!,
+			secret: process.env.NEXT_PUBLIC_SHARDWIRE_SECRET!,
+			appName: manifest.name,
+		}),
+		[],
+	);
 
-  const { app, ready, error } = useShardwireBridge(options, {
-    strict: true,
-    manifest,
-    botIntents: ['Guilds', 'GuildVoiceStates'],
-  });
+	const sw = useShardwireConnection(options, {
+		strict: true,
+		manifest,
+		botIntents: ['Guilds', 'GuildVoiceStates'],
+	});
 
-  const caps = useShardwireCapabilities(app, ready);
+	useShardwireListener(sw.status === 'ready' ? sw.app : null, {
+		event: 'voiceStateUpdate',
+		onEvent: (p) => console.log(p.state.guildId),
+		enabled: sw.status === 'ready',
+	});
 
-  useShardwireEvent(app, 'voiceStateUpdate', (p) => {
-    console.log('voice', p.voice.guildId);
-  }, undefined, ready);
+	if (sw.status === 'error') return <pre>{sw.error.message}</pre>;
+	if (sw.status === 'connecting') return <p>Connecting…</p>;
 
-  if (error) return <pre>{error.message}</pre>;
-  if (!ready || !app) return <p>Connecting…</p>;
-
-  return <pre>{JSON.stringify(caps, null, 2)}</pre>;
+	return <pre>{JSON.stringify(sw.capabilities, null, 2)}</pre>;
 }
 ```
 
