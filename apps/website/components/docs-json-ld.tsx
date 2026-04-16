@@ -34,7 +34,15 @@ function buildBreadcrumbs(page: DocsPage): { name: string; url: string }[] {
 export function DocsJsonLd({ page }: { page: DocsPage }) {
   const canonical = absoluteUrlFromPathname(page.url);
   const siteRoot = absoluteUrlFromPathname('/');
+  const websiteId = `${siteRoot}#website`;
   const crumbs = buildBreadcrumbs(page);
+
+  const webSite = {
+    '@type': 'WebSite',
+    '@id': websiteId,
+    name: siteConfig.name,
+    url: siteRoot,
+  };
 
   const breadcrumbList = {
     '@type': 'BreadcrumbList',
@@ -52,16 +60,12 @@ export function DocsJsonLd({ page }: { page: DocsPage }) {
     url: canonical,
     name: page.data.title,
     description: page.data.description,
-    isPartOf: {
-      '@type': 'WebSite',
-      name: siteConfig.name,
-      url: siteRoot,
-    },
+    isPartOf: { '@id': websiteId },
   };
 
   const jsonLd = {
     '@context': 'https://schema.org',
-    '@graph': [breadcrumbList, webPage],
+    '@graph': [webSite, breadcrumbList, webPage],
   };
 
   return (

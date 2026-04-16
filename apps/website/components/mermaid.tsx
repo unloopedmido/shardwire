@@ -10,13 +10,15 @@ function diagramTheme(): 'dark' | 'default' {
 export type MermaidProps = {
   /** Mermaid source (without the ```mermaid fence). */
   chart: string;
+  /** Plain-language summary: visible in HTML for accessibility and non-JS contexts while the SVG renders on the client. */
+  caption?: string;
 };
 
 /**
  * Renders a Mermaid diagram on the client. Fenced ```mermaid blocks in MDX are
  * not processed by the compiler — use this component instead.
  */
-export function Mermaid({ chart }: MermaidProps) {
+export function Mermaid({ chart, caption }: MermaidProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const reactId = useId().replaceAll(':', '');
   const definition = chart.trim();
@@ -50,9 +52,19 @@ export function Mermaid({ chart }: MermaidProps) {
   }, [definition, reactId]);
 
   return (
-    <div
-      ref={containerRef}
-      className="my-6 flex justify-center overflow-x-auto rounded-xl border border-fd-border bg-fd-card p-4 [&_svg]:h-auto [&_svg]:max-w-full"
-    />
+    <figure className="my-6 space-y-3">
+      {caption ? <figcaption className="text-sm text-fd-muted-foreground">{caption}</figcaption> : null}
+      <div
+        ref={containerRef}
+        role="img"
+        aria-label={caption ?? 'Architecture diagram'}
+        className="flex justify-center overflow-x-auto rounded-xl border border-fd-border bg-fd-card p-4 [&_svg]:h-auto [&_svg]:max-w-full"
+      />
+      <noscript>
+        <pre className="max-h-64 overflow-auto rounded-lg border border-fd-border bg-fd-card p-4 font-mono text-xs text-fd-muted-foreground">
+          {definition}
+        </pre>
+      </noscript>
+    </figure>
   );
 }

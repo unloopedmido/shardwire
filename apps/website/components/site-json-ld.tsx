@@ -1,12 +1,24 @@
 import { absoluteUrlFromPathname, siteConfig } from '@/lib/site';
 
 export function SiteJsonLd() {
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'SoftwareApplication',
+  const siteRoot = absoluteUrlFromPathname('/');
+  const websiteId = `${siteRoot}#website`;
+  const softwareId = `${siteRoot}#software`;
+
+  const webSite = {
+    '@type': 'WebSite',
+    '@id': websiteId,
     name: siteConfig.name,
     description: siteConfig.description,
-    url: absoluteUrlFromPathname('/'),
+    url: siteRoot,
+  };
+
+  const softwareApplication = {
+    '@type': 'SoftwareApplication',
+    '@id': softwareId,
+    name: siteConfig.name,
+    description: siteConfig.description,
+    url: siteRoot,
     applicationCategory: 'DeveloperApplication',
     operatingSystem: 'Cross-platform',
     codeRepository: siteConfig.githubUrl,
@@ -17,6 +29,12 @@ export function SiteJsonLd() {
       priceCurrency: 'USD',
     },
     sameAs: [siteConfig.githubUrl, siteConfig.npmUrl].filter(Boolean),
+    isPartOf: { '@id': websiteId },
+  };
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [webSite, softwareApplication],
   };
 
   return (

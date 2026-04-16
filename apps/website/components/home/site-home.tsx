@@ -101,7 +101,7 @@ export function SiteHome() {
           </div>
           
           <h1 className="m-0 p-0 text-[length:clamp(2.25rem,1.35rem+2.8vw,3.25rem)] font-medium leading-[1.1] tracking-tight text-[color:var(--site-foreground)]">
-            Keep the gateway stable. <br />
+            Keep the Discord gateway stable. <br />
             <span className="text-[color:var(--color-fd-muted-foreground)]">Move the rest independently.</span>
           </h1>
           

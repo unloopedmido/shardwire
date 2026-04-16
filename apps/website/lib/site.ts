@@ -19,10 +19,10 @@ export function absoluteUrlFromPathname(pathname: string): string {
 }
 
 export const defaultOgImage = {
-  url: absoluteUrlFromPathname('/icon.png'),
-  width: 512,
-  height: 512,
-  alt: 'Shardwire',
+  url: absoluteUrlFromPathname('/og.png'),
+  width: 1200,
+  height: 630,
+  alt: 'Shardwire — Discord split-process bridge',
 } as const;
 
 export function withBasePath(pathname: string): string {
