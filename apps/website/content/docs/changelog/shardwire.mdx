@@ -1,25 +1,11 @@
 ---
-title: Changelog
-description: Release notes for shardwire and @shardwire/react — with links to the docs that match each era of the API.
+title: 'shardwire'
+description: Release history for the shardwire npm package (v1.0.0 onward).
 ---
 
-<Callout type="info" title="Reading this page">
+This page lists releases for the **`shardwire`** package.
 
-- **New to Shardwire?** Start with [**Getting started**](/docs/getting-started) and [**How it works**](/docs/concepts/how-it-works).
-- **Something broke?** [**Troubleshooting**](/docs/troubleshooting) lists fixes for the same **`#anchors`** that appear in runtime errors (`See: …/docs/troubleshooting#…`).
-- **Types and symbols:** [**Reference**](/docs/reference) is the full API.
-
-</Callout>
-
-Release tags (monorepo): [`v1.0.0` … current](https://github.com/unloopedmido/shardwire/tags).
-
-<Tabs items={['shardwire', '@shardwire/react']}>
-
-<Tab value="shardwire">
-
-This tab covers the **`shardwire`** npm package from **v1.0.0** onward.
-
-npm: [`shardwire`](https://www.npmjs.com/package/shardwire)
+npm: [`shardwire`](https://www.npmjs.com/package/shardwire) · Also see [**@shardwire/react**](/docs/changelog/react) if you use the hooks package.
 
 ## 2.0.1
 
@@ -189,51 +175,3 @@ Patch release focused on reliability and docs after the docs-site / monorepo mig
 - Removed Discord interaction callback tokens from serialized **`BridgeInteraction`** payloads sent to apps.
 - Tightened secret handling to reject duplicate configured secret values and ambiguous value-only authentication matches.
 - Replaced package examples, tests, and skill metadata to match the Discord-first direction.
-
-</Tab>
-
-<Tab value="@shardwire/react">
-
-This tab covers the **`@shardwire/react`** npm package. It versions **independently** from **`shardwire`**; see **`dependencies`** / **`peerDependencies`** in `package.json` on each release for the **`shardwire`** range and **`react`** peer.
-
-npm: [`@shardwire/react`](https://www.npmjs.com/package/@shardwire/react)
-
-## 0.3.0
-
-- **Breaking:** Replaced **`useShardwireBridge`**, **`useShardwireCapabilities`**, and **`useShardwireEvent`** with **`useShardwireConnection`** (discriminated status + capabilities on `ready`), optional **`ShardwireProvider` / `useShardwire`**, and **`useShardwireListener`** (object argument; stable filter fingerprint).
-- **DX:** Connection reconnect key now covers **`reconnect`**, **`requestTimeoutMs`**, and **`metrics`** shape (not function identity). **`logger`** changes still require remount or parent `key` if you need a fresh bridge instance.
-- **Types:** Curated type re-exports from **`@shardwire/react`** for common app-bridge types.
-
-## 0.2.0
-
-- **Breaking:** **`engines.node`** **`>=22.0.0`** (matches **`shardwire` 2.x**).
-- **Dependency:** **`shardwire`** `^2.0.0` (see **`shardwire` 2.0.0** changelog).
-
-## 0.1.4
-
-- **Dependency:** **`shardwire`** `^1.9.3` (browser-safe request IDs; see **`shardwire` 1.9.3** changelog).
-
-## 0.1.3
-
-- **`shardwire`** is now a **runtime `dependency`** (`^1.9.3`) so `npm install @shardwire/react react` is enough for hook-only apps. **`react`** remains the only **peer dependency**.
-
-## 0.1.2
-
-- **Peer dependency:** **`shardwire`** `>= 1.9.2` (native **`WebSocket`** in browser app bridges; see **`shardwire` 1.9.2** changelog).
-
-## 0.1.1
-
-- Hooks now import **`shardwire/client`** so Vite/browser builds avoid **`discord.js`** / **`zlib-sync`** resolution errors.
-- **Peer dependency:** **`shardwire`** `>= 1.9.1` (required for the **`shardwire/client`** export).
-
-## 0.1.0
-
-Initial public release of optional React hooks for app-side bridges.
-
-- **`useShardwireBridge`**, **`useShardwireCapabilities`**, and **`useShardwireEvent`** — thin hooks around **`connectBotBridge`** for dashboards and controllers.
-- **Peer dependencies:** **`react`** `>= 18`, **`shardwire`** `>= 1.9.0` (neither is bundled).
-- Published from `packages/react` with ESM + CJS builds and TypeScript declarations.
-
-</Tab>
-
-</Tabs>
