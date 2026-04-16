@@ -1,113 +1,90 @@
 ---
-title: 'Getting Started'
-description: 'Install Shardwire, boot the bot bridge, connect an app process, and verify the first end-to-end event flow.'
+title: 'Getting started'
+description: 'The fastest way to see Shardwire working: clone the minimal example, set two secrets, run two commands.'
 ---
 
-<Callout type="info" title="New to Shardwire?">
+You are **two small scripts** away from a working bot: one starts **The Connection** on the bot side, the other connects your **app** and listens for events.
 
-The [**Tutorial**](/docs/tutorial/lesson-0-overview) walks through the same setup with **two terminals**, an **env var table**, and the runnable [**minimal-bridge**](https://github.com/unloopedmido/shardwire/tree/main/examples/minimal-bridge) example in this repo.
+<Callout type="info" title="Fastest path (today)">
+
+There is no `npx create-shardwire` template yet. The quickest win is the official **minimal-bridge** example in the repo: clone, `npm install`, add a `.env`, run **`npm run bot`** and **`npm run app`** in two terminals.
+
+[**Open minimal-bridge on GitHub →**](https://github.com/unloopedmido/shardwire/tree/main/examples/minimal-bridge)
 
 </Callout>
 
-Shardwire’s first successful setup is intentionally small:
+## Prerequisites
+
+- **Node.js 22+** (your app uses the built-in **WebSocket**—see [**Troubleshooting**](/docs/troubleshooting) if something complains).
+- A Discord bot **token** and a shared **secret** string you invent (any long random string).
 
 <Steps>
 
 <Step>
 
-Start a **bot bridge** (`createBotBridge`).
+Create a `.env` next to the example with **`DISCORD_TOKEN`** and **`SHARDWIRE_SECRET`** (same secret in both processes).
 
 </Step>
 
 <Step>
 
-Connect an **app bridge** (`connectBotBridge`).
+Run **`npm run bot`** — this starts the **bot bridge** (Discord + bridge server).
 
 </Step>
 
 <Step>
 
-Subscribe to a typed event (`app.on`).
-
-</Step>
-
-<Step>
-
-Check **`app.capabilities()`** matches what you expect.
+Run **`npm run app`** — this connects your **app** over **The Connection** and logs incoming messages.
 
 </Step>
 
 </Steps>
 
-## Prerequisites
+## The two tiny programs
 
-- Node.js `>=22.0.0` for the package runtime.
-- A Discord bot token in `DISCORD_TOKEN`.
-- A shared secret in `SHARDWIRE_SECRET`.
-- A local loopback URL such as `ws://127.0.0.1:3001/shardwire`.
-
-<Callout type="warn" title="Transport">
-
-`ws://` is for **loopback only**. Use `wss://` for remote deployments ([Remote bridge](/docs/operations/remote-bridge)).
-
-</Callout>
-
-## Install
-
-```bash
-npm install shardwire
-```
-
-## Bot process
+**Bot side** (holds Discord + exposes the bridge)—under 10 lines of core setup:
 
 ```ts
 import { createBotBridge } from 'shardwire';
 
 const bridge = createBotBridge({
-	token: process.env.DISCORD_TOKEN!,
-	intents: ['Guilds', 'GuildMessages', 'GuildMembers', 'MessageContent'],
-	server: {
-		port: 3001,
-		secrets: [process.env.SHARDWIRE_SECRET!],
-	},
+  token: process.env.DISCORD_TOKEN!,
+  intents: ['Guilds', 'GuildMessages', 'GuildMembers', 'MessageContent'],
+  server: { port: 3001, secrets: [process.env.SHARDWIRE_SECRET!] },
 });
-
 await bridge.ready();
-console.log('bot bridge ready');
 ```
 
-## App process
-
-Use **`shardwire/client`** for the app bridge so browser bundlers (for example Vite) do not pull in the bot runtime. Node-only scripts may also import from **`shardwire/client`**; the bot process still imports **`createBotBridge`** from **`shardwire`**.
+**App side** (your logic)—also under 10 lines to connect and subscribe:
 
 ```ts
 import { connectBotBridge } from 'shardwire/client';
 
 const app = connectBotBridge({
-	url: 'ws://127.0.0.1:3001/shardwire',
-	secret: process.env.SHARDWIRE_SECRET!,
-	appName: 'dashboard',
+  url: 'ws://127.0.0.1:3001/shardwire',
+  secret: process.env.SHARDWIRE_SECRET!,
+  appName: 'my-app',
 });
-
-app.on('messageCreate', ({ message }) => {
-	console.log('message', message.channelId, message.content);
-});
-
+app.on('messageCreate', ({ message }) => console.log(message.content));
 await app.ready();
-console.log(app.capabilities());
 ```
 
-## What to verify immediately
+<Callout type="warn" title="Import path on the app">
 
-- `bridge.ready()` completes without secret or transport validation errors.
-- `app.ready()` authenticates and returns negotiated capabilities.
-- The event you subscribed to appears in `app.capabilities().events`.
-- Your bot intents cover the events you expect to produce.
+In **Vite / browser** bundles, always import from **`shardwire/client`** so the heavy bot runtime is not pulled into the browser. In Node-only scripts you can still use **`shardwire/client`**—it is the same app API.
 
-## Where to go next
+</Callout>
 
-- Follow the [**Tutorial**](/docs/tutorial/lesson-2-first-interaction) for a first **`!ping` → `pong`** using `app.actions.sendMessage`.
-- Read [Incremental adoption](/docs/guides/incremental-adoption) if you are migrating from a monolithic bot.
-- Read [How Shardwire works](/docs/concepts/how-shardwire-works) for the runtime split and action results.
-- Read [Capabilities & Scoped Secrets](/docs/concepts/capabilities-and-scopes) before adding more app consumers.
-- Read [Diagnostics](/docs/operations/diagnostics) before you deploy.
+## What “good” looks like
+
+- The bot terminal prints that the bridge is ready.
+- The app terminal prints **capabilities** (what events and actions you can use).
+- Sending a message your bot can see shows up in the app logs.
+
+## Deep dives (Reference)
+
+- [`createBotBridge`](/docs/reference/bridge-apis/create-bot-bridge/)
+- [`connectBotBridge`](/docs/reference/bridge-apis/connect-bot-bridge/)
+- [App bridge options](/docs/reference/bridge-apis/app-bridge-options/)
+
+When something errors with **`See: https://shardwire.js.org/docs/troubleshooting#…`**, open [**Troubleshooting**](/docs/troubleshooting) and jump to that anchor—each one maps to a short explanation plus links back here or to Reference.

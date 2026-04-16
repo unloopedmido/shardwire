@@ -1,0 +1,166 @@
+---
+title: 'Troubleshooting'
+description: 'Fix common setup errors. Each heading matches the anchor in Shardwire error messages (See: …#anchor).'
+---
+
+When an error ends with **`See: https://shardwire.js.org/docs/troubleshooting#…`**, jump to the **same anchor** below. For types and error classes, see [**Reference → Errors & failures**](/docs/reference/errors-and-failures/).
+
+<Callout type="tip" title="Start with capabilities">
+
+Most “nothing happens” issues are **permissions and intents**, not a broken network. Check **`app.capabilities()`** after connect and compare to what you subscribed to.
+
+</Callout>
+
+<h2 id="nodejs-below-22-connectbotbridge-requires-globalthiswebsocket">Node.js 22+ and WebSocket</h2>
+
+**App** processes need **Node.js 22+** so **`globalThis.WebSocket`** works (same as modern browsers). Upgrade Node; polyfilling **`WebSocket`** on older Node is not supported.
+
+<h2 id="vite-and-zlib-sync">Vite and zlib-sync</h2>
+
+Bundlers may pull **`discord.js`** (and optional **`zlib-sync`**) if you import from the **`shardwire`** root in a **browser** bundle.
+
+**Fix:** import app-side code from **`shardwire/client`** only. Keep **`createBotBridge`** in **Node-only** bot files.
+
+<h2 id="vite-crypto-note">Vite and crypto</h2>
+
+Use **`shardwire` ≥ 2.0.0** on **Node 22+**; the client path uses **`globalThis.crypto`** for request IDs so Vite does not need **`node:crypto`**.
+
+<h2 id="websocket-not-constructor">Browser: WebSocket is not a constructor</h2>
+
+Use **Node 22+** and a current **`shardwire`** so the client build does not ship the wrong **`ws`** shim into the browser.
+
+---
+
+<h2 id="connection-and-auth-errors">Connection and authentication</h2>
+
+The app could not open **The Connection** or the secret did not match. Check **`url`** (including path, often **`/shardwire`**), **`secret`**, and that the **bot bridge** is running.
+
+<h2 id="app-bridge-not-connected">App bridge is not connected</h2>
+
+You called an action or API that requires an active session. **`await app.ready()`** first and avoid using **`app.actions`** after **`close()`**.
+
+<h2 id="capability-not-available">Capability not available</h2>
+
+The bridge did not expose that **event** or **action** for this app—usually **intents**, **secret scope**, or negotiation. Compare **`app.capabilities()`** to your subscriptions and manifest. See [**How it works**](/docs/concepts/how-it-works/) and [Bridge capability error](/docs/reference/errors-and-failures/bridge-capability-error/).
+
+<h2 id="action-request-errors">Action request failed</h2>
+
+The bridge rejected or could not complete an action request. Log **`result.error`** (or the thrown **`ActionRequestError`**) and check [**Action failure**](/docs/reference/errors-and-failures/action-failure/).
+
+<h2 id="action-execution-errors">Action execution errors</h2>
+
+Discord rejected the underlying operation (permissions, state, etc.). Inspect **`ActionExecutionError`** details and [**Action error**](/docs/reference/errors-and-failures/action-error/).
+
+<h2 id="strict-startup-failed">Strict startup failed</h2>
+
+**`ready({ strict: true })`** found a mismatch between your **manifest**, **bot intents**, **secret scope**, and **subscriptions**. Use **`diagnoseShardwireApp`** and print **`formatShardwireDiagnosis`** for a human-readable report—see [`formatShardwireDiagnosis`](/docs/reference/contracts-and-diagnostics/format-shardwire-diagnosis/).
+
+<h2 id="strict-manifest-required">Strict mode needs a manifest</h2>
+
+**`ready({ strict: true })`** requires a **`manifest`** object. Pass **`defineShardwireApp(...)`** (or an equivalent manifest).
+
+---
+
+<h2 id="manifest-unknown-event">Unknown manifest event</h2>
+
+**`defineShardwireApp`** listed an event name that is not in the Shardwire catalog. Use **`getShardwireCatalog()`** for valid names.
+
+<h2 id="manifest-unknown-action">Unknown manifest action</h2>
+
+**`defineShardwireApp`** listed an action name that is not in the catalog. Use **`getShardwireCatalog()`**.
+
+<h2 id="manifest-filter-unknown-event">Filter references unknown event</h2>
+
+**`filters`** in the manifest mention an event you did not declare in **`events`**.
+
+<h2 id="manifest-filter-event-not-listed">Filters for an event not listed</h2>
+
+You added **filters** for an event that is missing from **`events`**.
+
+<h2 id="manifest-filter-key-unsupported">Unsupported filter key</h2>
+
+A **filter key** is not valid for that event. Check **`app.catalog().subscriptionFilters`**.
+
+---
+
+<h2 id="positive-number-required">Must be a positive number</h2>
+
+A numeric option (for example **idempotency TTL**) must be a **positive** number.
+
+<h2 id="scope-array-or-star">Scope must be * or an array</h2>
+
+**Secret scope** **`allow`** must be **`"*"`** or an array of permission strings.
+
+<h2 id="scope-non-string-value">Scope contains a non-string</h2>
+
+Every entry in the **`allow`** array must be a string.
+
+<h2 id="scope-unsupported-value">Unsupported scope value</h2>
+
+A permission string is not recognized. Regenerate scope from **`generateSecretScope`** or copy from the catalog docs.
+
+<h2 id="secret-non-empty-required">Secret must be non-empty</h2>
+
+**`server.secrets`** entry must be a non-empty string (or an object with **`id`** and **`value`** fields when using object form).
+
+<h2 id="secret-value-required">Secret value required</h2>
+
+When using object form, **`value`** must be non-empty.
+
+<h2 id="secret-id-required">Secret id required</h2>
+
+When you supply an **`id`**, it must be a non-empty string.
+
+<h2 id="bot-token-required">Bot token required</h2>
+
+**`createBotBridge`** needs **`token`** (your Discord bot token).
+
+<h2 id="bot-intents-required">Bot intents required</h2>
+
+Pass at least one **Discord intent** so the runtime knows what to subscribe to.
+
+<h2 id="idempotency-scope-invalid">Idempotency scope invalid</h2>
+
+**`server.idempotencyScope`** must be **`"connection"`** or **`"secret"`**.
+
+<h2 id="secrets-required">Secrets required</h2>
+
+**`server.secrets`** must be a non-empty array.
+
+<h2 id="duplicate-secret-id">Duplicate secret id</h2>
+
+Two secrets share the same **`id`**. Use unique ids or omit ids where allowed.
+
+<h2 id="duplicate-secret-value">Duplicate secret value</h2>
+
+Two secrets share the same **value**. Each connection secret should be distinct unless you intend reuse.
+
+---
+
+<h2 id="app-url-required">App URL required</h2>
+
+**`connectBotBridge`** needs **`url`**.
+
+<h2 id="app-url-invalid">App URL invalid</h2>
+
+**`url`** must parse as a valid URL.
+
+<h2 id="app-url-protocol">App URL protocol</h2>
+
+**`url`** must use **`ws://`** or **`wss://`**.
+
+<h2 id="app-wss-required">Non-loopback requires wss</h2>
+
+If the host is **not** loopback, use **`wss://`** (TLS).
+
+<h2 id="app-secret-required">App secret required</h2>
+
+**`connectBotBridge`** needs **`secret`**.
+
+<h2 id="app-secretid-invalid">App secretId invalid</h2>
+
+**`secretId`** must be a non-empty string when provided.
+
+<h2 id="app-name-invalid">App name invalid</h2>
+
+**`appName`** must be a non-empty string.

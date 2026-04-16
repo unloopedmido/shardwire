@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { connectBotBridge } from 'shardwire';
+import { connectBotBridge } from 'shardwire/client';
 
 const secret = process.env.SHARDWIRE_SECRET;
 const url = process.env.SHARDWIRE_URL ?? 'ws://127.0.0.1:3001/shardwire';
@@ -24,6 +24,17 @@ app.on('messageCreate', async ({ message }) => {
   });
   if (!result.ok) {
     console.error('sendMessage failed', result.error.code, result.error.message);
+  }
+});
+
+app.on('interactionCreate', async ({ interaction }) => {
+  if (interaction.kind !== 'chatInput' || interaction.commandName !== 'hello') return;
+  const result = await app.actions.replyToInteraction({
+    interactionId: interaction.id,
+    content: 'Hello from Shardwire!',
+  });
+  if (!result.ok) {
+    console.error('replyToInteraction failed', result.error.code, result.error.message);
   }
 });
 

@@ -1,0 +1,52 @@
+---
+title: 'How it works'
+description: 'Brain vs Body: what stays alive, what you can swap, and why secrets matter.'
+---
+
+## Brain vs Body
+
+- **Bot bridge (the Body)** — Built with **`createBotBridge`**. It owns the **Discord connection** and keeps **The Connection** open for your apps. Think of it as the chest that keeps the **heart** beating.
+- **App (the Brain)** — Built with **`connectBotBridge`**. This is **your** logic: commands, dashboards, workers. You can **restart it**, **deploy it**, or **run several** (with separate secrets) without tearing down Discord.
+
+<Callout type="tip" title="Analogy">
+
+**Shardwire** is the **Heart** that stays beating while you swap the **Brain**. Restart the app; the gateway does not need to reconnect.
+
+</Callout>
+
+## The Connection
+
+Between **Body** and **Brain** is **The Connection** (a WebSocket to the bridge). You mostly think in terms of:
+
+- **Events** — “Something happened on Discord” (normalized objects you subscribe to with **`app.on`**).
+- **Actions** — “Do something on Discord” (typed calls on **`app.actions.*`** that return **`result.ok`**).
+
+You do **not** need to master transport details to ship your first bot—treat **The Connection** as “how my app talks to the bridge.”
+
+## Secrets: the password for your bridge
+
+**Secrets** are how the bridge knows **which app is allowed**. You configure one or more secret strings on the **bot** side; each **app** presents the same secret (or a **scoped** secret with tighter permissions—advanced).
+
+<Callout type="info" title="Beginner mental model">
+
+Think of a secret as a **password** to your bridge—not your Discord token. Never commit secrets; use env vars in dev and your host’s secret store in production.
+
+</Callout>
+
+## Local vs internet
+
+- On your laptop, **The Connection** often uses **`ws://`** to **localhost** only.
+- On a server or two separate hosts, you use **`wss://`** (encrypted), like **`https://`** for WebSockets.
+
+<Callout type="warn" title="Loopback rule">
+
+**`ws://`** is for loopback (**127.0.0.1**, **localhost**) only. Anything else must use **`wss://`**. See [**Keeping it alive**](/docs/guides/keeping-it-alive) for deployment.
+
+</Callout>
+
+## Reference
+
+- [`createBotBridge`](/docs/reference/bridge-apis/create-bot-bridge/)
+- [`connectBotBridge`](/docs/reference/bridge-apis/connect-bot-bridge/)
+- [`generateSecretScope`](/docs/reference/contracts-and-diagnostics/generate-secret-scope/)
+- [`defineShardwireApp`](/docs/reference/contracts-and-diagnostics/define-shardwire-app/)

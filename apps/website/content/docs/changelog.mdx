@@ -1,9 +1,15 @@
 ---
 title: Changelog
-description: Release notes by package — core shardwire and optional @shardwire/react.
+description: Release notes for shardwire and @shardwire/react — with links to the docs that match each era of the API.
 ---
 
-Pick a package below. Each tab has its own version history.
+<Callout type="info" title="Reading this page">
+
+- **New to Shardwire?** Start with [**Getting started**](/docs/getting-started) and [**How it works**](/docs/concepts/how-it-works).
+- **Something broke?** [**Troubleshooting**](/docs/troubleshooting) lists fixes for the same **`#anchors`** that appear in runtime errors (`See: …/docs/troubleshooting#…`).
+- **Types and symbols:** [**Reference**](/docs/reference) is the full API.
+
+</Callout>
 
 Release tags (monorepo): [`v1.0.0` … current](https://github.com/unloopedmido/shardwire/tags).
 
@@ -11,9 +17,13 @@ Release tags (monorepo): [`v1.0.0` … current](https://github.com/unloopedmido/
 
 <Tab value="shardwire">
 
-This tab covers the **`shardwire`** npm package from **v1.0.0** onward. Earlier pre–1.0 history lived in the legacy generic bridge API and is intentionally omitted here.
+This tab covers the **`shardwire`** npm package from **v1.0.0** onward.
 
 npm: [`shardwire`](https://www.npmjs.com/package/shardwire)
+
+## 2.0.1
+
+- **`SHARDWIRE_DOCS`** canonical URLs in `packages/shardwire/src/utils/docs-links.ts` now match the beginner-first docs site (e.g. [**Troubleshooting**](https://shardwire.js.org/docs/troubleshooting/), [**Getting started**](https://shardwire.js.org/docs/getting-started/), reference deep-links for bot/app setup). No change to runtime TypeScript APIs.
 
 ## 2.0.0
 
@@ -31,7 +41,7 @@ Patch release for **Vite / browser** action calls.
 Patch release for **browser and Vite** app bridges.
 
 - **`connectBotBridge`** now uses **`globalThis.WebSocket`** (WHATWG) instead of importing the **`ws`** package, so client bundles no longer hit broken `ws` browser shims (`WebSocket is not a constructor`).
-- **Node.js 22+** is required for app processes (native **`globalThis.WebSocket`**). See [Troubleshooting](https://shardwire.js.org/docs/operations/troubleshooting/#nodejs-below-22-connectbotbridge-requires-globalthiswebsocket).
+- **Node.js 22+** is required for app processes (native **`globalThis.WebSocket`**). See [Troubleshooting — Node.js 22+](/docs/troubleshooting#nodejs-below-22-connectbotbridge-requires-globalthiswebsocket).
 - Declaration emit: replaced **`NodeJS.Timeout`** / interval types with **`ReturnType<typeof setTimeout>`** / **`setInterval`** where needed so **`shardwire/client`** `.d.ts` builds cleanly.
 
 ## 1.9.1
@@ -47,7 +57,7 @@ Minor release focused on adoption documentation, diagnostics ergonomics, and an 
 
 - Added **`formatShardwireDiagnosis(report, options?)`** and **`FormatShardwireDiagnosisOptions`** for readable diagnosis output (CI logs, deploy logs, strict-startup failures).
 - Regenerated reference docs for the new formatter symbols.
-- Documentation: [incremental adoption](/docs/guides/incremental-adoption), golden [recipes](/docs/guides/recipe-moderation-worker) (moderation, interactions, analytics, music controller), [CI contract validation](/docs/operations/ci-contract-validation), [secret cookbook](/docs/operations/secret-cookbook), [remote bridge (wss)](/docs/operations/remote-bridge), [observability](/docs/operations/observability), [slash command registration](/docs/guides/slash-command-sync), [product boundaries](/docs/advanced/product-boundaries), and [custom domain contracts (spike)](/docs/advanced/custom-domain-contracts).
+- Documentation (historical): incremental adoption guides, recipes (moderation, interactions, analytics, music), operations notes, slash registration guidance, and advanced product notes — the **current** narrative docs are the smaller set under [**/docs**](/docs/) (Getting started, How it works, Tutorial, Guides, Troubleshooting); deep detail lives in [**Reference**](/docs/reference).
 - TypeScript: set **`ignoreDeprecations`** to **`"6.0"`** in **`packages/shardwire/tsconfig.json`** so declaration emit stays stable on TypeScript 6.x.
 
 ## 1.8.0
@@ -93,7 +103,7 @@ Patch release: include package metadata in the npm tarball.
 - Documentation site migrated to Next.js + Fumadocs with generated API reference under `/docs/reference/`.
 - IDE hovers: public exports carry `@see` links to their reference pages on the docs site.
 - Added `docsReferenceAbsoluteUrl` / routing helpers in `reference-doc-url.ts` (kept in sync with the reference generator).
-- Website changelog page and expanded docs URL map in `SHARDWIRE_DOCS`.
+- Website changelog page and expanded docs URL map in `SHARDWIRE_DOCS` (`packages/shardwire/src/utils/docs-links.ts`).
 - TypeScript: set `ignoreDeprecations` to `"5.0"` so declaration emit (`tsup` DTS) works on TypeScript 6.x.
 
 ## 1.5.1
@@ -101,7 +111,7 @@ Patch release: include package metadata in the npm tarball.
 Patch release focused on reliability and docs after the docs-site / monorepo migration.
 
 - Fixed reconnect behavior so exponential backoff no longer resets on socket open before auth succeeds.
-- Added stable troubleshooting links in runtime and config errors (`See: https://shardwire.js.org/docs/operations/troubleshooting/#…`).
+- Added stable troubleshooting links in runtime and config errors (`See: https://shardwire.js.org/docs/troubleshooting/#…` — **anchor IDs** match headings on the [**Troubleshooting**](/docs/troubleshooting) page).
 - Added an **Errors** documentation section with anchor-based remediation for common failures.
 - Updated deployment configuration and canonical docs URL handling.
 - Hardened CI and publish workflows for the workspace layout and restored docs build checks in CI.
@@ -205,7 +215,7 @@ npm: [`@shardwire/react`](https://www.npmjs.com/package/@shardwire/react)
 
 ## 0.1.3
 
-- **`shardwire`** is now a **runtime `dependency`** (`^1.9.2`) so `npm install @shardwire/react react` is enough for hook-only apps. **`react`** remains the only **peer dependency**.
+- **`shardwire`** is now a **runtime `dependency`** (`^1.9.3`) so `npm install @shardwire/react react` is enough for hook-only apps. **`react`** remains the only **peer dependency**.
 
 ## 0.1.2
 

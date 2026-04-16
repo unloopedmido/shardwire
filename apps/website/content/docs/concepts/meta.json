@@ -1,5 +1,4 @@
 {
   "title": "Concepts",
-  "defaultOpen": true,
-  "pages": ["how-shardwire-works", "capabilities-and-scopes"]
+  "pages": ["how-it-works"]
 }
