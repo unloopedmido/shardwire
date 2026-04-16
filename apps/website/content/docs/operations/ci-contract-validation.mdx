@@ -1,0 +1,62 @@
+---
+title: 'CI contract validation'
+description: 'Fail pull requests when a Shardwire app manifest, intents, subscriptions, or expectedScope drift from what production should negotiate.'
+---
+
+Shardwire already gives you everything needed to treat the bridge as a **versioned contract**:
+
+- [`defineShardwireApp`](/docs/guides/manifests) for required events, actions, and filter keys
+- [`diagnoseShardwireApp`](/docs/reference/contracts-and-diagnostics/diagnose-shardwire-app/) for structured issues
+- [`generateSecretScope`](/docs/reference/contracts-and-diagnostics/generate-secret-scope/) for minimum secret shape
+- optional [`expectedScope`](/docs/guides/strict-startup) for maximum allowed negotiation
+
+CI should exercise the same checks so bad merges cannot ship.
+
+## Recommended approach
+
+1. **Export** the manifest (and optional `expectedScope` object) from a small module your app and tests import.
+2. In CI, build a **frozen negotiation fixture**: the `BridgeCapabilities` object your bot is supposed to expose for that secret in production (events/actions arrays). Check this file in when you intentionally change capabilities.
+3. Run `diagnoseShardwireApp(manifest, negotiatedFixture, options)` with:
+   - `botIntents` matching `createBotBridge({ intents })`
+   - `subscriptions` listing every `{ name, filter? }` your app registers **before** strict `ready`
+   - `expectedScope` when you use it in `app.ready`
+
+4. Fail the job when `!report.ok` and print [`formatShardwireDiagnosis(report)`](/docs/reference/contracts-and-diagnostics/format-shardwire-diagnosis/) so logs are readable.
+
+## Example (Vitest-style)
+
+```ts
+import { describe, expect, it } from 'vitest';
+import { diagnoseShardwireApp, formatShardwireDiagnosis } from 'shardwire';
+import { appManifest } from '../src/shardwire-manifest.js';
+import { productionNegotiatedCapabilities } from '../fixtures/shardwire-negotiated.js';
+
+describe('Shardwire contract', () => {
+	it('matches production negotiation and intents', () => {
+		const report = diagnoseShardwireApp(appManifest, productionNegotiatedCapabilities, {
+			strictIntentCheck: true,
+			botIntents: ['Guilds', 'GuildMessages', 'MessageContent'],
+			subscriptions: [{ name: 'messageCreate', filter: { guildId: '123' } }],
+		});
+
+		if (!report.ok) {
+			console.error(formatShardwireDiagnosis(report, { title: 'Shardwire CI' }));
+		}
+		expect(report.ok).toBe(true);
+	});
+});
+```
+
+Keep `productionNegotiatedCapabilities` updated whenever you change bot intents, secret `allow` lists, or which apps connect.
+
+## What this catches early
+
+- required events or actions missing from negotiation
+- manifest events whose intents are not enabled on the bot
+- runtime subscriptions or filter keys not declared on the manifest
+- `expectedScope` violations when negotiation is broader than intended
+
+## Related
+
+- [Strict startup](/docs/guides/strict-startup) for the runtime gate
+- [Incremental adoption](/docs/guides/incremental-adoption) for staged rollout

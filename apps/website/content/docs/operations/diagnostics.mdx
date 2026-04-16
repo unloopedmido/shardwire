@@ -1,6 +1,6 @@
 ---
-title: "Diagnostics"
-description: "Use the built-in diagnostic helpers before you widen scope or add custom logging."
+title: 'Diagnostics'
+description: 'Use the built-in diagnostic helpers before you widen scope or add custom logging.'
 ---
 
 Shardwire ships diagnostic surfaces because most bridge failures are capability-shape failures, not low-level transport mysteries.
@@ -10,19 +10,20 @@ Shardwire ships diagnostic surfaces because most bridge failures are capability-
 - `app.capabilities()` for the live negotiated surface
 - `app.catalog()` for the static built-in event/action catalog
 - `diagnoseShardwireApp()` for manifest versus runtime checks
+- `formatShardwireDiagnosis()` for **human-readable** reports (CI logs, deploy logs, strict-startup output)
 
 ## Example
 
 ```ts
-import { diagnoseShardwireApp } from 'shardwire';
+import { diagnoseShardwireApp, formatShardwireDiagnosis } from 'shardwire';
 
 const report = diagnoseShardwireApp(manifest, app.capabilities(), {
-  botIntents: ['Guilds', 'GuildMessages', 'MessageContent'],
-  subscriptions: [{ name: 'messageCreate', filter: { guildId } }],
+	botIntents: ['Guilds', 'GuildMessages', 'MessageContent'],
+	subscriptions: [{ name: 'messageCreate', filter: { guildId } }],
 });
 
 if (!report.ok) {
-  console.error(report.issues);
+	console.error(formatShardwireDiagnosis(report, { title: 'preflight' }));
 }
 ```
 

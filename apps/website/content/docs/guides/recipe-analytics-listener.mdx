@@ -1,0 +1,89 @@
+---
+title: 'Recipe: analytics listener'
+description: 'Events-only app process with no bridge actions: narrow secret, manifest, strict startup, and safe logging or export.'
+---
+
+Analytics, audit logs, and metrics pipelines often need **only events**—no `app.actions.*` calls. That is the **narrowest** capability surface and the easiest scoped secret to reason about.
+
+## Manifest (events only)
+
+```ts
+import { defineShardwireApp, generateSecretScope } from 'shardwire';
+
+export const analyticsManifest = defineShardwireApp({
+	name: 'analytics-listener',
+	events: ['messageCreate', 'messageDelete', 'guildMemberAdd', 'guildMemberRemove'],
+	actions: [],
+	filters: {
+		messageCreate: ['guildId', 'channelId'],
+		messageDelete: ['guildId', 'channelId'],
+		guildMemberAdd: ['guildId', 'userId'],
+		guildMemberRemove: ['guildId', 'userId'],
+	},
+});
+
+export const analyticsMinimumSecret = generateSecretScope(analyticsManifest);
+```
+
+`actions: []` keeps the generated minimum scope free of action permissions.
+
+## Bot bridge secret
+
+```ts
+secrets: [
+  {
+    id: 'analytics',
+    value: process.env.SHARDWIRE_SECRET_ANALYTICS!,
+    allow: analyticsMinimumSecret,
+  },
+],
+```
+
+Even if the bot process negotiates a **broader** secret for other apps, this connection only receives what `allow` grants.
+
+## App process
+
+```ts
+import { connectBotBridge } from 'shardwire';
+import { analyticsManifest, analyticsMinimumSecret } from './analytics-manifest.js';
+
+const app = connectBotBridge({
+	url: process.env.SHARDWIRE_URL!,
+	secret: process.env.SHARDWIRE_SECRET_ANALYTICS!,
+	appName: analyticsManifest.name,
+});
+
+app.on('messageCreate', ({ message }) => {
+	// append-only sink: your warehouse, file, or queue
+	recordMessageCreated(message);
+});
+
+app.on('messageDelete', ({ message }) => {
+	recordMessageDeleted(message); // BridgeDeletedMessage — partial content is normal
+});
+
+app.on('guildMemberAdd', ({ member }) => {
+	recordMemberJoined(member);
+});
+
+app.on('guildMemberRemove', ({ member }) => {
+	recordMemberLeft(member);
+});
+
+await app.ready({
+	strict: true,
+	manifest: analyticsManifest,
+	botIntents: ['Guilds', 'GuildMessages', 'MessageContent', 'GuildMembers'],
+	expectedScope: analyticsMinimumSecret,
+});
+```
+
+## Operational advantages
+
+- **Least privilege:** a leaked analytics secret cannot send messages or ban users.
+- **Predictable load:** you can scale read-only consumers without touching moderation or dashboard secrets ([Secret cookbook](/docs/operations/secret-cookbook)).
+
+## Related
+
+- [Capabilities & scoped secrets](/docs/concepts/capabilities-and-scopes)
+- [CI contract validation](/docs/operations/ci-contract-validation)

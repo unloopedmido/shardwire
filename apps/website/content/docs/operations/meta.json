@@ -3,6 +3,10 @@
   "defaultOpen": true,
   "pages": [
     "deployment",
+    "ci-contract-validation",
+    "secret-cookbook",
+    "remote-bridge",
+    "observability",
     "diagnostics",
     "troubleshooting"
   ]
