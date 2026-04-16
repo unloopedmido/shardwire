@@ -10,12 +10,7 @@
 
 ---
 
-> [!IMPORTANT]
-> **Browser bundle:** variables prefixed with `VITE_` are exposed to client code. Only place bridge URL and appropriately scoped secrets there—read the Shardwire docs on secret scopes before exposing anything to the public internet.
->
-> **Two long-running processes:** Vite dev server plus the bot/bridge Node process.
->
-> **Uninstall / reset:** stop processes and delete the project directory.
+You will run **Vite and the bot/bridge** together in development. Anything prefixed with `VITE_` is compiled into the browser bundle—only put a bridge URL and secrets there that you are willing to expose to clients, and read the Shardwire docs on secret scopes first. Stop processes and delete this directory to remove the project.
 
 ```bash
 npm install

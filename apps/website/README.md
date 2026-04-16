@@ -8,13 +8,6 @@
 
 ---
 
-> [!IMPORTANT]
-> **Private package:** not published to npm; exists to build and preview documentation from the monorepo.
->
-> **Build:** runs reference generation scripts (`predev` / `prebuild`) that read TypeScript sources from workspace packages. Requires a full monorepo install at the root.
->
-> **Network:** `next dev` and `serve` bind locally by default; no extra outbound telemetry is added by these scripts.
-
 ```bash
 # from repository root
 npm install
@@ -42,6 +35,8 @@ $ npm run docs:dev
 
 ## Install
 
+This workspace package is **not published to npm**; it builds the public docs from a full monorepo checkout. `predev` / `prebuild` run reference generation against `packages/*` TypeScript. `next dev` and `serve` bind locally by default; these scripts do not add extra telemetry.
+
 Work from the **monorepo root** so workspace dependencies resolve:
 
 ```bash
@@ -50,11 +45,11 @@ npm install
 
 Then use root scripts (defined in the root `package.json`):
 
-| Command | Purpose |
-| --- | --- |
-| `npm run docs:dev` | Development server with reference rebuild on start |
-| `npm run docs:build` | Production build (static export configuration per Next setup) |
-| `npm run docs:preview` | Serve the built `out/` directory |
+| Command                | Purpose                                                       |
+| ---------------------- | ------------------------------------------------------------- |
+| `npm run docs:dev`     | Development server with reference rebuild on start            |
+| `npm run docs:build`   | Production build (static export configuration per Next setup) |
+| `npm run docs:preview` | Serve the built `out/` directory                              |
 
 <details>
 <summary><b>Details</b> — package-local scripts</summary>

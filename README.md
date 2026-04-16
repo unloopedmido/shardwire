@@ -10,15 +10,6 @@
 
 ---
 
-> [!IMPORTANT]
-> **What touches your machine:** cloning this repo only adds source. Running examples or the docs app installs npm dependencies under each workspace. Published packages (`shardwire`, `@shardwire/react`, `create-shardwire`) are installed from npm like any other dependency.
->
-> **Network:** a running bot talks to Discord; the app connects to the bridge over WebSocket. `create-shardwire` may fetch package metadata during install (normal npm behavior).
->
-> **Secrets:** you configure Discord tokens, application IDs, and a shared bridge secret in `.env` (or your host’s secret store)—examples use names like `SHARDWIRE_SECRET`; never commit real tokens.
->
-> **Reversibility:** stop processes and remove the clone. Uninstall published packages with `npm uninstall <name>` in the project that added them.
-
 ```bash
 npm create shardwire@latest
 ```
@@ -52,6 +43,8 @@ You should see the app connect to the bridge and handle traffic defined in the e
 
 ## Install
 
+Cloning only adds source; `npm install` pulls dependencies like any Node project. When you run examples or a bot, processes reach Discord and the bridge WebSocket you configure. Keep tokens and bridge secrets in `.env` or your host’s secret store (examples use names like `SHARDWIRE_SECRET`); never commit real values. To clean up, stop processes and delete the checkout; drop a published dependency from a project with `npm uninstall <name>`.
+
 **Start a new project (recommended):**
 
 ```bash
@@ -79,12 +72,12 @@ npm install
 
 Useful root scripts:
 
-| Script | Purpose |
-| --- | --- |
-| `npm run build` | Build `shardwire`, `@shardwire/react`, and the docs site |
-| `npm run verify` | Lint, tests, typecheck, and builds across published packages and the scaffold |
-| `npm run docs:dev` | Next.js docs + reference dev server |
-| `npm run docs:build` / `docs:preview` | Static export build and local preview |
+| Script                                | Purpose                                                                       |
+| ------------------------------------- | ----------------------------------------------------------------------------- |
+| `npm run build`                       | Build `shardwire`, `@shardwire/react`, and the docs site                      |
+| `npm run verify`                      | Lint, tests, typecheck, and builds across published packages and the scaffold |
+| `npm run docs:dev`                    | Next.js docs + reference dev server                                           |
+| `npm run docs:build` / `docs:preview` | Static export build and local preview                                         |
 
 Examples under `examples/` use `file:` dependencies back to `packages/*` so you can iterate without publishing.
 
@@ -109,13 +102,13 @@ The **bot process** owns the Discord gateway session and hosts a **bridge server
 <details>
 <summary><b>Details</b> — repository layout</summary>
 
-| Path | Role |
-| --- | --- |
-| `packages/shardwire` | Core bridge + Node client (`shardwire`, `shardwire/client`) |
-| `packages/react` | Optional React hooks for app-side UIs |
-| `packages/create-shardwire` | Interactive project scaffold |
-| `apps/website` | Public documentation site (Fumadocs + Next.js) |
-| `examples/*` | Runnable references wired to local `file:` packages |
+| Path                        | Role                                                        |
+| --------------------------- | ----------------------------------------------------------- |
+| `packages/shardwire`        | Core bridge + Node client (`shardwire`, `shardwire/client`) |
+| `packages/react`            | Optional React hooks for app-side UIs                       |
+| `packages/create-shardwire` | Interactive project scaffold                                |
+| `apps/website`              | Public documentation site (Fumadocs + Next.js)              |
+| `examples/*`                | Runnable references wired to local `file:` packages         |
 
 Source of truth for APIs and guides is the published documentation, not this file alone.
 

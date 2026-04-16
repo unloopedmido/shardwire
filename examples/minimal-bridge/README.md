@@ -10,12 +10,7 @@
 
 ---
 
-> [!IMPORTANT]
-> **Monorepo path:** this example uses `file:../../packages/shardwire`. Install **from this directory** after cloning the full [`shardwire`](https://github.com/unloopedmido/shardwire) repository.
->
-> **Network:** connects to Discord and opens the bridge WebSocket as configured in source and `.env`.
->
-> **Secrets:** never commit a real `.env`.
+Clone the full [`shardwire`](https://github.com/unloopedmido/shardwire) repository, then run the commands below **from this directory**—`package.json` uses `file:../../packages/shardwire`. Running the example reaches Discord and the bridge WebSocket you configure in `.env`; never commit a real `.env`.
 
 ```bash
 cd examples/minimal-bridge
@@ -57,11 +52,11 @@ Requires **Node.js 22+**.
 <details>
 <summary><b>Details</b> — scripts</summary>
 
-| Script | Purpose |
-| --- | --- |
-| `npm run bot` | Bot process + bridge (`src/bot.js`) |
-| `npm run app` | App client (`src/app.js`) |
-| `npm run register` | Slash command registration helper |
+| Script             | Purpose                             |
+| ------------------ | ----------------------------------- |
+| `npm run bot`      | Bot process + bridge (`src/bot.js`) |
+| `npm run app`      | App client (`src/app.js`)           |
+| `npm run register` | Slash command registration helper   |
 
 </details>
 

@@ -10,12 +10,7 @@
 
 ---
 
-> [!IMPORTANT]
-> **Install location:** always run `npm install` from this **repository root** so workspace links resolve.
->
-> **Secrets:** use the root `.env.example` → `.env` flow (or the split your team prefers) before starting either workspace.
->
-> **Cleanup:** stop processes; remove the directory to delete the scaffold output.
+Run `npm install` from **this project root** so workspace links resolve. Copy `.env.example` to `.env` at the root (or follow the env layout your team prefers) before starting either package. Stop processes and delete the directory when you want a clean slate.
 
 ```bash
 npm install

@@ -10,15 +10,6 @@
 
 ---
 
-> [!IMPORTANT]
-> **What it touches:** creates a **new directory** with source files, `package.json`, and config templates on disk. It does not modify global npm settings or files outside the target path you choose.
->
-> **Network:** uses npm to resolve template dependencies (normal package install traffic).
->
-> **Secrets:** prompts may ask for names and versions; **Discord tokens are not generated here**. You add secrets to `.env` after the scaffold.
->
-> **Undo:** delete the generated folder. **Uninstall the tool:** `npm uninstall -g create-shardwire` only if you installed globally (most users run via `npm create` without a global install).
-
 ```bash
 npm create shardwire@latest
 ```
@@ -50,6 +41,8 @@ $ npm run app    # or npm run dev for Vite — second terminal
 ---
 
 ## Install
+
+The CLI writes a **new directory** of source and config under the path you pick; it does not change global npm settings or files outside that folder. Dependency downloads are normal npm traffic. It does **not** mint Discord tokens—you add secrets to `.env` after scaffolding. Undo by deleting the folder; `npm uninstall -g create-shardwire` only applies if you installed the bin globally (most people use `npm create` without that).
 
 The supported entry is **`npm create`**, which downloads this package on demand:
 

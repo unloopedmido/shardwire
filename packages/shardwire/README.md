@@ -10,13 +10,6 @@
 
 ---
 
-> [!IMPORTANT]
-> **Network:** connects to Discord (gateway / REST as you configure with discord.js) and accepts inbound WebSocket connections for the bridge when you start the server side.
->
-> **Secrets:** you supply a shared bridge secret and Discord credentials in your environment; the library does not phone home beyond what you implement.
->
-> **Uninstall:** `npm uninstall shardwire` in the consuming project.
-
 ```bash
 npm install shardwire
 ```
@@ -58,6 +51,8 @@ const session = await connectBotBridge({
 ---
 
 ## Install
+
+At runtime, traffic follows your Discord.js configuration (Discord gateway/REST) and any bridge WebSocket server you start. Put the bridge secret and bot credentials in your environment; the library does not add its own outbound analytics. Remove the dependency with `npm uninstall shardwire` in the consuming project.
 
 ```bash
 npm install shardwire

@@ -10,12 +10,7 @@
 
 ---
 
-> [!IMPORTANT]
-> **Monorepo path:** depends on `file:../../packages/shardwire` and `file:../../packages/react`. Clone the full repository, then install **in this folder**.
->
-> **Browser exposure:** Vite injects `VITE_*` env vars into client code. Only put bridge URL and scoped secrets here that you are willing to ship to browsers—follow the main docs on secret scopes and capabilities.
->
-> **Two processes:** Vite dev server plus the bot/bridge process.
+Clone the full repository, then install **in this folder**—dependencies resolve to `file:../../packages/shardwire` and `file:../../packages/react`. You will run **two processes** (Vite plus the bot/bridge). Remember that Vite exposes `VITE_*` variables to the browser bundle, so only put a bridge URL and secrets there that you intend to ship to clients; see the main docs on scopes and capabilities.
 
 ```bash
 cd examples/react-vite-dashboard
@@ -57,12 +52,12 @@ Requires **Node.js 22+**.
 <details>
 <summary><b>Details</b> — scripts</summary>
 
-| Script | Purpose |
-| --- | --- |
-| `npm run bot` | Bot + bridge (`bot/bot.js`) |
-| `npm run dev` | Vite dev server for the React app |
+| Script                              | Purpose                              |
+| ----------------------------------- | ------------------------------------ |
+| `npm run bot`                       | Bot + bridge (`bot/bot.js`)          |
+| `npm run dev`                       | Vite dev server for the React app    |
 | `npm run build` / `npm run preview` | Production bundle and static preview |
-| `npm run register` | Slash command registration |
+| `npm run register`                  | Slash command registration           |
 
 </details>
 

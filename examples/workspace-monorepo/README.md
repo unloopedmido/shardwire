@@ -10,12 +10,7 @@
 
 ---
 
-> [!IMPORTANT]
-> **Monorepo-in-monorepo:** this example defines its own npm workspaces under `packages/bot` and `packages/app`. Run commands from **this example’s root**, not only from the repository root.
->
-> **Local `shardwire`:** workspace packages depend on the parent `packages/shardwire` build via `file:` paths configured inside the nested workspaces—clone the full Shardwire repo and run `npm install` here so links resolve.
->
-> **Secrets:** copy `.env.example` to `.env` at this example root and fill Discord + bridge values before running.
+This folder is its **own** npm workspace (`packages/bot`, `packages/app`). Run the commands below from **this example’s root** after cloning the full Shardwire repo so `file:` links to `packages/shardwire` resolve. Copy `.env.example` to `.env` here and fill Discord + bridge values before running.
 
 ```bash
 cd examples/workspace-monorepo
@@ -58,11 +53,11 @@ Requires **Node.js 22+**.
 
 Root `package.json` scripts forward into named workspaces:
 
-| Script | Delegates to |
-| --- | --- |
-| `npm run bot` | `@example/shardwire-workspace-bot` `start` |
-| `npm run app` | `@example/shardwire-workspace-app` `start` |
-| `npm run register` | bot workspace `register` |
+| Script             | Delegates to                               |
+| ------------------ | ------------------------------------------ |
+| `npm run bot`      | `@example/shardwire-workspace-bot` `start` |
+| `npm run app`      | `@example/shardwire-workspace-app` `start` |
+| `npm run register` | bot workspace `register`                   |
 
 Open each workspace’s `package.json` for exact command definitions.
 

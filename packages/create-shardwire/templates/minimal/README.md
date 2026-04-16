@@ -10,12 +10,7 @@
 
 ---
 
-> [!IMPORTANT]
-> **Network:** Discord API traffic from the bot and a WebSocket connection from the app to your bridge endpoint.
->
-> **Secrets:** store `DISCORD_TOKEN`, bridge secret, and related IDs in `.env` (created from `.env.example`). Never commit real values.
->
-> **Undo:** stop both processes; delete the project folder to remove everything this scaffold created.
+Running the bot hits Discord; the app opens a WebSocket to the bridge URL you configure. Keep `DISCORD_TOKEN`, the bridge secret, and related IDs in `.env` (start from `.env.example`); never commit real values. Stop both processes and delete this folder when you want it gone.
 
 ```bash
 npm install

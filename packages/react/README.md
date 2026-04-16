@@ -10,13 +10,6 @@
 
 ---
 
-> [!IMPORTANT]
-> **Depends on:** `react` (peer, 18+) and the `shardwire` package for types and client behavior used under the hood.
->
-> **Network:** whatever your app bridge endpoint is (WebSocket to the bot-side server). No separate analytics channel is added by this package.
->
-> **Uninstall:** `npm uninstall @shardwire/react` (and `shardwire` if nothing else needs it).
-
 ```bash
 npm install @shardwire/react shardwire
 ```
@@ -34,27 +27,27 @@ This package is **optional sugar** on top of `shardwire/client` for React apps. 
 ## See It Work
 
 ```tsx
-import { ShardwireProvider, useShardwire } from "@shardwire/react";
+import { ShardwireProvider, useShardwire } from '@shardwire/react';
 
 function Root() {
-  return (
-    <ShardwireProvider
-      options={{
-        url: import.meta.env.VITE_SHARDWIRE_URL,
-        secret: import.meta.env.VITE_SHARDWIRE_SECRET,
-      }}
-    >
-      <Dashboard />
-    </ShardwireProvider>
-  );
+	return (
+		<ShardwireProvider
+			options={{
+				url: import.meta.env.VITE_SHARDWIRE_URL,
+				secret: import.meta.env.VITE_SHARDWIRE_SECRET,
+			}}
+		>
+			<Dashboard />
+		</ShardwireProvider>
+	);
 }
 
 function Dashboard() {
-  const connection = useShardwire();
-  if (connection.status === "connecting") return <p>Connecting…</p>;
-  if (connection.status === "error") return <p>Failed: {connection.error.message}</p>;
-  if (connection.status === "ready") return <p>Connected</p>;
-  return null;
+	const connection = useShardwire();
+	if (connection.status === 'connecting') return <p>Connecting…</p>;
+	if (connection.status === 'error') return <p>Failed: {connection.error.message}</p>;
+	if (connection.status === 'ready') return <p>Connected</p>;
+	return null;
 }
 ```
 
@@ -63,6 +56,8 @@ Exact hook names and config fields follow the current API—see the reference li
 ---
 
 ## Install
+
+Expect **`react` 18+** as a peer dependency and **`shardwire`** for the client types and runtime this package wraps. Network use is whatever WebSocket URL you pass to the bridge—there is no separate telemetry channel from this package. Remove with `npm uninstall @shardwire/react` (and `shardwire` if nothing else needs it).
 
 ```bash
 npm install @shardwire/react shardwire
