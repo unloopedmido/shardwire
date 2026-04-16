@@ -72,7 +72,7 @@ if (!moved.ok) {
 
 ## React dashboards
 
-Optional **`@shardwire/react`** provides hooks around `connectBotBridge` so dashboard UIs do not need to wire lifecycle by hand. See the README in the repository (`packages/react`) and the [music controller recipe](/docs/guides/recipe-music-controller). The hooks package depends on **`shardwire`** and peers only **`react`**; core **`shardwire`** still does not bundle React.
+Optional **`@shardwire/react`** provides **`useShardwireConnection`**, **`ShardwireProvider` / `useShardwire`**, and **`useShardwireListener`** around `connectBotBridge` so dashboard UIs do not need to wire lifecycle by hand. See the README in the repository (`packages/react`) and the [music controller recipe](/docs/guides/recipe-music-controller). The package depends on **`shardwire`** and peers only **`react`**; core **`shardwire`** still does not bundle React.
 
 ## What belongs here
 

@@ -188,6 +188,12 @@ This tab covers the **`@shardwire/react`** npm package. It versions **independen
 
 npm: [`@shardwire/react`](https://www.npmjs.com/package/@shardwire/react)
 
+## 0.3.0
+
+- **Breaking:** Replaced **`useShardwireBridge`**, **`useShardwireCapabilities`**, and **`useShardwireEvent`** with **`useShardwireConnection`** (discriminated status + capabilities on `ready`), optional **`ShardwireProvider` / `useShardwire`**, and **`useShardwireListener`** (object argument; stable filter fingerprint).
+- **DX:** Connection reconnect key now covers **`reconnect`**, **`requestTimeoutMs`**, and **`metrics`** shape (not function identity). **`logger`** changes still require remount or parent `key` if you need a fresh bridge instance.
+- **Types:** Curated type re-exports from **`@shardwire/react`** for common app-bridge types.
+
 ## 0.2.0
 
 - **Breaking:** **`engines.node`** **`>=22.0.0`** (matches **`shardwire` 2.x**).
