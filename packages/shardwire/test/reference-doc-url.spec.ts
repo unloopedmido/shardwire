@@ -25,6 +25,9 @@ describe('docsReferenceAbsoluteUrl', () => {
 		expect(docsReferenceAbsoluteUrl('defineShardwireApp', origin)).toBe(
 			`${origin}/docs/reference/contracts-and-diagnostics/define-shardwire-app/`,
 		);
+		expect(docsReferenceAbsoluteUrl('formatShardwireDiagnosis', origin)).toBe(
+			`${origin}/docs/reference/contracts-and-diagnostics/format-shardwire-diagnosis/`,
+		);
 	});
 
 	it('slugifies like the website reference generator', () => {
@@ -35,5 +38,10 @@ describe('docsReferenceAbsoluteUrl', () => {
 	it('categorizes Action* models before generic Bridge* names', () => {
 		expect(getReferenceCategoryId('SendMessageActionPayload')).toBe('action-models');
 		expect(getReferenceCategoryId('BridgeMessage')).toBe('event-and-data-models');
+	});
+
+	it('places formatShardwireDiagnosis in contracts-and-diagnostics', () => {
+		expect(getReferenceCategoryId('formatShardwireDiagnosis')).toBe('contracts-and-diagnostics');
+		expect(getReferenceCategoryId('FormatShardwireDiagnosisOptions')).toBe('contracts-and-diagnostics');
 	});
 });

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { BotEventName, ShardwireSubscriptionFilterKey } from '../src/discord/types';
 import { defineShardwireApp, generateSecretScope } from '../src/dx/app-manifest';
 import { diagnoseShardwireApp } from '../src/dx/diagnose-app';
+import { formatShardwireDiagnosis } from '../src/dx/format-diagnosis';
 import { explainCapability } from '../src/dx/explain-capability';
 import { buildPreflightReport } from '../src/dx/preflight';
 import { getShardwireCatalog } from '../src/dx/shardwire-catalog';
@@ -323,5 +324,41 @@ describe('diagnoseShardwireApp', () => {
 		const unused = report.issues.filter((i) => i.code.startsWith('unused_negotiated'));
 		expect(unused.length).toBeGreaterThanOrEqual(2);
 		expect(unused.every((i) => i.severity === 'warning')).toBe(true);
+	});
+});
+
+describe('formatShardwireDiagnosis', () => {
+	it('prints FAILED and error section when report is not ok', () => {
+		const manifest = defineShardwireApp({
+			name: 'fmt-test',
+			events: ['messageCreate'],
+			actions: ['deleteMessage'],
+		});
+		const report = diagnoseShardwireApp(
+			manifest,
+			{ events: [], actions: [] },
+			{ strictIntentCheck: true, botIntents: ['GuildMessages'] },
+		);
+		expect(report.ok).toBe(false);
+		const text = formatShardwireDiagnosis(report, { title: 'CI check' });
+		expect(text.startsWith('CI check: FAILED')).toBe(true);
+		expect(text).toContain('Errors');
+		expect(text).toContain('missing_event_capability');
+	});
+
+	it('prints ok and no issues when diagnosis is clean', () => {
+		const manifest = defineShardwireApp({ name: 'clean', events: ['ready'], actions: [] });
+		const report = diagnoseShardwireApp(manifest, { events: ['ready'], actions: [] }, {});
+		expect(report.ok).toBe(true);
+		const text = formatShardwireDiagnosis(report);
+		expect(text).toContain('ok');
+		expect(text).toContain('No issues.');
+	});
+
+	it('respects omitScopeSummary', () => {
+		const manifest = defineShardwireApp({ name: 'x', events: ['ready'], actions: [] });
+		const report = diagnoseShardwireApp(manifest, { events: ['ready'], actions: [] }, {});
+		const text = formatShardwireDiagnosis(report, { omitScopeSummary: true });
+		expect(text).not.toContain('Minimum scope');
 	});
 });
