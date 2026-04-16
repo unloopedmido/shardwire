@@ -24,7 +24,9 @@ Before generating or refactoring code, **read the current signatures and types**
 | Deploy (keeping it alive) | https://shardwire.js.org/docs/guides/keeping-it-alive/ |
 | API reference (symbols, sections) | https://shardwire.js.org/docs/reference/ |
 | Troubleshooting (incl. `See:` anchors) | https://shardwire.js.org/docs/troubleshooting/ |
-| Changelog | https://shardwire.js.org/docs/changelog/ |
+| Changelog (hub) | https://shardwire.js.org/docs/changelog/ |
+| Changelog — `shardwire` | https://shardwire.js.org/docs/changelog/shardwire/ |
+| Changelog — `@shardwire/react` | https://shardwire.js.org/docs/changelog/react/ |
 
 Per-symbol pages follow `https://shardwire.js.org/docs/reference/<section>/<kebab-case-name>/` (e.g. `bridge-apis`, `contracts-and-diagnostics`, `action-models`, `event-and-data-models`, `errors-and-failures`).
 
