@@ -1,0 +1,118 @@
+:root {
+	color-scheme: light dark;
+	--dashboard-bg: #fafafa;
+	--dashboard-surface: #ffffff;
+	--dashboard-text: #0a0a0a;
+	--dashboard-muted: #525252;
+	--dashboard-border: #e5e5e5;
+	--dashboard-focus: #2563eb;
+	--dashboard-line: 1.55;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--dashboard-bg: #0a0a0a;
+		--dashboard-surface: #141414;
+		--dashboard-text: #fafafa;
+		--dashboard-muted: #a3a3a3;
+		--dashboard-border: #262626;
+		--dashboard-focus: #60a5fa;
+		--dashboard-line: 1.62;
+	}
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	min-height: 100vh;
+	font-family:
+		system-ui,
+		-apple-system,
+		'Segoe UI',
+		Roboto,
+		'Helvetica Neue',
+		sans-serif;
+	font-size: 1rem;
+	line-height: var(--dashboard-line);
+	background: var(--dashboard-bg);
+	color: var(--dashboard-text);
+}
+
+#root {
+	min-height: 100vh;
+}
+
+.dashboard-shell {
+	max-width: 65ch;
+	margin: 0 auto;
+	padding: 1.5rem 1.25rem 3rem;
+}
+
+.dashboard-stack {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.dashboard-title {
+	margin: 0 0 0.25rem;
+	font-size: clamp(1.35rem, 1.1rem + 1.2vw, 1.75rem);
+	font-weight: 600;
+	line-height: 1.2;
+	letter-spacing: -0.02em;
+}
+
+.dashboard-section {
+	margin-top: 0.5rem;
+}
+
+.dashboard-heading {
+	margin: 0 0 0.5rem;
+	font-size: 0.8125rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: var(--dashboard-muted);
+}
+
+.dashboard-pre {
+	margin: 0;
+	padding: 1rem 1.1rem;
+	font-size: 0.8125rem;
+	line-height: 1.45;
+	font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, monospace;
+	tab-size: 2;
+	background: var(--dashboard-surface);
+	border: 1px solid var(--dashboard-border);
+	border-radius: 0.375rem;
+	overflow-x: auto;
+}
+
+.dashboard-panel {
+	padding: 1rem 1.1rem;
+	background: var(--dashboard-surface);
+	border: 1px solid var(--dashboard-border);
+	border-radius: 0.375rem;
+}
+
+.dashboard-muted {
+	color: var(--dashboard-muted);
+}
+
+code {
+	font-size: 0.9em;
+	padding: 0.1em 0.35em;
+	border-radius: 0.25rem;
+	background: var(--dashboard-surface);
+	border: 1px solid var(--dashboard-border);
+}
+
+:focus-visible {
+	outline: 2px solid var(--dashboard-focus);
+	outline-offset: 2px;
+}

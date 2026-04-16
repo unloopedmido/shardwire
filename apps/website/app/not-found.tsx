@@ -28,13 +28,13 @@ export default function NotFound() {
           <div className="flex justify-center gap-3">
             <Link
               href="/docs"
-              className="inline-flex items-center rounded-full border border-[color:var(--site-line-strong)] bg-[color:var(--site-accent-strong)] px-5 py-2.5 text-sm font-medium text-white"
+              className="inline-flex min-h-11 items-center justify-center rounded-full border border-[color:var(--site-line-strong)] bg-[color:var(--site-foreground)] px-5 py-2.5 text-sm font-medium text-[color:var(--site-background)] transition-opacity duration-200 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--site-foreground)]"
             >
               Open docs
             </Link>
             <Link
               href="/docs/reference"
-              className="inline-flex items-center rounded-full border border-[color:var(--site-line)] bg-[color:var(--site-panel)] px-5 py-2.5 text-sm font-medium text-fd-foreground"
+              className="inline-flex min-h-11 items-center justify-center rounded-full border border-[color:var(--site-line)] bg-[color:var(--site-panel)] px-5 py-2.5 text-sm font-medium text-fd-foreground transition-colors duration-200 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] hover:border-[color:var(--site-line-strong)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--site-foreground)]"
             >
               Open reference
             </Link>

@@ -1,29 +1,28 @@
 import './global.css';
 
 import type { Metadata } from 'next';
-import { IBM_Plex_Mono, IBM_Plex_Sans, Newsreader } from 'next/font/google';
+import { Bricolage_Grotesque, JetBrains_Mono, Lexend } from 'next/font/google';
 import type { ReactNode } from 'react';
 
 import { Provider } from '@/app/provider';
 import { defaultOgImage, siteConfig, withBasePath } from '@/lib/site';
 
-const sans = IBM_Plex_Sans({
+const sans = Lexend({
   subsets: ['latin'],
-  variable: '--font-ibm-plex-sans',
+  variable: '--font-lexend',
   weight: ['400', '500', '600'],
 });
 
-const mono = IBM_Plex_Mono({
+const mono = JetBrains_Mono({
   subsets: ['latin'],
-  variable: '--font-ibm-plex-mono',
+  variable: '--font-jetbrains-mono',
   weight: ['400', '500'],
 });
 
-const display = Newsreader({
+const display = Bricolage_Grotesque({
   subsets: ['latin'],
-  variable: '--font-newsreader',
-  weight: ['400', '500'],
-  style: ['normal', 'italic'],
+  variable: '--font-display',
+  weight: ['600', '700'],
 });
 
 export const metadata: Metadata = {

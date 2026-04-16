@@ -41,7 +41,7 @@ type TerminalWindowProps = {
 
 function TerminalWindow({ children, title }: TerminalWindowProps) {
   return (
-    <div className="bg-[color:var(--site-background-elevated)] border border-[color:var(--site-line)] rounded-xl shadow-2xl w-full overflow-hidden">
+    <div className="bg-[color:var(--site-background-elevated)] border border-[color:var(--site-line)] rounded-xl shadow-2xl w-full overflow-hidden transition-shadow duration-300 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] motion-safe:hover:shadow-[0_24px_48px_-12px_rgba(0,0,0,0.18)] dark:motion-safe:hover:shadow-[0_24px_48px_-12px_rgba(0,0,0,0.45)]">
       <div className="border-b border-[color:var(--site-line)] px-3 py-2 flex items-center gap-1.5 bg-[color:var(--site-background)]">
         <div className="w-3 h-3 rounded-full bg-[#ff5f56] shadow-sm" />
         <div className="w-3 h-3 rounded-full bg-[#ffbd2e] shadow-sm" />
@@ -96,11 +96,11 @@ export function SiteHome() {
         
         <div className="space-y-6 max-w-2xl mb-12">
           <div className="flex items-center gap-3 text-[color:var(--color-fd-muted-foreground)] font-mono text-xs uppercase tracking-widest">
-            <span className="w-2 h-2 bg-[color:var(--site-foreground)] rounded-full animate-pulse opacity-50" />
+            <span className="size-2 rounded-full bg-[color:var(--site-foreground)] opacity-50 motion-safe:animate-pulse" />
             Discord bots without the downtime scare
           </div>
           
-          <h1 className="text-4xl sm:text-5xl font-medium tracking-tight text-[color:var(--site-foreground)] m-0 p-0 leading-tight">
+          <h1 className="m-0 p-0 text-[length:clamp(2.25rem,1.35rem+2.8vw,3.25rem)] font-medium leading-[1.1] tracking-tight text-[color:var(--site-foreground)]">
             Keep the gateway stable. <br />
             <span className="text-[color:var(--color-fd-muted-foreground)]">Move the rest independently.</span>
           </h1>
@@ -112,7 +112,7 @@ export function SiteHome() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-[color:var(--site-line)] border border-[color:var(--site-line)] rounded-sm overflow-hidden mb-12">
           {/* Quick Start pane */}
-          <div className="bg-[color:var(--site-background)] p-6 sm:p-8 flex flex-col">
+          <div className="flex flex-col bg-[color:var(--site-background)] p-6 sm:p-8 motion-safe:transition-transform motion-safe:duration-300 motion-safe:[transition-timing-function:cubic-bezier(0.25,1,0.5,1)] motion-safe:hover:-translate-y-0.5">
             <h2 className="text-sm font-mono text-[color:var(--site-foreground)] mb-4 flex items-center gap-2">
               <span className="text-[color:var(--color-fd-muted-foreground)]">01.</span> Install
             </h2>
@@ -126,16 +126,16 @@ export function SiteHome() {
             <div className="mt-auto pt-8 flex flex-col gap-3">
               <Link
                 href="/docs/tutorial/first-interaction"
-                className="inline-flex items-center text-sm font-medium text-[color:var(--site-foreground)] hover:text-[color:var(--color-fd-muted-foreground)] transition-colors"
+                className="group inline-flex min-h-11 items-center text-sm font-medium text-[color:var(--site-foreground)] transition-colors duration-200 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] hover:text-[color:var(--color-fd-muted-foreground)] focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--site-foreground)]"
               >
                 First slash command
-                <svg className="ml-2 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="ml-2 size-4 shrink-0 motion-safe:transition-transform motion-safe:duration-200 motion-safe:[transition-timing-function:cubic-bezier(0.25,1,0.5,1)] group-hover:translate-x-0.5" aria-hidden fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
               </Link>
               <Link
                 href="/docs/getting-started"
-                className="text-sm text-[color:var(--color-fd-muted-foreground)] hover:text-[color:var(--site-foreground)] transition-colors"
+                className="inline-flex min-h-11 items-center text-sm text-[color:var(--color-fd-muted-foreground)] transition-colors duration-200 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] hover:text-[color:var(--site-foreground)] focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--site-foreground)]"
               >
                 Or jump to Getting Started
               </Link>
@@ -143,7 +143,7 @@ export function SiteHome() {
           </div>
           
           {/* View Docs pane */}
-          <div className="bg-[color:var(--site-background)] p-6 sm:p-8 flex flex-col">
+          <div className="flex flex-col bg-[color:var(--site-background)] p-6 sm:p-8 motion-safe:transition-transform motion-safe:duration-300 motion-safe:[transition-timing-function:cubic-bezier(0.25,1,0.5,1)] motion-safe:hover:-translate-y-0.5">
             <h2 className="text-sm font-mono text-[color:var(--site-foreground)] mb-4 flex items-center gap-2">
               <span className="text-[color:var(--color-fd-muted-foreground)]">02.</span> Reference
             </h2>
@@ -153,7 +153,7 @@ export function SiteHome() {
             <div className="mt-auto">
               <Link 
                 href="/docs/reference" 
-                className="inline-flex items-center px-4 py-2 bg-[color:var(--site-foreground)] text-[color:var(--site-background)] text-sm font-medium hover:opacity-80 transition-opacity rounded-sm"
+                className="inline-flex min-h-11 items-center justify-center rounded-sm bg-[color:var(--site-foreground)] px-4 py-2 text-sm font-medium text-[color:var(--site-background)] transition-opacity duration-200 [transition-timing-function:cubic-bezier(0.25,1,0.5,1)] hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--site-foreground)]"
               >
                 Browse API Reference
               </Link>

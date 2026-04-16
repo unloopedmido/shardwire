@@ -3,8 +3,8 @@
 @import 'fumadocs-ui/css/preset.css';
 
 @theme inline {
-  --font-sans: var(--font-ibm-plex-sans);
-  --font-mono: var(--font-ibm-plex-mono);
+  --font-sans: var(--font-lexend);
+  --font-mono: var(--font-jetbrains-mono);
 }
 
 :root {
@@ -58,11 +58,23 @@ html {
   background-color: var(--site-background);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 body {
   background-color: var(--site-background);
   color: var(--site-foreground);
-  font-family: var(--font-ibm-plex-sans), sans-serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
   min-height: 100vh;
+}
+
+.dark body {
+  line-height: 1.58;
 }
 
 ::selection {

@@ -29,11 +29,11 @@ npm create shardwire -y --template minimal --no-install
 
 ## Templates
 
-| ID             | Contents                                                                  |
-| -------------- | ------------------------------------------------------------------------- |
-| **minimal**    | `tsx` + `src/bot.ts` / `src/app.ts` / `src/register.ts` — smallest bridge |
-| **react-vite** | Vite + React + `@shardwire/react`, `bot/bot.ts`, strict manifest          |
-| **workspace**  | npm workspaces: `packages/bot` + `packages/app`, shared root `.env`       |
+| ID             | Contents                                                                          |
+| -------------- | --------------------------------------------------------------------------------- |
+| **minimal**    | `tsx` + `src/bot.ts` / `src/app.ts` / `src/register.ts` — smallest bridge         |
+| **react-vite** | Vite + React + `@shardwire/react`, `src/index.css`, `bot/bot.ts`, strict manifest |
+| **workspace**  | npm workspaces: `packages/bot` + `packages/app`, shared root `.env`               |
 
 Published `shardwire` / `@shardwire/react` versions are pinned in the scaffold via `^2.0.0` / `^0.3.0` (see `src/run.ts`).
 
