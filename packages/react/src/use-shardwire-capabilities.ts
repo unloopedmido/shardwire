@@ -1,4 +1,4 @@
-import type { AppBridge, BridgeCapabilities } from 'shardwire';
+import type { AppBridge, BridgeCapabilities } from 'shardwire/client';
 import { useMemo } from 'react';
 
 /** Returns negotiated capabilities after the bridge reports `ready`, otherwise `null`. */

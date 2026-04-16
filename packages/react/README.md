@@ -10,6 +10,8 @@ This package **does not** ship React as a runtime dependency of `shardwire` core
 npm install @shardwire/react react shardwire
 ```
 
+Requires **`shardwire` ≥ 1.9.1** (provides the `shardwire/client` entry used by these hooks so Vite and other browser bundlers do not pull in `discord.js` / `zlib-sync`).
+
 ## Hooks
 
 - **`useShardwireBridge(options, ready?)`** — `connectBotBridge` on mount, `await ready(...)`, `close` on unmount. Memoize `options` (same URL/secret) to avoid unnecessary reconnects.
@@ -20,7 +22,7 @@ npm install @shardwire/react react shardwire
 
 ```tsx
 import { useMemo } from 'react';
-import { defineShardwireApp } from 'shardwire';
+import { defineShardwireApp } from 'shardwire/client';
 import { useShardwireBridge, useShardwireCapabilities, useShardwireEvent } from '@shardwire/react';
 
 const manifest = defineShardwireApp({

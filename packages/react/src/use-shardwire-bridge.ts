@@ -1,5 +1,5 @@
-import { connectBotBridge } from 'shardwire';
-import type { AppBridge, AppBridgeOptions, AppBridgeReadyOptions } from 'shardwire';
+import { connectBotBridge } from 'shardwire/client';
+import type { AppBridge, AppBridgeOptions, AppBridgeReadyOptions } from 'shardwire/client';
 import { useEffect, useRef, useState } from 'react';
 
 /**

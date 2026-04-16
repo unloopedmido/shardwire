@@ -30,4 +30,16 @@ description: "Work failures from connection and capability negotiation outward; 
 - compare manifest actions to scoped secret permissions
 - compare runtime subscriptions to declared manifest filters
 
+## Vite and zlib-sync
+
+Bundlers pre-bundle the main `shardwire` entry, which includes the bot runtime (`discord.js`). `discord.js` references the optional native module `zlib-sync`, which Vite cannot resolve for the browser (error text: `Failed to resolve import "zlib-sync"`).
+
+**Fix:** import app-side APIs from the dedicated client entry instead of the package root:
+
+```ts
+import { connectBotBridge, defineShardwireApp } from 'shardwire/client';
+```
+
+Keep `createBotBridge` imports on `shardwire` in **Node-only** bot processes. `@shardwire/react` resolves `shardwire/client` internally from `shardwire` **1.9.1+**.
+
 Treat troubleshooting as a capability audit first, not a transport guess.

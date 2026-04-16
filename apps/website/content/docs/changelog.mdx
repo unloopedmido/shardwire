@@ -15,6 +15,13 @@ This tab covers the **`shardwire`** npm package from **v1.0.0** onward. Earlier 
 
 npm: [`shardwire`](https://www.npmjs.com/package/shardwire)
 
+## 1.9.1
+
+Patch release for browser bundlers (Vite, and similar) that pre-bundle **`discord.js`** optional dependencies such as **`zlib-sync`**.
+
+- Added **`shardwire/client`** — same app bridge + DX + workflows + shared types as the root export, **without** the bot-side **`createBotBridge`** / **`discord.js`** graph.
+- **`BOT_INTENT_BITS` / `BotIntentName`:** derive intent names and bit values from **`discord-api-types`** **`GatewayIntentBits`** (aligned with **`discord.js`**) so catalog and diagnosis code do not need a **`discord.js`** import.
+
 ## 1.9.0
 
 Minor release focused on adoption documentation, diagnostics ergonomics, and an optional React companion package.
@@ -161,6 +168,11 @@ Patch release focused on reliability and docs after the docs-site / monorepo mig
 This tab covers the **`@shardwire/react`** npm package. It versions **independently** from **`shardwire`**; check **`peerDependencies`** on each release for the required **`shardwire`** range.
 
 npm: [`@shardwire/react`](https://www.npmjs.com/package/@shardwire/react)
+
+## 0.1.1
+
+- Hooks now import **`shardwire/client`** so Vite/browser builds avoid **`discord.js`** / **`zlib-sync`** resolution errors.
+- **Peer dependency:** **`shardwire`** `>= 1.9.1` (required for the **`shardwire/client`** export).
 
 ## 0.1.0
 

@@ -4,9 +4,9 @@ import type {
 	APIComponentInMessageActionRow,
 	APIEmbed,
 	APITextInputComponent,
+	GatewayIntentBits,
 	Snowflake,
 } from 'discord-api-types/v10';
-import type { GatewayIntentBits } from 'discord.js';
 import { withErrorDocsLink } from '../utils/docs-links';
 
 /**
