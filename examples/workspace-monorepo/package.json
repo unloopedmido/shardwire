@@ -1,0 +1,17 @@
+{
+	"name": "shardwire-workspace-example",
+	"private": true,
+	"type": "module",
+	"engines": {
+		"node": ">=22.0.0"
+	},
+	"workspaces": [
+		"packages/bot",
+		"packages/app"
+	],
+	"scripts": {
+		"bot": "npm run start -w @example/shardwire-workspace-bot",
+		"app": "npm run start -w @example/shardwire-workspace-app",
+		"register": "npm run register -w @example/shardwire-workspace-bot"
+	}
+}

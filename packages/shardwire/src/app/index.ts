@@ -97,7 +97,16 @@ function metricsExtrasFromActionError(error: ActionError): {
 export function connectBotBridge(options: AppBridgeOptions): AppBridge {
 	assertAppBridgeOptions(options);
 
-	const logger = withLogger(options.logger);
+	const logger = withLogger(
+		options.debug && options.logger?.debug === undefined
+			? {
+					...options.logger,
+					debug: (message, context) => {
+						console.debug(`[shardwire] ${message}`, context ?? '');
+					},
+				}
+			: options.logger,
+	);
 	const metrics = options.metrics;
 	const reconnectEnabled = options.reconnect?.enabled ?? true;
 	const initialDelayMs = options.reconnect?.initialDelayMs ?? 500;
@@ -292,6 +301,7 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
 			currentCapabilities = { events: [], actions: [] };
 			capabilityError = null;
 
+			logger.debug('WebSocket open; sending auth.hello', { url: options.url });
 			sendRaw(
 				stringifyEnvelope(
 					makeEnvelope('auth.hello', {
@@ -320,6 +330,10 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
 						isAuthed = true;
 						currentConnectionId = payload.connectionId;
 						currentCapabilities = payload.capabilities;
+						logger.debug('auth.ok; bridge authenticated', {
+							connectionId: payload.connectionId,
+							capabilities: payload.capabilities,
+						});
 						syncSubscriptions();
 						resolveConnect();
 						break;

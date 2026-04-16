@@ -27,6 +27,8 @@ Before generating or refactoring code, **read the current signatures and types**
 | Changelog (hub) | https://shardwire.js.org/docs/changelog/ |
 | Changelog — `shardwire` | https://shardwire.js.org/docs/changelog/shardwire/ |
 | Changelog — `@shardwire/react` | https://shardwire.js.org/docs/changelog/react/ |
+| Changelog — `create-shardwire` | https://shardwire.js.org/docs/changelog/create-shardwire/ |
+| Scaffold (`npm create shardwire`) | https://shardwire.js.org/docs/getting-started/ (see “Choose your path”) |
 
 Per-symbol pages follow `https://shardwire.js.org/docs/reference/<section>/<kebab-case-name>/` (e.g. `bridge-apis`, `contracts-and-diagnostics`, `action-models`, `event-and-data-models`, `errors-and-failures`).
 

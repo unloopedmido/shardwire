@@ -1,15 +1,22 @@
 ---
 title: 'Getting started'
-description: 'The fastest way to see Shardwire working: clone the minimal example, set two secrets, run two commands.'
+description: 'The fastest way to see Shardwire working: scaffold or clone an example, set two secrets, run two commands.'
 ---
 
-You are **two small scripts** away from a working bot: one starts **The Connection** on the bot side, the other connects your **app** and listens for events.
+You are **two small programs** away from a working bot: one starts **The Connection** on the bot side, the other connects your **app** and listens for events.
 
-<Callout type="info" title="Fastest path (today)">
+## Choose your path
 
-There is no `npx create-shardwire` template yet. The quickest win is the official **minimal-bridge** example in the repo: clone, `npm install`, add a `.env`, run **`npm run bot`** and **`npm run app`** in two terminals.
+| Path | Best for | How |
+| --- | --- | --- |
+| **`npm create shardwire`** | New project outside this repo; uses **`shardwire` from npm** | Run **`npm create shardwire`** (or **`npm create shardwire my-app`**), then follow the printed steps |
+| **minimal-bridge** | Smallest Node-only example inside the monorepo | [**minimal-bridge on GitHub**](https://github.com/unloopedmido/shardwire/tree/main/examples/minimal-bridge) |
+| **React + Vite** | Browser dashboard / UI with **`@shardwire/react`** | [**react-vite-dashboard**](https://github.com/unloopedmido/shardwire/tree/main/examples/react-vite-dashboard) |
+| **npm workspaces** | `packages/bot` + `packages/app` with one root **`.env`** | [**workspace-monorepo**](https://github.com/unloopedmido/shardwire/tree/main/examples/workspace-monorepo) |
 
-[**Open minimal-bridge on GitHub →**](https://github.com/unloopedmido/shardwire/tree/main/examples/minimal-bridge)
+<Callout type="info" title="Scaffold from npm">
+
+**`npm create shardwire`** drops a minimal **bot + app** project (same idea as **minimal-bridge**). After install, copy **`.env.example`** to **`.env`**, set **`DISCORD_TOKEN`** and **`SHARDWIRE_SECRET`**, then run **`npm run bot`** and **`npm run app`** in two terminals.
 
 </Callout>
 
@@ -22,7 +29,7 @@ There is no `npx create-shardwire` template yet. The quickest win is the officia
 
 <Step>
 
-Create a `.env` next to the example with **`DISCORD_TOKEN`** and **`SHARDWIRE_SECRET`** (same secret in both processes).
+Create a `.env` next to the example (or scaffold) with **`DISCORD_TOKEN`** and **`SHARDWIRE_SECRET`** (same secret in both processes). For **Vite** examples, also set **`VITE_SHARDWIRE_SECRET`** to the **same** value — see [**Connection and authentication**](/docs/troubleshooting#connection-and-auth-errors) if the app cannot connect.
 
 </Step>
 
@@ -34,11 +41,17 @@ Run **`npm run bot`** — this starts the **bot bridge** (Discord + bridge serve
 
 <Step>
 
-Run **`npm run app`** — this connects your **app** over **The Connection** and logs incoming messages.
+Run **`npm run app`** (or **`npm run dev`** for Vite) — this connects your **app** over **The Connection** and subscribes to events.
 
 </Step>
 
 </Steps>
+
+## Common mistakes (quick checks)
+
+- **Secret mismatch** — the string in **`server.secrets`** (bot) must equal **`secret`** (app). For Vite, **`VITE_SHARDWIRE_SECRET`** must match **`SHARDWIRE_SECRET`**. See [**Connection and authentication**](/docs/troubleshooting#connection-and-auth-errors).
+- **Wrong URL** — path is usually **`/shardwire`**; loopback **`ws://`** vs remote **`wss://`**. See [**App URL protocol**](/docs/troubleshooting#app-url-protocol) and [**Non-loopback requires wss**](/docs/troubleshooting#app-wss-required).
+- **Bot not running first** — start the bot process before the app. See [**Connection and authentication**](/docs/troubleshooting#connection-and-auth-errors).
 
 ## The two tiny programs
 
@@ -77,9 +90,9 @@ In **Vite / browser** bundles, always import from **`shardwire/client`** so the 
 
 ## What “good” looks like
 
-- The bot terminal prints that the bridge is ready.
-- The app terminal prints **capabilities** (what events and actions you can use).
-- Sending a message your bot can see shows up in the app logs.
+- The bot terminal prints that the bridge is ready (`bot bridge ready` in official examples).
+- The app terminal prints **capabilities** (what events and actions you can use), or the Vite page shows **ready** with capabilities JSON.
+- Sending a message your bot can see shows up in the app logs (or UI).
 
 ## Deep dives (Reference)
 

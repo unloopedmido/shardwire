@@ -7,10 +7,17 @@
 
 Shardwire is a Discord-first bridge for running Discord gateway/runtime in one process while app logic runs in another.
 
-## Repository Layout
+## Repository layout
 
-- package source: `packages/shardwire`
-- docs website: `apps/website`
+| Path | Role |
+| --- | --- |
+| [`packages/shardwire`](./packages/shardwire/) | Core library: `createBotBridge`, `connectBotBridge`, diagnostics |
+| [`packages/react`](./packages/react/) | Optional `@shardwire/react` hooks for browser app processes |
+| [`packages/create-shardwire`](./packages/create-shardwire/) | `npm create shardwire` scaffold (published separately) |
+| [`apps/website`](./apps/website/) | Documentation site ([shardwire.js.org](https://shardwire.js.org/)) |
+| [`examples/minimal-bridge`](./examples/minimal-bridge/) | Smallest Node bot + app sample |
+| [`examples/react-vite-dashboard`](./examples/react-vite-dashboard/) | Vite + React + `@shardwire/react` |
+| [`examples/workspace-monorepo`](./examples/workspace-monorepo/) | npm workspaces: `packages/bot` + `packages/app` |
 
 ## Documentation
 
@@ -22,7 +29,13 @@ Shardwire is a Discord-first bridge for running Discord gateway/runtime in one p
 npm install shardwire
 ```
 
-## Local Development (Monorepo Root)
+Quick scaffold (uses npm packages, not this monorepo):
+
+```bash
+npm create shardwire
+```
+
+## Local development (monorepo root)
 
 ```bash
 npm install
@@ -30,7 +43,11 @@ npm run pkg:verify
 npm run docs:dev
 ```
 
-## Conceptual Flow
+- **`pkg:verify`** — lint, test, and build `shardwire` + `@shardwire/react`
+- **`docs:dev`** — run the docs site locally
+- Examples under **`examples/`** use `file:../../packages/shardwire` — run **`npm run pkg:build`** before **`npm install`** inside an example
+
+## Conceptual flow
 
 1. Start bot side with `createBotBridge(...)`
 2. Connect app side with `connectBotBridge(...)`

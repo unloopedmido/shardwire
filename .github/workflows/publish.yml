@@ -8,6 +8,7 @@ on:
     paths:
       - packages/shardwire/package.json
       - packages/react/package.json
+      - packages/create-shardwire/package.json
       - .github/workflows/publish.yml
 
 concurrency:
@@ -98,8 +99,43 @@ jobs:
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
           echo "reason=${REASON}" >> "$GITHUB_OUTPUT"
 
+      - name: Detect create-shardwire version bump
+        id: create_shardwire
+        run: |
+          set -euo pipefail
+          NEW=$(node -p "require('./packages/create-shardwire/package.json').version")
+          TAG="create-shardwire-v${NEW}"
+          if ! git rev-parse HEAD~1 >/dev/null 2>&1; then
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            echo "No parent commit; skipping create-shardwire."
+            exit 0
+          fi
+          if ! git cat-file -e HEAD~1:packages/create-shardwire/package.json 2>/dev/null; then
+            REASON="packages/create-shardwire/package.json newly added on HEAD"
+          else
+            OLD=$(git show HEAD~1:packages/create-shardwire/package.json | node -p "JSON.parse(require('fs').readFileSync(0,'utf8')).version")
+            if [ "$OLD" != "$NEW" ]; then
+              REASON="create-shardwire package.json version ${OLD} -> ${NEW}"
+            elif git ls-remote --tags origin "refs/tags/${TAG}" | grep -q .; then
+              echo "publish=false" >> "$GITHUB_OUTPUT"
+              echo "create-shardwire package.json version unchanged ($NEW) and tag ${TAG} exists on remote; skipping."
+              exit 0
+            else
+              REASON="create-shardwire package.json version unchanged ($NEW) but tag ${TAG} missing on remote (initial publish or retry)"
+            fi
+          fi
+          if git ls-remote --tags origin "refs/tags/${TAG}" | grep -q .; then
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            echo "Tag ${TAG} already exists on remote; skipping create-shardwire (${REASON})."
+            exit 0
+          fi
+          echo "publish=true" >> "$GITHUB_OUTPUT"
+          echo "version=${NEW}" >> "$GITHUB_OUTPUT"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "reason=${REASON}" >> "$GITHUB_OUTPUT"
+
       - name: Set up Node.js
-        if: steps.shardwire.outputs.publish == 'true' || steps.react.outputs.publish == 'true'
+        if: steps.shardwire.outputs.publish == 'true' || steps.react.outputs.publish == 'true' || steps.create_shardwire.outputs.publish == 'true'
         uses: actions/setup-node@v6
         with:
           node-version: 24
@@ -107,12 +143,12 @@ jobs:
           registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
-        if: steps.shardwire.outputs.publish == 'true' || steps.react.outputs.publish == 'true'
+        if: steps.shardwire.outputs.publish == 'true' || steps.react.outputs.publish == 'true' || steps.create_shardwire.outputs.publish == 'true'
         run: npm ci
 
       - name: Run verification
-        if: steps.shardwire.outputs.publish == 'true' || steps.react.outputs.publish == 'true'
-        run: npm run pkg:verify
+        if: steps.shardwire.outputs.publish == 'true' || steps.react.outputs.publish == 'true' || steps.create_shardwire.outputs.publish == 'true'
+        run: npm run verify
 
       - name: Push shardwire version tag
         if: steps.shardwire.outputs.publish == 'true'
@@ -137,3 +173,15 @@ jobs:
       - name: Publish @shardwire/react to npm
         if: steps.react.outputs.publish == 'true'
         run: npm publish -w '@shardwire/react' --provenance --access public
+
+      - name: Push create-shardwire version tag
+        if: steps.create_shardwire.outputs.publish == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag "${{ steps.create_shardwire.outputs.tag }}"
+          git push origin "refs/tags/${{ steps.create_shardwire.outputs.tag }}"
+
+      - name: Publish create-shardwire to npm
+        if: steps.create_shardwire.outputs.publish == 'true'
+        run: npm publish -w create-shardwire --provenance --access public

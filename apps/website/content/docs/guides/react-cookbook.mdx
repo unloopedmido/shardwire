@@ -1,0 +1,28 @@
+---
+title: 'React cookbook'
+description: 'Patterns for @shardwire/react: connection lifecycle, strict manifests, and avoiding unnecessary reconnects.'
+---
+
+This guide assumes you already followed [**Getting started**](/docs/getting-started) and use **`shardwire/client`** (not the `shardwire` root import) in the browser bundle.
+
+## Connection state
+
+`useShardwire()` returns a **discriminated union**: `connecting` → `ready` | `error`. Render UI from `status` before calling `useShardwireListener` or using `app.actions`.
+
+## Strict `ready` and manifests
+
+With **`ready={{ strict: true, manifest, botIntents }}`**, the manifest must list every built-in **event** and **action** you rely on, and **`botIntents`** must cover catalog **required intents** for those events. If startup fails, use **`diagnoseShardwireApp`** and **`formatShardwireDiagnosis`** from **`shardwire/client`** (see [**Strict startup failed**](/docs/troubleshooting#strict-startup-failed)).
+
+## Reconnects and `logger`
+
+`useShardwireConnection` **reconnects** when connection-affecting fields of **`options`** change (URL, secret, app name, etc.). The **`logger`** callback identity is **ignored** for that comparison so inline `logger: { debug: () => ... }` does not thrash connections. To swap loggers intentionally, **remount** the hook or set a parent **`key`**.
+
+## Filters and `useShardwireListener`
+
+Inline filter objects are **fingerprinted** so `{ guildId }` does not resubscribe every render. Still declare filter keys in **`defineShardwireApp`** under **`filters`** when using **`ready.strict`** — see [**Filters for an event not listed**](/docs/troubleshooting#manifest-filter-event-not-listed) and [**Strict startup failed**](/docs/troubleshooting#strict-startup-failed).
+
+## Further reading
+
+- **`@shardwire/react`** on npm — see the package README for **`ShardwireProvider`**, **`useShardwire`**, and **`useShardwireListener`**
+- [**Troubleshooting → Vite**](/docs/troubleshooting#vite-and-zlib-sync)
+- [**`connectBotBridge`**](/docs/reference/bridge-apis/connect-bot-bridge/)

@@ -24,6 +24,11 @@ export interface AppBridgeOptions {
 		jitter?: boolean;
 	};
 	requestTimeoutMs?: number;
+	/**
+	 * When true, enables **debug** logging for the connection handshake (WebSocket open, auth, negotiated capabilities)
+	 * if you did not supply a custom {@link ShardwireLogger.debug} implementation. Uses `console.debug` with a `[shardwire]` prefix.
+	 */
+	debug?: boolean;
 	logger?: ShardwireLogger;
 	metrics?: AppBridgeMetricsHooks;
 }

@@ -190,6 +190,9 @@ export function assertAppBridgeOptions(options: AppBridgeOptions): void {
 	if (options.appName !== undefined && !isNonEmptyString(options.appName)) {
 		throw new Error(withErrorDocsLink('App bridge option `appName` must be a non-empty string.', 'app-name-invalid'));
 	}
+	if (options.debug !== undefined && typeof options.debug !== 'boolean') {
+		throw new TypeError('App bridge option `debug` must be a boolean when provided.');
+	}
 	if (options.requestTimeoutMs !== undefined) {
 		assertPositiveNumber('requestTimeoutMs', options.requestTimeoutMs);
 	}

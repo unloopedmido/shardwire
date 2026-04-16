@@ -11,7 +11,7 @@
 	],
 	"scripts": {
 		"build": "npm run -w shardwire build && npm run -w @shardwire/react build && npm run -w website build",
-		"verify": "npm run -w shardwire verify && npm run -w @shardwire/react typecheck && npm run -w @shardwire/react test && npm run -w @shardwire/react build && npm run -w website build",
+		"verify": "npm run -w shardwire verify && npm run -w @shardwire/react typecheck && npm run -w @shardwire/react test && npm run -w @shardwire/react build && npm run -w create-shardwire verify && npm run -w website build",
 		"docs:dev": "npm run -w website dev",
 		"docs:build": "npm run -w website build",
 		"docs:preview": "npm run -w website preview",

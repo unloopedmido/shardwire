@@ -10,9 +10,14 @@ import type {
 	ShardwireAppManifest,
 	ShardwireSubscriptionFilterKey,
 } from '../discord/types';
+import { docsErrorLink } from '../utils/docs-links';
 import { generateSecretScope } from './app-manifest';
 
 const KNOWN_FILTER_KEY_SET = new Set<string>(SUBSCRIPTION_FILTER_KEYS);
+
+function remediationWithDocs(remediation: string, troubleshootingAnchor: string): string {
+	return `${remediation} See: ${docsErrorLink(troubleshootingAnchor)}`;
+}
 
 /**
  * For each built-in event, subscription-filter keys that the bridge’s `eventMetadata` may supply when matching handlers.
@@ -180,7 +185,10 @@ export function diagnoseShardwireApp(
 				category: 'intent',
 				message:
 					'Strict startup: manifest events require gateway intents; pass `botIntents` matching `createBotBridge({ intents })`.',
-				remediation: 'Call `app.ready({ strict: true, manifest, botIntents: [...] })`.',
+				remediation: remediationWithDocs(
+					'Call `app.ready({ strict: true, manifest, botIntents: [...] })`.',
+					'strict-startup-failed',
+				),
 				context: { requiredIntents },
 			});
 		} else {
@@ -190,7 +198,10 @@ export function diagnoseShardwireApp(
 				category: 'intent',
 				message:
 					'Manifest events require gateway intents; `botIntents` was not provided so intent coverage could not be checked.',
-				remediation: 'Pass `botIntents` into `diagnoseShardwireApp` to verify intents.',
+				remediation: remediationWithDocs(
+					'Pass `botIntents` into `diagnoseShardwireApp` to verify intents.',
+					'strict-startup-failed',
+				),
 				context: { requiredIntents },
 			});
 		}
@@ -203,7 +214,10 @@ export function diagnoseShardwireApp(
 					code: 'missing_intent',
 					category: 'intent',
 					message: `Gateway intent "${intent}" is required for manifest events but is not enabled on the bot bridge.`,
-					remediation: `Add "${intent}" to \`createBotBridge({ intents: [...] })\`.`,
+					remediation: remediationWithDocs(
+						`Add "${intent}" to \`createBotBridge({ intents: [...] })\`.`,
+						'bot-intents-required',
+					),
 					context: { intent, requiredIntents },
 				});
 			}
@@ -217,8 +231,10 @@ export function diagnoseShardwireApp(
 				code: 'missing_event_capability',
 				category: 'secret_scope',
 				message: `Negotiated capabilities do not include required event "${ev}".`,
-				remediation:
+				remediation: remediationWithDocs(
 					'Widen scoped secret `allow.events` and/or bot gateway intents so this event is produced and allowed.',
+					'capability-not-available',
+				),
 				context: { event: ev },
 			});
 		}
@@ -231,7 +247,10 @@ export function diagnoseShardwireApp(
 				code: 'missing_action_capability',
 				category: 'action',
 				message: `Action "${act}" is declared by the manifest but is not in negotiated capabilities; it cannot succeed in this configuration.`,
-				remediation: 'Include this action in scoped secret `allow.actions` (or use a full-access secret).',
+				remediation: remediationWithDocs(
+					'Include this action in scoped secret `allow.actions` (or use a full-access secret).',
+					'capability-not-available',
+				),
 				context: { action: act },
 			});
 		}
@@ -350,8 +369,10 @@ export function diagnoseShardwireApp(
 					code: 'missing_event_capability',
 					category: 'subscription',
 					message: `Handler is registered for \`${sub.name}\` (\`app.on('${sub.name}', ...)\`), but negotiated bridge capabilities do not include that event, so it will never receive payloads. Negotiated events: ${negotiatedEventsQuoted}.`,
-					remediation:
+					remediation: remediationWithDocs(
 						'Widen `createBotBridge({ intents })` and/or the scoped secret `allow.events` until this event is negotiated, or remove the handler.',
+						'capability-not-available',
+					),
 					context: {
 						subscribedEvent: sub.name,
 						event: sub.name,

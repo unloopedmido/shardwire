@@ -121,6 +121,10 @@ export function Controller() {
 }
 ```
 
+## Docs
+
+- [**React cookbook**](https://shardwire.js.org/docs/guides/react-cookbook/) — strict manifests, reconnect behavior, filters with `useShardwireListener`
+
 ## Scope
 
 Hooks wrap **built-in** Shardwire events/actions only. For app-specific RPC or shared player state, use a **second channel** (HTTP/Redis/WebSocket) next to Shardwire — see [**How it works**](https://shardwire.js.org/docs/concepts/how-it-works/) for the bridge model and [**Reference**](https://shardwire.js.org/docs/reference/) for the supported surface.

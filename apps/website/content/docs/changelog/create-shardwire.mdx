@@ -1,0 +1,14 @@
+---
+title: 'create-shardwire'
+description: Release history for the create-shardwire npm package (scaffold CLI).
+---
+
+This page lists releases for the **`create-shardwire`** package (`npm create shardwire`).
+
+npm: [`create-shardwire`](https://www.npmjs.com/package/create-shardwire) · Core library: [**shardwire**](/docs/changelog/shardwire).
+
+## 1.0.1
+
+- **CI:** GitHub Actions runs the full monorepo **`npm run verify`** (shardwire, **@shardwire/react**, **create-shardwire**, website) on push and pull requests.
+- **Publish:** Bumps to **`packages/create-shardwire/package.json`** can trigger npm publish with git tag **`create-shardwire-v<version>`** (same provenance pattern as **shardwire** / **@shardwire/react**).
+- **CLI:** TypeScript bundle with **@clack/prompts**; templates **minimal** (tsx), **react-vite**, and **workspace**; path-aware targets and **`validate-npm-package-name`** validation.

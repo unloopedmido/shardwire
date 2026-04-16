@@ -1,0 +1,29 @@
+{
+	"name": "shardwire-react-vite-example",
+	"private": true,
+	"type": "module",
+	"engines": {
+		"node": ">=22.0.0"
+	},
+	"scripts": {
+		"bot": "node bot/bot.js",
+		"dev": "vite",
+		"build": "vite build",
+		"preview": "vite preview",
+		"register": "node register.mjs"
+	},
+	"dependencies": {
+		"@shardwire/react": "file:../../packages/react",
+		"dotenv": "^16.4.7",
+		"react": "^19.2.3",
+		"react-dom": "^19.2.3",
+		"shardwire": "file:../../packages/shardwire"
+	},
+	"devDependencies": {
+		"@types/react": "^19.2.7",
+		"@types/react-dom": "^19.2.3",
+		"@vitejs/plugin-react": "^4.3.4",
+		"typescript": "^6.0.2",
+		"vite": "^6.0.0"
+	}
+}
