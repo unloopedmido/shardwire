@@ -5,3 +5,4 @@ packages/shardwire/dist
 packages/react/dist
 packages/shardwire/coverage
 .vscode
+.cursor
