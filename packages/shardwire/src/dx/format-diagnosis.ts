@@ -96,5 +96,10 @@ export function formatShardwireDiagnosis(
 		lines.push('');
 	}
 
-	return lines.join('\n').replace(/\n+$/, '');
+	const body = lines.join('\n');
+	let end = body.length;
+	while (end > 0 && body.charCodeAt(end - 1) === 10) {
+		end -= 1;
+	}
+	return body.slice(0, end);
 }
