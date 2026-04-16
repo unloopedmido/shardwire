@@ -1,6 +1,6 @@
 {
 	"name": "shardwire",
-	"version": "1.9.1",
+	"version": "1.9.2",
 	"description": "Discord-first bridge between a bot process and external apps over WebSocket.",
 	"homepage": "https://shardwire.js.org/",
 	"repository": {

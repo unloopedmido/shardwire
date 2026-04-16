@@ -10,7 +10,7 @@ This package **does not** ship React as a runtime dependency of `shardwire` core
 npm install @shardwire/react react shardwire
 ```
 
-Requires **`shardwire` ≥ 1.9.1** (provides the `shardwire/client` entry used by these hooks so Vite and other browser bundlers do not pull in `discord.js` / `zlib-sync`).
+Requires **`shardwire` ≥ 1.9.2** (provides `shardwire/client` without `discord.js`, and uses native `WebSocket` in the browser instead of the `ws` package shim).
 
 ## Hooks
 

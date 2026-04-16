@@ -15,6 +15,14 @@ This tab covers the **`shardwire`** npm package from **v1.0.0** onward. Earlier 
 
 npm: [`shardwire`](https://www.npmjs.com/package/shardwire)
 
+## 1.9.2
+
+Patch release for **browser and Vite** app bridges.
+
+- **`connectBotBridge`** now uses **`globalThis.WebSocket`** (WHATWG) instead of importing the **`ws`** package, so client bundles no longer hit broken `ws` browser shims (`WebSocket is not a constructor`).
+- **Node.js 18–21** (no global `WebSocket`): polyfill `globalThis.WebSocket` from **`ws`** before connecting, or run the app process on **Node 22+** — see [Troubleshooting](https://shardwire.js.org/docs/operations/troubleshooting/#nodejs-below-22-connectbotbridge-requires-globalthiswebsocket).
+- Declaration emit: replaced **`NodeJS.Timeout`** / interval types with **`ReturnType<typeof setTimeout>`** / **`setInterval`** where needed so **`shardwire/client`** `.d.ts` builds cleanly.
+
 ## 1.9.1
 
 Patch release for browser bundlers (Vite, and similar) that pre-bundle **`discord.js`** optional dependencies such as **`zlib-sync`**.
@@ -168,6 +176,10 @@ Patch release focused on reliability and docs after the docs-site / monorepo mig
 This tab covers the **`@shardwire/react`** npm package. It versions **independently** from **`shardwire`**; check **`peerDependencies`** on each release for the required **`shardwire`** range.
 
 npm: [`@shardwire/react`](https://www.npmjs.com/package/@shardwire/react)
+
+## 0.1.2
+
+- **Peer dependency:** **`shardwire`** `>= 1.9.2` (native **`WebSocket`** in browser app bridges; see **`shardwire` 1.9.2** changelog).
 
 ## 0.1.1
 
