@@ -21,7 +21,7 @@ await bridge.ready();`;
 
 const appCode = `import { connectBotBridge } from 'shardwire/client';
 
-// 2. App process: WebSocket client + typed subscriptions
+// 2. App process: The Connection + typed subscriptions
 const app = connectBotBridge({
   url: 'ws://127.0.0.1:3001/shardwire',
   secret: process.env.SHARDWIRE_SECRET!,
@@ -97,7 +97,7 @@ export function SiteHome() {
         <div className="space-y-6 max-w-2xl mb-12">
           <div className="flex items-center gap-3 text-[color:var(--color-fd-muted-foreground)] font-mono text-xs uppercase tracking-widest">
             <span className="w-2 h-2 bg-[color:var(--site-foreground)] rounded-full animate-pulse opacity-50" />
-            Runtime Separation for Discord
+            Discord bots without the downtime scare
           </div>
           
           <h1 className="text-4xl sm:text-5xl font-medium tracking-tight text-[color:var(--site-foreground)] m-0 p-0 leading-tight">
@@ -106,7 +106,7 @@ export function SiteHome() {
           </h1>
           
           <p className="text-base text-[color:var(--color-fd-muted-foreground)] leading-relaxed max-w-xl">
-            Shardwire splits Discord event runtime from the app code that consumes it. A TypeScript-first bridge with scoped secrets, strict startup contracts, and generated reference docs.
+            Shardwire keeps your Discord connection running while you restart or deploy your code. Hot-reload app logic, typed events and actions, and browse the full API in Reference when you need the details.
           </p>
         </div>
 
@@ -125,10 +125,10 @@ export function SiteHome() {
             
             <div className="mt-auto pt-8 flex flex-col gap-3">
               <Link
-                href="/docs/tutorial/lesson-0-overview"
+                href="/docs/tutorial/first-interaction"
                 className="inline-flex items-center text-sm font-medium text-[color:var(--site-foreground)] hover:text-[color:var(--color-fd-muted-foreground)] transition-colors"
               >
-                Start the tutorial
+                First slash command
                 <svg className="ml-2 w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
@@ -162,7 +162,7 @@ export function SiteHome() {
         </div>
 
         {/* Code Example Section */}
-        <TerminalWindow title="Split Architecture Example">
+        <TerminalWindow title="Bot + app (The Connection)">
           <div className="grid grid-cols-1 md:grid-cols-2 divide-x divide-[color:var(--site-line)] divide-y md:divide-y-0">
             <div className="p-6 overflow-x-auto bg-[color:var(--site-background)]">
               <SyntaxCodeBlock code={botCode} filename="bot-process.ts" />
@@ -185,24 +185,26 @@ export function SiteHome() {
         </h2>
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row gap-12 border-x border-[color:var(--site-line)] px-6">
           <div className="flex-1">
-             <div className="font-mono text-[10px] text-[color:var(--color-fd-muted-foreground)] uppercase tracking-widest mb-3">Architecture</div>
-             <h3 className="text-[color:var(--site-foreground)] font-medium mb-2">Bridge-first Design</h3>
+             <div className="font-mono text-[10px] text-[color:var(--color-fd-muted-foreground)] uppercase tracking-widest mb-3">Mental model</div>
+             <h3 className="text-[color:var(--site-foreground)] font-medium mb-2">Body + brain</h3>
              <p className="text-sm text-[color:var(--color-fd-muted-foreground)] leading-relaxed">
-               The docs start with the runtime split itself: what moves to the bot process, what stays in your app process, and where capabilities are negotiated.
+               The bot bridge (body) holds Discord. Your app (brain) connects over The Connection—restart the app without dropping the gateway.
              </p>
           </div>
           <div className="flex-1">
-             <div className="font-mono text-[10px] text-[color:var(--color-fd-muted-foreground)] uppercase tracking-widest mb-3">Operations</div>
-             <h3 className="text-[color:var(--site-foreground)] font-medium mb-2">Built for Production</h3>
+             <div className="font-mono text-[10px] text-[color:var(--color-fd-muted-foreground)] uppercase tracking-widest mb-3">Running your bot</div>
+             <h3 className="text-[color:var(--site-foreground)] font-medium mb-2">Ship it</h3>
              <p className="text-sm text-[color:var(--color-fd-muted-foreground)] leading-relaxed">
-               Deployment, diagnostics, scoped-secret safety, and troubleshooting live alongside API docs instead of as an afterthought.
+               <Link href="/docs/guides/keeping-it-alive" className="underline underline-offset-2">Keeping it alive</Link> covers hosts like Railway and Render;{' '}
+               <Link href="/docs/troubleshooting" className="underline underline-offset-2">Troubleshooting</Link> helps when errors include doc links.
              </p>
           </div>
           <div className="flex-1">
-             <div className="font-mono text-[10px] text-[color:var(--color-fd-muted-foreground)] uppercase tracking-widest mb-3">Guarantees</div>
-             <h3 className="text-[color:var(--site-foreground)] font-medium mb-2">Strict Startup</h3>
+             <div className="font-mono text-[10px] text-[color:var(--color-fd-muted-foreground)] uppercase tracking-widest mb-3">When you grow</div>
+             <h3 className="text-[color:var(--site-foreground)] font-medium mb-2">Strict checks</h3>
              <p className="text-sm text-[color:var(--color-fd-muted-foreground)] leading-relaxed">
-               Strict startup turns mismatches into startup failures instead of silent drift. Mismatched intents break instantly, not at runtime.
+               Optional strict startup catches intent and manifest mismatches early—see{' '}
+               <Link href="/docs/reference" className="underline underline-offset-2">Reference</Link> for defineShardwireApp and diagnostics.
              </p>
           </div>
         </div>

@@ -1,0 +1,96 @@
+---
+title: 'Your first slash command'
+description: 'Register a /hello command, reply from the app, then change the text and restart only the app—no gateway reconnect.'
+---
+
+This guide matches the [**minimal-bridge**](https://github.com/unloopedmido/shardwire/tree/main/examples/minimal-bridge) example when you pull the latest repo: a tiny **register** script plus an **`interactionCreate`** handler.
+
+<Callout type="info" title="What you will feel">
+
+After this works, change the reply string in **`src/app.js`**, save, and **restart only `npm run app`**. The slash response updates **without** the long “bot is starting…” pause—because **The Connection** and Discord gateway stayed up in the **bot** terminal.
+
+</Callout>
+
+## Prerequisites
+
+- Finished [**Getting started**](/docs/getting-started) (bot + app running).
+- **Node.js 22+**.
+- A **Discord Application ID** (same as your bot’s application) and a **guild id** where you can install the bot (guild commands appear instantly for testing).
+
+Add to your `.env`:
+
+- **`DISCORD_APPLICATION_ID`** — Developer Portal → your app → **Application ID**.
+- **`DISCORD_GUILD_ID`** — Server ID (enable Developer Mode → right‑click server → Copy ID).
+
+<Callout type="warn" title="Slash commands and registration">
+
+Shardwire delivers **`interactionCreate`** and interaction **actions** over **The Connection**. **Registering** the slash command with Discord is a **separate one-time step** (Discord REST API). That keeps your command list explicit and versioned—see [`replyToInteraction`](/docs/reference/action-models/reply-to-interaction-action-payload/).
+
+</Callout>
+
+<Steps>
+
+<Step>
+
+Keep **`npm run bot`** running in **terminal A**.
+
+</Step>
+
+<Step>
+
+Run **`npm run register`** once (from the example). This creates a **`/hello`** command in your test guild.
+
+</Step>
+
+<Step>
+
+Run **`npm run app`** in **terminal B** (or restart it after edits).
+
+</Step>
+
+<Step>
+
+In Discord, type **`/hello`**. You should see **`Hello from Shardwire!`** (or whatever string you put in code).
+
+</Step>
+
+<Step>
+
+Edit the reply text in **`src/app.js`**, save, **restart only terminal B**. Run **`/hello`** again—the new text appears **without** restarting the bot process.
+
+</Step>
+
+</Steps>
+
+## What the app code is doing
+
+You listen for **`interactionCreate`**, check for a **slash** interaction (**`chatInput`**) and your command name, then call **`replyToInteraction`**. Always branch on **`result.ok`**:
+
+```ts
+app.on('interactionCreate', async ({ interaction }) => {
+  if (interaction.kind !== 'chatInput' || interaction.commandName !== 'hello') return;
+
+  const result = await app.actions.replyToInteraction({
+    interactionId: interaction.id,
+    content: 'Hello from Shardwire!',
+  });
+
+  if (!result.ok) {
+    console.error(result.error.code, result.error.message);
+  }
+});
+```
+
+<Callout type="tip" title="Nothing happens?">
+
+- Confirm the **`Guilds`** intent on the bot (needed for guild slash commands).
+- Re-run **`npm run register`** if you changed command name or guild.
+- Check [**Troubleshooting**](/docs/troubleshooting) for **`capability-not-available`** and connection errors.
+
+</Callout>
+
+## Reference
+
+- [`interactionCreate`](/docs/reference/event-and-data-models/interaction-create-event-payload/)
+- [`replyToInteraction`](/docs/reference/action-models/reply-to-interaction-action-payload/)
+- [`ActionResult`](/docs/reference/errors-and-failures/action-result/)

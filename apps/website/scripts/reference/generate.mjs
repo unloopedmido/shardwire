@@ -14,8 +14,8 @@ const CATEGORY_DEFINITIONS = [
     description: 'Bot-side and app-side bridge entry points, configuration types, and negotiated capabilities.',
     guideLinks: [
       { label: 'Getting Started', href: '/docs/getting-started' },
-      { label: 'Bot Bridge', href: '/docs/guides/bot-bridge' },
-      { label: 'App Bridge', href: '/docs/guides/app-bridge' },
+      { label: 'How it works', href: '/docs/concepts/how-it-works' },
+      { label: 'Troubleshooting', href: '/docs/troubleshooting' },
     ],
   },
   {
@@ -23,39 +23,42 @@ const CATEGORY_DEFINITIONS = [
     title: 'Contracts & Diagnostics',
     description: 'Manifest contracts, capability discovery, strict startup, and diagnostics helpers.',
     guideLinks: [
-      { label: 'Manifests', href: '/docs/guides/manifests' },
-      { label: 'Strict Startup', href: '/docs/guides/strict-startup' },
-      { label: 'Diagnostics', href: '/docs/operations/diagnostics' },
+      { label: 'How it works', href: '/docs/concepts/how-it-works' },
+      { label: 'Troubleshooting', href: '/docs/troubleshooting' },
+      { label: 'defineShardwireApp', href: '/docs/reference/contracts-and-diagnostics/define-shardwire-app' },
     ],
   },
   {
     id: 'workflows',
     title: 'Workflow Helpers',
     description: 'Higher-level helpers that combine multiple bridge actions into practical workflows.',
-    guideLinks: [{ label: 'Workflow Helpers', href: '/docs/guides/workflows' }],
+    guideLinks: [
+      { label: 'Getting Started', href: '/docs/getting-started' },
+      { label: 'First slash command', href: '/docs/tutorial/first-interaction' },
+    ],
   },
   {
     id: 'errors-and-failures',
     title: 'Errors & Failures',
     description: 'Error classes, failure payloads, and result wrappers you should branch on explicitly.',
     guideLinks: [
-      { label: 'Diagnostics', href: '/docs/operations/diagnostics' },
-      { label: 'Troubleshooting', href: '/docs/operations/troubleshooting' },
+      { label: 'Troubleshooting', href: '/docs/troubleshooting' },
+      { label: 'How it works', href: '/docs/concepts/how-it-works' },
     ],
   },
   {
     id: 'event-and-data-models',
     title: 'Event & Data Models',
     description: 'Normalized Discord payload models, event envelopes, catalog metadata, and bridge-side data shapes.',
-    guideLinks: [{ label: 'How Shardwire works', href: '/docs/concepts/how-shardwire-works' }],
+    guideLinks: [{ label: 'How it works', href: '/docs/concepts/how-it-works' }],
   },
   {
     id: 'action-models',
     title: 'Action Models',
     description: 'Action payloads, action result data, and the typed result wrappers returned from the bridge.',
     guideLinks: [
-      { label: 'Capabilities & Scoped Secrets', href: '/docs/concepts/capabilities-and-scopes' },
-      { label: 'App Bridge', href: '/docs/guides/app-bridge' },
+      { label: 'How it works', href: '/docs/concepts/how-it-works' },
+      { label: 'connectBotBridge', href: '/docs/reference/bridge-apis/connect-bot-bridge' },
     ],
   },
 ];

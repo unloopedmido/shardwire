@@ -1,37 +1,64 @@
 ---
-title: 'Introduction'
-description: 'Shardwire keeps Discord runtime and app logic separated without giving up typed events, typed actions, or startup discipline.'
+title: 'Why Shardwire?'
+description: 'Keep Discord online while you change your code. Hot-reload app logic without dropping the gateway connection.'
 ---
 
-Shardwire is a Discord-first bridge: one **Node process** holds your bot and Discord connection, and another **Node process** (or several) connects over a WebSocket to react to events and call typed actions—without sharing the same memory as `discord.js` client code.
+**Shardwire** is the **Heart** that keeps beating: your bot stays connected to Discord. Your **App** is the **Brain** you can swap, restart, and edit on the fly—without the usual “bot is offline…” gap.
 
-If you are new here, you do not need the whole architecture first.
+## The magic
 
-<Callout type="info" title="Start here">
+- **No more full downtime** when you tweak features: restart **your app**, not the whole bot process.
+- **The Connection** between your code and Discord stays warm while you iterate.
 
-Follow the [**Tutorial**](/docs/tutorial/lesson-0-overview) for a **guided path** (two terminals, env vars, first `!ping`). It is the fastest way to see Shardwire working end to end.
+<Callout type="tip" title="Try it">
+
+Jump to [**Getting started**](/docs/getting-started) for a copy-paste **Hello World**, then [**First slash command**](/docs/tutorial/first-interaction) for the “edit → save → instant reply” moment.
 
 </Callout>
 
-Prefer a single condensed page? Use [**Getting Started**](/docs/getting-started) for the same bot + app snippets in one place.
+## Code → Bridge → Discord
 
-## What lives where
+In one glance: you write **code**, it talks to the **Shardwire bridge** (**The Connection**), and the bridge keeps **Discord** in sync.
 
-- The **bot process** runs `createBotBridge()` and owns Discord connectivity, intents, event normalization, and action execution.
-- The **app process** runs `connectBotBridge()` and consumes typed events while invoking typed actions across the bridge.
-- **Scoped secrets** and **negotiated capabilities** define what each app process is allowed to see and do.
+<Mermaid
+  chart={`flowchart LR
+    subgraph you [Your_project]
+      code[Your_code]
+    end
+    subgraph sw [Shardwire]
+      bridge[The_Connection]
+    end
+    subgraph dc [Discord]
+      gw[Your_bot]
+    end
+    code -->|"restart_anytime"| bridge
+    bridge --> gw`}
+/>
 
-## Where everything else lives
+<Callout type="info" title="New here?">
 
-- [**Concepts**](/docs/concepts/how-shardwire-works) — mental model (split process, events, actions, results).
-- [**Guides**](/docs/guides/incremental-adoption) — adoption stages, manifests, strict startup, recipes.
-- [**Operations**](/docs/operations/deployment) — deployment, diagnostics, troubleshooting.
-- [**Advanced**](/docs/advanced/product-boundaries) — product scope and maintainer-facing ADR notes.
-- [**Reference**](/docs/reference) — generated API docs from the public package exports (large sidebar: sections stay **collapsed** by default so narrative docs stay easy to scan).
+1. [**Getting started**](/docs/getting-started) — fastest path to something running.  
+2. [**How it works**](/docs/concepts/how-it-works) — **Brain vs Body** in plain language.  
+3. [**Reference**](/docs/reference) — full API when you need the details.
 
-## Why teams reach for it
+</Callout>
 
-- Split-process architecture without inventing a custom event bus.
-- Capability-aware actions and subscriptions instead of ad-hoc permission checks.
-- Strict startup that can reject mismatched intents, secret scope, and subscriptions before traffic hits your app.
-- A public API surface small enough to reason about but broad enough to support real apps.
+## Where to go next
+
+<Cards>
+  <Card
+    title="Getting started"
+    description="Install, env vars, and your first bridge in minutes."
+    href="/docs/getting-started"
+  />
+  <Card
+    title="How it works"
+    description="Body (bridge) vs Brain (app), and what secrets really are."
+    href="/docs/concepts/how-it-works"
+  />
+  <Card
+    title="API Reference"
+    description="Types, events, actions, and errors—deep dives live here."
+    href="/docs/reference"
+  />
+</Cards>

@@ -7,7 +7,8 @@
   "type": "module",
   "scripts": {
     "bot": "node src/bot.js",
-    "app": "node src/app.js"
+    "app": "node src/app.js",
+    "register": "node src/register.mjs"
   },
   "dependencies": {
     "dotenv": "^16.4.7",

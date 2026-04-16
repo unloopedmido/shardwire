@@ -1,0 +1,60 @@
+---
+title: 'Keeping it alive'
+description: 'Run your bot on Railway, Render, or a VPS—use wss://, protect secrets, and think in two pieces: bot + app.'
+---
+
+**Running your bot** in production means running **two things** you already have locally:
+
+1. **Bot bridge** — still uses **`createBotBridge`** (Discord + bridge server).
+2. **App** — still uses **`connectBotBridge`**, but **`The Connection`** URL becomes **`wss://`** instead of **`ws://`** on localhost.
+
+You are not learning “systems architecture”—you are picking a host and setting env vars.
+
+<Callout type="warn" title="The one rule that trips people up">
+
+**`ws://`** is **only** for loopback. On the public internet, use **`wss://`** (TLS), same idea as **HTTPS**.
+
+</Callout>
+
+## Railway or Render (friendly PaaS)
+
+Typical shape:
+
+- **Service A (bot)** — Node 22+, start command runs your **bot** entry (`createBotBridge`). Expose the **bridge port** (or use the platform’s private networking if both services live in the same project).
+- **Service B (app)** — Node 22+, start command runs your **app** entry (`connectBotBridge`) with **`SHARDWIRE_URL=wss://…/shardwire`** pointing at **A**.
+
+<Callout type="tip" title="WebSockets on PaaS">
+
+Confirm your platform **allows WebSocket upgrades** on the route to the bridge (some need explicit “enable websockets” or a dedicated port). If connections drop, check **idle timeouts**—bridges use heartbeats; aggressive proxies need to allow bidirectional ping/pong.
+
+</Callout>
+
+**Secrets**
+
+- Put **`DISCORD_TOKEN`** and **`SHARDWIRE_SECRET`** in the host’s **secret** store, not in your repo.
+- The **app** secret must match a secret configured on the **bot** bridge.
+
+## VPS (you control the box)
+
+- Run the **bot** process under **systemd**, **pm2**, or a container.
+- Put **TLS** in front of the bridge (**Caddy**, **nginx**, or a cloud load balancer) and expose **`wss://`** to your app.
+- Run one or more **app** processes wherever makes sense; each uses **`wss://`** to connect.
+
+<Callout type="info" title="Capability audit before you blame the network">
+
+If “it connects but nothing happens,” it is often **intents**, **secret scope**, or **subscriptions**—not “the wire is broken.” Use [**Troubleshooting**](/docs/troubleshooting) and, when you need raw types, [**Reference → Errors & failures**](/docs/reference/errors-and-failures/).
+
+</Callout>
+
+## Checklist
+
+- Bridge **path** end-to-end (often **`/shardwire`**).
+- Remote URL uses **`wss://`**.
+- **Secrets** match between bot config and app env.
+- **Node 22+** on the **app** side.
+
+## Reference
+
+- [`createBotBridge`](/docs/reference/bridge-apis/create-bot-bridge/) (server options, secrets)
+- [`connectBotBridge`](/docs/reference/bridge-apis/connect-bot-bridge/) (`url`, `secret`)
+- [`formatShardwireDiagnosis`](/docs/reference/contracts-and-diagnostics/format-shardwire-diagnosis/) (readable errors in logs)
