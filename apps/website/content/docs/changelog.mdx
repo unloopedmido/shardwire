@@ -7,6 +7,17 @@ This page lists **notable changes in the `shardwire` package** from **v1.0.0** t
 
 Release tags on GitHub: [`v1.0.0` … current](https://github.com/unloopedmido/shardwire/tags).
 
+## 1.9.0
+
+Minor release focused on adoption documentation, diagnostics ergonomics, and an optional React companion package.
+
+- Added **`formatShardwireDiagnosis(report, options?)`** and **`FormatShardwireDiagnosisOptions`** for readable diagnosis output (CI logs, deploy logs, strict-startup failures).
+- Regenerated reference docs for the new formatter symbols.
+- Documentation: [incremental adoption](/docs/guides/incremental-adoption), golden [recipes](/docs/guides/recipe-moderation-worker) (moderation, interactions, analytics, music controller), [CI contract validation](/docs/operations/ci-contract-validation), [secret cookbook](/docs/operations/secret-cookbook), [remote bridge (wss)](/docs/operations/remote-bridge), [observability](/docs/operations/observability), [slash command registration](/docs/guides/slash-command-sync), [product boundaries](/docs/concepts/product-boundaries), and [custom domain contracts (spike)](/docs/concepts/custom-domain-contracts).
+- Added optional workspace package **`@shardwire/react`** with hooks around **`connectBotBridge`** (`useShardwireBridge`, `useShardwireCapabilities`, `useShardwireEvent`).
+- Root **`verify`** / **`build`** scripts now typecheck and build **`@shardwire/react`** after **`shardwire`**.
+- TypeScript: set **`ignoreDeprecations`** to **`"6.0"`** in **`packages/shardwire/tsconfig.json`** so declaration emit stays stable on TypeScript 6.x.
+
 ## 1.8.0
 
 Minor release focused on broad Discord surface expansion and release polish.
