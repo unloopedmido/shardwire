@@ -61,7 +61,7 @@ The reference is **generated** from `packages/shardwire/src/index.ts` (`npm run 
 ### v1.9.0+ ergonomics
 
 - **`formatShardwireDiagnosis(report, options?)`** — human-readable text from a `diagnoseShardwireApp` report (CI logs, deploy logs, strict-startup failures). Reference: `https://shardwire.js.org/docs/reference/contracts-and-diagnostics/format-shardwire-diagnosis/`
-- **`@shardwire/react`** (workspace package) — optional hooks around **`connectBotBridge`**: `useShardwireBridge`, `useShardwireCapabilities`, `useShardwireEvent`. Hooks resolve **`shardwire/client`** (not the root export) so Vite/browser bundles avoid **`discord.js`** / **`zlib-sync`**. Source and examples: `packages/react/README.md`; does not bundle React — install `react`, **`shardwire` ≥ 1.9.2**, and `@shardwire/react` together.
+- **`@shardwire/react`** (workspace package) — optional hooks around **`connectBotBridge`**: `useShardwireBridge`, `useShardwireCapabilities`, `useShardwireEvent`. Hooks resolve **`shardwire/client`** (not the root export) so Vite/browser bundles avoid **`discord.js`** / **`zlib-sync`**. Source and examples: `packages/react/README.md`; does not bundle React — install **`react`** and **`@shardwire/react`** together (`@shardwire/react` pulls in compatible **`shardwire`**; add **`shardwire`** explicitly if you pin or import it directly).
 
 ### Runtime error links (`See: …`)
 

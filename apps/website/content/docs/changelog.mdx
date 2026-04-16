@@ -173,9 +173,13 @@ Patch release focused on reliability and docs after the docs-site / monorepo mig
 
 <Tab value="@shardwire/react">
 
-This tab covers the **`@shardwire/react`** npm package. It versions **independently** from **`shardwire`**; check **`peerDependencies`** on each release for the required **`shardwire`** range.
+This tab covers the **`@shardwire/react`** npm package. It versions **independently** from **`shardwire`**; see **`dependencies`** / **`peerDependencies`** in `package.json` on each release for the **`shardwire`** range and **`react`** peer.
 
 npm: [`@shardwire/react`](https://www.npmjs.com/package/@shardwire/react)
+
+## 0.1.3
+
+- **`shardwire`** is now a **runtime `dependency`** (`^1.9.2`) so `npm install @shardwire/react react` is enough for hook-only apps. **`react`** remains the only **peer dependency**.
 
 ## 0.1.2
 

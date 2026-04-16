@@ -164,7 +164,7 @@ Use this during startup and troubleshooting.
 
 ## React app processes (`@shardwire/react`)
 
-Optional workspace package for dashboards and controllers (v1.9.0+). **Does not** declare `react` as a dependency of core `shardwire` — install `react`, `shardwire`, and `@shardwire/react`.
+Optional workspace package for dashboards and controllers (v1.9.0+). Core **`shardwire`** does not bundle **`react`**. For **`@shardwire/react`**, install **`react`** and **`@shardwire/react`** (which pulls in compatible **`shardwire`**); add **`shardwire`** explicitly if you import it directly too.
 
 - `useShardwireBridge(options, ready?)` — connect on mount, `await ready(...)`, close on unmount; memoize `options` when stable.
 - `useShardwireCapabilities(app, isReady)` — negotiated caps when connected.

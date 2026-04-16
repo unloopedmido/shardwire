@@ -7,10 +7,10 @@ This package **does not** ship React as a runtime dependency of `shardwire` core
 ## Install
 
 ```bash
-npm install @shardwire/react react shardwire
+npm install @shardwire/react react
 ```
 
-Requires **`shardwire` ≥ 1.9.2** (provides `shardwire/client` without `discord.js`, and uses native `WebSocket` in the browser instead of the `ws` package shim).
+`@shardwire/react` depends on a compatible **`shardwire`** release (`^1.9.2`). Add **`shardwire`** explicitly if you want to pin it or already import it directly (for example `defineShardwireApp` from `shardwire/client`).
 
 ## Hooks
 

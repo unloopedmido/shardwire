@@ -40,7 +40,7 @@ Bundlers pre-bundle the main `shardwire` entry, which includes the bot runtime (
 import { connectBotBridge, defineShardwireApp } from 'shardwire/client';
 ```
 
-Keep `createBotBridge` imports on `shardwire` in **Node-only** bot processes. `@shardwire/react` resolves `shardwire/client` internally; use **`shardwire` ≥ 1.9.2** with **`@shardwire/react`** current releases.
+Keep `createBotBridge` imports on `shardwire` in **Node-only** bot processes. `@shardwire/react` resolves `shardwire/client` via its **`shardwire`** dependency; upgrade **`@shardwire/react`** (or add **`shardwire`** explicitly) to get **`shardwire` ≥ 1.9.2** when you need recent client fixes.
 
 ## Browser or Vite: `WebSocket is not a constructor`
 
