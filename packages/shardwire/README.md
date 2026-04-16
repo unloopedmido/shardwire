@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/shardwire)](https://www.npmjs.com/package/shardwire)
 [![npm downloads](https://img.shields.io/npm/dm/shardwire)](https://www.npmjs.com/package/shardwire)
-[![Node.js](https://img.shields.io/badge/node-%3E%3D18.18-339933)](https://nodejs.org/)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D22.0.0-339933)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 Shardwire is a Discord-first bridge for running Discord gateway/runtime in one process while app logic runs in another.

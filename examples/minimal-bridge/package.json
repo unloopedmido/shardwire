@@ -1,6 +1,9 @@
 {
   "name": "minimal-shardwire-bridge",
   "private": true,
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "type": "module",
   "scripts": {
     "bot": "node src/bot.js",

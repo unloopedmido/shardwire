@@ -1,6 +1,9 @@
 {
 	"name": "shardwire-monorepo",
 	"private": true,
+	"engines": {
+		"node": ">=22.0.0"
+	},
 	"homepage": "https://shardwire.js.org/",
 	"workspaces": [
 		"packages/*",

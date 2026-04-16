@@ -1,6 +1,6 @@
 {
 	"name": "@shardwire/react",
-	"version": "0.1.4",
+	"version": "0.2.0",
 	"description": "Optional React hooks for Shardwire app bridges (dashboards and controllers).",
 	"homepage": "https://shardwire.js.org/",
 	"repository": {
@@ -27,7 +27,7 @@
 	},
 	"files": ["dist"],
 	"engines": {
-		"node": ">=18.18"
+		"node": ">=22.0.0"
 	},
 	"scripts": {
 		"clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
@@ -35,7 +35,7 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-		"shardwire": "^1.9.3"
+		"shardwire": "^2.0.0"
 	},
 	"peerDependencies": {
 		"react": ">=18.0.0"
