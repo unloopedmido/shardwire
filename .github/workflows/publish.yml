@@ -7,6 +7,7 @@ on:
       - master
     paths:
       - packages/shardwire/package.json
+      - packages/react/package.json
 
 concurrency:
   group: npm-publish-package-json
@@ -26,31 +27,62 @@ jobs:
           fetch-depth: 2
           fetch-tags: true
 
-      - name: Detect version bump
-        id: meta
+      - name: Detect shardwire version bump
+        id: shardwire
         run: |
           set -euo pipefail
           NEW=$(node -p "require('./packages/shardwire/package.json').version")
           if ! git rev-parse HEAD~1 >/dev/null 2>&1; then
             echo "publish=false" >> "$GITHUB_OUTPUT"
-            echo "No parent commit; skipping."
+            echo "No parent commit; skipping shardwire."
             exit 0
           fi
           if ! git cat-file -e HEAD~1:packages/shardwire/package.json 2>/dev/null; then
             echo "publish=false" >> "$GITHUB_OUTPUT"
-            echo "Parent commit has no packages/shardwire/package.json (migration boundary); skipping."
+            echo "Parent commit has no packages/shardwire/package.json; skipping shardwire."
             exit 0
           fi
           OLD=$(git show HEAD~1:packages/shardwire/package.json | node -p "JSON.parse(require('fs').readFileSync(0,'utf8')).version")
           if [ "$OLD" = "$NEW" ]; then
             echo "publish=false" >> "$GITHUB_OUTPUT"
-            echo "package.json version unchanged ($NEW); skipping."
+            echo "shardwire package.json version unchanged ($NEW); skipping."
             exit 0
           fi
           TAG="v${NEW}"
           if git ls-remote --tags origin "refs/tags/${TAG}" | grep -q .; then
             echo "publish=false" >> "$GITHUB_OUTPUT"
-            echo "Tag ${TAG} already exists on remote; skipping."
+            echo "Tag ${TAG} already exists on remote; skipping shardwire."
+            exit 0
+          fi
+          echo "publish=true" >> "$GITHUB_OUTPUT"
+          echo "version=${NEW}" >> "$GITHUB_OUTPUT"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Detect @shardwire/react version bump
+        id: react
+        run: |
+          set -euo pipefail
+          NEW=$(node -p "require('./packages/react/package.json').version")
+          if ! git rev-parse HEAD~1 >/dev/null 2>&1; then
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            echo "No parent commit; skipping react."
+            exit 0
+          fi
+          if ! git cat-file -e HEAD~1:packages/react/package.json 2>/dev/null; then
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            echo "Parent commit has no packages/react/package.json; skipping react."
+            exit 0
+          fi
+          OLD=$(git show HEAD~1:packages/react/package.json | node -p "JSON.parse(require('fs').readFileSync(0,'utf8')).version")
+          if [ "$OLD" = "$NEW" ]; then
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            echo "@shardwire/react package.json version unchanged ($NEW); skipping."
+            exit 0
+          fi
+          TAG="react-v${NEW}"
+          if git ls-remote --tags origin "refs/tags/${TAG}" | grep -q .; then
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            echo "Tag ${TAG} already exists on remote; skipping react."
             exit 0
           fi
           echo "publish=true" >> "$GITHUB_OUTPUT"
@@ -58,7 +90,7 @@ jobs:
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
 
       - name: Set up Node.js
-        if: steps.meta.outputs.publish == 'true'
+        if: steps.shardwire.outputs.publish == 'true' || steps.react.outputs.publish == 'true'
         uses: actions/setup-node@v6
         with:
           node-version: 24
@@ -66,21 +98,33 @@ jobs:
           registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
-        if: steps.meta.outputs.publish == 'true'
+        if: steps.shardwire.outputs.publish == 'true' || steps.react.outputs.publish == 'true'
         run: npm ci
 
       - name: Run verification
-        if: steps.meta.outputs.publish == 'true'
+        if: steps.shardwire.outputs.publish == 'true' || steps.react.outputs.publish == 'true'
         run: npm run pkg:verify
 
-      - name: Push version tag
-        if: steps.meta.outputs.publish == 'true'
+      - name: Push shardwire version tag
+        if: steps.shardwire.outputs.publish == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag "${{ steps.meta.outputs.tag }}"
-          git push origin "refs/tags/${{ steps.meta.outputs.tag }}"
+          git tag "${{ steps.shardwire.outputs.tag }}"
+          git push origin "refs/tags/${{ steps.shardwire.outputs.tag }}"
 
-      - name: Publish to npm
-        if: steps.meta.outputs.publish == 'true'
+      - name: Push @shardwire/react version tag
+        if: steps.react.outputs.publish == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag "${{ steps.react.outputs.tag }}"
+          git push origin "refs/tags/${{ steps.react.outputs.tag }}"
+
+      - name: Publish shardwire to npm
+        if: steps.shardwire.outputs.publish == 'true'
         run: npm publish -w shardwire --provenance --access public
+
+      - name: Publish @shardwire/react to npm
+        if: steps.react.outputs.publish == 'true'
+        run: npm publish -w '@shardwire/react' --provenance --access public
