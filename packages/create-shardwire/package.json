@@ -1,6 +1,6 @@
 {
 	"name": "create-shardwire",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"description": "Interactive scaffold for Shardwire Discord bot + app projects.",
 	"type": "module",
 	"bin": {
