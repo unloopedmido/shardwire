@@ -10,7 +10,7 @@ This package **does not** ship React as a runtime dependency of `shardwire` core
 npm install @shardwire/react react
 ```
 
-`@shardwire/react` depends on a compatible **`shardwire`** release (`^1.9.2`). Add **`shardwire`** explicitly if you want to pin it or already import it directly (for example `defineShardwireApp` from `shardwire/client`).
+`@shardwire/react` depends on a compatible **`shardwire`** release (`^1.9.3`). Add **`shardwire`** explicitly if you want to pin it or already import it directly (for example `defineShardwireApp` from `shardwire/client`).
 
 ## Hooks
 

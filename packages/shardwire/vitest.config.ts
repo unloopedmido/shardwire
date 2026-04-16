@@ -2,7 +2,7 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
 	test: {
-		setupFiles: ['./test/setup-websocket.ts'],
+		setupFiles: ['./test/setup-crypto.ts', './test/setup-websocket.ts'],
 		coverage: {
 			provider: 'v8',
 			reporter: ['text', 'json-summary'],
