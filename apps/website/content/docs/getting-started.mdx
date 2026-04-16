@@ -3,12 +3,41 @@ title: 'Getting Started'
 description: 'Install Shardwire, boot the bot bridge, connect an app process, and verify the first end-to-end event flow.'
 ---
 
+<Callout type="info" title="New to Shardwire?">
+
+The [**Tutorial**](/docs/tutorial/lesson-0-overview) walks through the same setup with **two terminals**, an **env var table**, and the runnable [**minimal-bridge**](https://github.com/unloopedmido/shardwire/tree/main/examples/minimal-bridge) example in this repo.
+
+</Callout>
+
 Shardwire’s first successful setup is intentionally small:
 
-1. Start a bot bridge.
-2. Connect an app bridge.
-3. Subscribe to a typed event.
-4. Check that the negotiated capability surface matches what you expect.
+<Steps>
+
+<Step>
+
+Start a **bot bridge** (`createBotBridge`).
+
+</Step>
+
+<Step>
+
+Connect an **app bridge** (`connectBotBridge`).
+
+</Step>
+
+<Step>
+
+Subscribe to a typed event (`app.on`).
+
+</Step>
+
+<Step>
+
+Check **`app.capabilities()`** matches what you expect.
+
+</Step>
+
+</Steps>
 
 ## Prerequisites
 
@@ -17,7 +46,11 @@ Shardwire’s first successful setup is intentionally small:
 - A shared secret in `SHARDWIRE_SECRET`.
 - A local loopback URL such as `ws://127.0.0.1:3001/shardwire`.
 
-> `ws://` is for loopback only. Use `wss://` for remote deployments.
+<Callout type="warn" title="Transport">
+
+`ws://` is for **loopback only**. Use `wss://` for remote deployments ([Remote bridge](/docs/operations/remote-bridge)).
+
+</Callout>
 
 ## Install
 
@@ -71,7 +104,8 @@ console.log(app.capabilities());
 
 ## Where to go next
 
+- Follow the [**Tutorial**](/docs/tutorial/lesson-2-first-interaction) for a first **`!ping` → `pong`** using `app.actions.sendMessage`.
 - Read [Incremental adoption](/docs/guides/incremental-adoption) if you are migrating from a monolithic bot.
-- Read [Bridge Architecture](/docs/concepts/bridge-architecture) for the runtime split.
+- Read [How Shardwire works](/docs/concepts/how-shardwire-works) for the runtime split and action results.
 - Read [Capabilities & Scoped Secrets](/docs/concepts/capabilities-and-scopes) before adding more app consumers.
 - Read [Diagnostics](/docs/operations/diagnostics) before you deploy.

@@ -1,0 +1,55 @@
+---
+title: 'Lesson 1 — Run the bridge locally'
+description: 'Clone or copy the minimal example, set env vars, start the bot process, then the app process.'
+---
+
+The repository includes a runnable copy of this lesson under [`examples/minimal-bridge`](https://github.com/unloopedmido/shardwire/tree/main/examples/minimal-bridge). You can copy those files into your own folder instead if you prefer.
+
+## Environment variables
+
+| Variable | Where | Purpose |
+| --- | --- | --- |
+| `DISCORD_TOKEN` | Bot process only | Discord bot token |
+| `SHARDWIRE_SECRET` | Both processes | Shared bridge secret (any long random string) |
+| `SHARDWIRE_URL` | App process (optional) | Defaults to `ws://127.0.0.1:3001/shardwire` in the example |
+
+<Callout type="warn" title="Loopback only">
+
+Use `ws://` only on your own machine (`127.0.0.1`). Production should use `wss://` behind TLS ([Remote bridge](/docs/operations/remote-bridge)).
+
+</Callout>
+
+## From the monorepo root
+
+<Steps>
+
+<Step>
+From the **repo root**: `npm install` then `npm run pkg:build` so the `shardwire` package is built.
+</Step>
+
+<Step>
+From **`examples/minimal-bridge`**: `npm install` (this links the local `file:../../packages/shardwire` dependency).
+</Step>
+
+<Step>
+Copy `examples/minimal-bridge/.env.example` to `examples/minimal-bridge/.env` and fill in `DISCORD_TOKEN` and `SHARDWIRE_SECRET`.
+</Step>
+
+<Step>
+In **terminal A**, from `examples/minimal-bridge`: `npm run bot` — wait for `bot bridge ready`.
+</Step>
+
+<Step>
+In **terminal B**, same folder: `npm run app` — wait for `app bridge ready` and check logged capabilities.
+</Step>
+
+</Steps>
+
+## What “good” looks like
+
+- Bot terminal prints `bot bridge ready` with no secret validation errors.
+- App terminal prints `app bridge ready` and a line from `app.capabilities()`.
+- If the app exits immediately, re-check `SHARDWIRE_SECRET` matches on both sides and the URL path is `/shardwire` (or the path you configured on the bot).
+- With the example `src/app.js`, sending **`!ping`** in a channel the bot can access should produce **`pong`** (covered again in [lesson 2](/docs/tutorial/lesson-2-first-interaction)).
+
+Next: [Lesson 2 — First interaction](/docs/tutorial/lesson-2-first-interaction).

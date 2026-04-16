@@ -17,7 +17,10 @@ export const SHARDWIRE_DOCS = {
 	deployment: `${SHARDWIRE_DOCS_ORIGIN}/docs/operations/deployment/`,
 	troubleshooting: `${SHARDWIRE_DOCS_ORIGIN}/docs/operations/troubleshooting/`,
 	errors: `${SHARDWIRE_DOCS_ORIGIN}/docs/operations/troubleshooting/`,
-	examples: `${SHARDWIRE_DOCS_ORIGIN}/docs/getting-started/`,
+	/** Hands-on walkthrough + runnable `examples/minimal-bridge` in the repo. */
+	tutorial: `${SHARDWIRE_DOCS_ORIGIN}/docs/tutorial/lesson-0-overview/`,
+	howShardwireWorks: `${SHARDWIRE_DOCS_ORIGIN}/docs/concepts/how-shardwire-works/`,
+	examples: `${SHARDWIRE_DOCS_ORIGIN}/docs/tutorial/lesson-1-run-locally/`,
 	changelog: `${SHARDWIRE_DOCS_ORIGIN}/docs/changelog/`,
 	/** @deprecated Prefer {@link SHARDWIRE_DOCS.changelog}. Kept as an alias for the same URL. */
 	releaseNotes: `${SHARDWIRE_DOCS_ORIGIN}/docs/changelog/`,

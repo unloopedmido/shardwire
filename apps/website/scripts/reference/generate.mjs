@@ -47,10 +47,7 @@ const CATEGORY_DEFINITIONS = [
     id: 'event-and-data-models',
     title: 'Event & Data Models',
     description: 'Normalized Discord payload models, event envelopes, catalog metadata, and bridge-side data shapes.',
-    guideLinks: [
-      { label: 'Bridge Architecture', href: '/docs/concepts/bridge-architecture' },
-      { label: 'Runtime Model', href: '/docs/concepts/runtime-model' },
-    ],
+    guideLinks: [{ label: 'How Shardwire works', href: '/docs/concepts/how-shardwire-works' }],
   },
   {
     id: 'action-models',
@@ -238,6 +235,7 @@ export async function generateReferenceDocs({
   await writeFile(path.join(docsRoot, 'index.mdx'), renderReferenceIndex(groups), 'utf8');
   await writeJson(path.join(docsRoot, 'meta.json'), {
     title: 'Reference',
+    defaultOpen: false,
     pages: ['index', ...groups.filter((group) => group.entries.length > 0).map((group) => group.id)],
   });
 
@@ -252,6 +250,7 @@ export async function generateReferenceDocs({
     await writeFile(path.join(groupRoot, 'index.mdx'), renderCategoryIndex(group), 'utf8');
     await writeJson(path.join(groupRoot, 'meta.json'), {
       title: group.title,
+      defaultOpen: false,
       pages: ['index', ...group.entries.map((entry) => entry.slug)],
     });
 

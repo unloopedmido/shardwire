@@ -1,5 +1,6 @@
 {
   "title": "Contracts & Diagnostics",
+  "defaultOpen": false,
   "pages": [
     "index",
     "capability-explanation",

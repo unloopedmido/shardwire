@@ -1,0 +1,74 @@
+---
+title: 'How Shardwire works'
+description: 'The bot versus app split, how events and actions cross the bridge, and why results are typed instead of thrown.'
+---
+
+Shardwire is built around one idea: the Discord gateway lifecycle and your application logic do not need to live in the same process.
+
+## Bot process responsibilities
+
+- Maintain the Discord connection.
+- Declare gateway intents.
+- Normalize Discord payloads into bridge-safe data models.
+- Execute built-in actions on behalf of connected app processes.
+- Enforce secret scope and capability negotiation.
+
+## App process responsibilities
+
+- Connect over WebSocket with `connectBotBridge()`.
+- Register subscriptions with `app.on(...)`.
+- Use `app.actions.*` to trigger side effects on the bot side.
+- Run product logic, storage, dashboards, workflows, or moderation rules.
+
+## Why the split helps
+
+- Gateway uptime is insulated from slow application code.
+- App processes can scale or restart independently.
+- Capability scope becomes explicit instead of implicit.
+- You stop mixing Discord runtime concerns into every product service.
+
+## The contract surface
+
+The app process does not receive raw `discord.js` objects. It receives normalized bridge payloads and typed action results.
+
+That is why the generated reference includes dedicated sections for bridge APIs, event and data models, action models, and errors and failures.
+
+## Runtime: three flows
+
+### 1. Event flow
+
+- Discord gateway traffic enters the bot process.
+- Shardwire normalizes it into bridge payloads.
+- Subscriptions are matched and sent to app processes.
+
+### 2. Action flow
+
+- The app process invokes `app.actions.<name>(payload)`.
+- The bridge validates capability access for that action.
+- The bot runtime executes the action and returns an `ActionResult<T>`.
+
+### 3. Startup flow
+
+- Authentication succeeds.
+- Capabilities are negotiated.
+- Optional strict validation checks manifest, intents, runtime subscriptions, and `expectedScope`.
+
+## Why `ActionResult` matters
+
+Actions return `ActionResult<T>`, not exceptions for normal failure branches.
+
+Branch on `result.ok`:
+
+```ts
+const result = await app.actions.sendMessage({
+  channelId,
+  content: 'hello from the app process',
+});
+
+if (!result.ok) {
+  console.error(result.error.code, result.error.message);
+  return;
+}
+```
+
+See the reference for `ActionResult`, `ActionError`, and the action payload and result maps when wiring handlers.

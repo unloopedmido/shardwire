@@ -23,14 +23,15 @@ All **documentation routes** live under **`/docs/`** on that host.
 ### Top-level and guides
 
 - Docs home: `https://shardwire.js.org/docs/`
+- **Tutorial** (guided path + runnable example): `https://shardwire.js.org/docs/tutorial/lesson-0-overview/`
 - Getting started: `https://shardwire.js.org/docs/getting-started/`
 - Changelog: `https://shardwire.js.org/docs/changelog/`
 - **Concepts**
-  - Bridge architecture: `https://shardwire.js.org/docs/concepts/bridge-architecture/`
+  - How Shardwire works: `https://shardwire.js.org/docs/concepts/how-shardwire-works/`
   - Capabilities & scopes: `https://shardwire.js.org/docs/concepts/capabilities-and-scopes/`
-  - Runtime model: `https://shardwire.js.org/docs/concepts/runtime-model/`
-  - Product boundaries: `https://shardwire.js.org/docs/concepts/product-boundaries/`
-  - Custom domain contracts (spike): `https://shardwire.js.org/docs/concepts/custom-domain-contracts/`
+- **Advanced**
+  - Product boundaries: `https://shardwire.js.org/docs/advanced/product-boundaries/`
+  - Custom domain contracts (spike): `https://shardwire.js.org/docs/advanced/custom-domain-contracts/`
 - **Guides**
   - Incremental adoption: `https://shardwire.js.org/docs/guides/incremental-adoption/`
   - Bot bridge: `https://shardwire.js.org/docs/guides/bot-bridge/`

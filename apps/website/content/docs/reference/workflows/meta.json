@@ -1,5 +1,6 @@
 {
   "title": "Workflow Helpers",
+  "defaultOpen": false,
   "pages": [
     "index",
     "create-thread-then-send-message",

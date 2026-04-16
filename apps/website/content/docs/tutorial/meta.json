@@ -1,0 +1,10 @@
+{
+  "title": "Tutorial",
+  "defaultOpen": true,
+  "pages": [
+    "lesson-0-overview",
+    "lesson-1-run-locally",
+    "lesson-2-first-interaction",
+    "lesson-3-when-nothing-happens"
+  ]
+}

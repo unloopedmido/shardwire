@@ -1,5 +1,6 @@
 {
   "title": "Bridge APIs",
+  "defaultOpen": false,
   "pages": [
     "index",
     "app-bridge",

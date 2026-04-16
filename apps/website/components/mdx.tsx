@@ -1,9 +1,18 @@
 import defaultComponents from 'fumadocs-ui/mdx';
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import type { MDXComponents } from 'mdx/types';
+
+import { Mermaid } from '@/components/mermaid';
 
 export function getMDXComponents(components?: MDXComponents) {
   return {
     ...defaultComponents,
+    Step,
+    Steps,
+    Tab,
+    Tabs,
+    Mermaid,
     // TODO: Replace this fallback with a client-only/dynamic AutoTypeTable integration
     // once fumadocs-typescript UI is compatible with this Next server MDX build path.
     AutoTypeTable: () =>
