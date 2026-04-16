@@ -1,6 +1,6 @@
 ---
-title: "Deployment"
-description: "Production deployment changes the transport story: use TLS, treat secrets as contracts, and verify capability scope before rollout."
+title: 'Deployment'
+description: 'Production deployment changes the transport story: use TLS, treat secrets as contracts, and verify capability scope before rollout.'
 ---
 
 Shardwire can run locally over loopback with `ws://`, but production deployments should assume a remote boundary.
@@ -27,3 +27,10 @@ Most “the app connected but nothing happens” incidents are not transport bug
 - missing intents
 - overly narrow secret scope
 - handlers subscribed to events the connection never negotiated
+
+## Related operations guides
+
+- [Remote bridge (wss)](/docs/operations/remote-bridge) for TLS, logging, and trust boundaries
+- [Secret cookbook](/docs/operations/secret-cookbook) for multi-app secrets
+- [CI contract validation](/docs/operations/ci-contract-validation) to catch drift before deploy
+- [Observability](/docs/operations/observability) for metrics hooks and tuning

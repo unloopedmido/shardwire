@@ -1,0 +1,82 @@
+---
+title: 'Recipe: interactions worker'
+description: 'App process handles slash commands and components: interactionCreate manifest, defer/reply actions, strict startup, and scoped secrets.'
+---
+
+Use this recipe when most product logic for **slash commands, buttons, or modals** should live in an app process while the bot process keeps the gateway.
+
+## Manifest
+
+```ts
+import { defineShardwireApp, generateSecretScope } from 'shardwire';
+
+export const interactionsManifest = defineShardwireApp({
+	name: 'interactions-worker',
+	events: ['interactionCreate'],
+	actions: [
+		'replyToInteraction',
+		'deferInteraction',
+		'editInteractionReply',
+		'followUpInteraction',
+		'updateInteraction',
+	],
+	filters: {
+		interactionCreate: ['guildId', 'channelId', 'interactionKind', 'commandName', 'customId'],
+	},
+});
+
+export const interactionsMinimumSecret = generateSecretScope(interactionsManifest);
+```
+
+## Bot intents
+
+`interactionCreate` requires the **`Guilds`** intent for guild-scoped interactions. Add others only if your handlers need them (for example **`DirectMessage`** for DMs).
+
+## App process (pattern)
+
+```ts
+import { connectBotBridge } from 'shardwire';
+import { interactionsManifest, interactionsMinimumSecret } from './interactions-manifest.js';
+
+const app = connectBotBridge({
+	url: process.env.SHARDWIRE_URL!,
+	secret: process.env.SHARDWIRE_SECRET_INTERACTIONS!,
+	appName: interactionsManifest.name,
+});
+
+app.on('interactionCreate', async ({ interaction }) => {
+	if (interaction.kind !== 'applicationCommand' || !interaction.guildId) return;
+
+	if (interaction.commandName === 'ping') {
+		const defer = await app.actions.deferInteraction({ interactionId: interaction.id });
+		if (!defer.ok) return;
+
+		const reply = await app.actions.editInteractionReply({
+			interactionId: interaction.id,
+			content: 'pong',
+		});
+		if (!reply.ok) {
+			console.error(reply.error);
+		}
+	}
+});
+
+await app.ready({
+	strict: true,
+	manifest: interactionsManifest,
+	botIntents: ['Guilds'],
+	expectedScope: interactionsMinimumSecret,
+});
+```
+
+Use the [workflow helpers](/docs/guides/workflows) when a single handler repeats defer-then-edit sequences.
+
+## Verify
+
+- Subscriptions use only filter keys declared on the manifest ([Manifests](/docs/guides/manifests)).
+- Strict startup lists every action your code path may call—not only the first reply.
+
+## Related
+
+- [Recipe: moderation worker](/docs/guides/recipe-moderation-worker)
+- [Diagnostics](/docs/operations/diagnostics)

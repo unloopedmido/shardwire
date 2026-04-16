@@ -1,6 +1,6 @@
 ---
-title: "Getting Started"
-description: "Install Shardwire, boot the bot bridge, connect an app process, and verify the first end-to-end event flow."
+title: 'Getting Started'
+description: 'Install Shardwire, boot the bot bridge, connect an app process, and verify the first end-to-end event flow.'
 ---
 
 Shardwire’s first successful setup is intentionally small:
@@ -31,12 +31,12 @@ npm install shardwire
 import { createBotBridge } from 'shardwire';
 
 const bridge = createBotBridge({
-  token: process.env.DISCORD_TOKEN!,
-  intents: ['Guilds', 'GuildMessages', 'GuildMembers', 'MessageContent'],
-  server: {
-    port: 3001,
-    secrets: [process.env.SHARDWIRE_SECRET!],
-  },
+	token: process.env.DISCORD_TOKEN!,
+	intents: ['Guilds', 'GuildMessages', 'GuildMembers', 'MessageContent'],
+	server: {
+		port: 3001,
+		secrets: [process.env.SHARDWIRE_SECRET!],
+	},
 });
 
 await bridge.ready();
@@ -49,13 +49,13 @@ console.log('bot bridge ready');
 import { connectBotBridge } from 'shardwire';
 
 const app = connectBotBridge({
-  url: 'ws://127.0.0.1:3001/shardwire',
-  secret: process.env.SHARDWIRE_SECRET!,
-  appName: 'dashboard',
+	url: 'ws://127.0.0.1:3001/shardwire',
+	secret: process.env.SHARDWIRE_SECRET!,
+	appName: 'dashboard',
 });
 
 app.on('messageCreate', ({ message }) => {
-  console.log('message', message.channelId, message.content);
+	console.log('message', message.channelId, message.content);
 });
 
 await app.ready();
@@ -71,6 +71,7 @@ console.log(app.capabilities());
 
 ## Where to go next
 
+- Read [Incremental adoption](/docs/guides/incremental-adoption) if you are migrating from a monolithic bot.
 - Read [Bridge Architecture](/docs/concepts/bridge-architecture) for the runtime split.
 - Read [Capabilities & Scoped Secrets](/docs/concepts/capabilities-and-scopes) before adding more app consumers.
 - Read [Diagnostics](/docs/operations/diagnostics) before you deploy.

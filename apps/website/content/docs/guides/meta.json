@@ -2,10 +2,16 @@
   "title": "Guides",
   "defaultOpen": true,
   "pages": [
+    "incremental-adoption",
     "bot-bridge",
     "app-bridge",
     "manifests",
     "strict-startup",
-    "workflows"
+    "workflows",
+    "recipe-moderation-worker",
+    "recipe-interactions-worker",
+    "recipe-analytics-listener",
+    "recipe-music-controller",
+    "slash-command-sync"
   ]
 }

@@ -4,6 +4,8 @@
   "pages": [
     "bridge-architecture",
     "capabilities-and-scopes",
-    "runtime-model"
+    "runtime-model",
+    "product-boundaries",
+    "custom-domain-contracts"
   ]
 }

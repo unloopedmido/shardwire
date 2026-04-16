@@ -1,0 +1,101 @@
+---
+title: 'Recipe: music bot + remote web controller'
+description: 'Use Shardwire for Discord voice and member actions while a separate channel carries player/queue state for a dashboard—no custom wire primitives.'
+---
+
+Music bots usually need **two different problems** solved:
+
+1. **Discord gateway facts** — who is in which voice channel, move/mute/deafen, stage permissions — Shardwire’s built-ins cover this well ([Voice state](/docs/reference/event-and-data-models/voice-state-update-event-payload/), [move member voice](/docs/reference/action-models/move-member-voice-action-payload/)).
+2. **Product state** — queue, now playing, Lavalink node health — that is **not** Discord’s API surface and should not be forced through the Shardwire manifest.
+
+This recipe keeps that separation explicit: **Shardwire = Discord**, **your HTTP/WS/Redis = player state**.
+
+## Architecture
+
+```mermaid
+flowchart LR
+  subgraph bot [Bot process]
+    BR[createBotBridge]
+    LJ[Lavalink or audio runtime]
+    BR --- LJ
+  end
+  subgraph shardwireApp [Shardwire app process]
+    SW[connectBotBridge]
+  end
+  subgraph web [Web dashboard]
+    UI[React UI]
+    API[Your REST or WS]
+  end
+  BR --> SW
+  SW -->|"Discord events and actions"| UI
+  UI <-->|"queue player state"| API
+  API <-->|"optional"| LJ
+```
+
+## Shardwire manifest (Discord slice only)
+
+```ts
+import { defineShardwireApp, generateSecretScope } from 'shardwire';
+
+export const musicControlManifest = defineShardwireApp({
+	name: 'music-control',
+	events: ['voiceStateUpdate', 'interactionCreate'],
+	actions: ['moveMemberVoice', 'deferInteraction', 'editInteractionReply', 'replyToInteraction'],
+	filters: {
+		voiceStateUpdate: ['guildId', 'channelId', 'userId', 'voiceChannelId'],
+		interactionCreate: ['guildId', 'channelId', 'interactionKind', 'commandName'],
+	},
+});
+
+export const musicControlSecretScope = generateSecretScope(musicControlManifest);
+```
+
+Bot intents must include **`GuildVoiceStates`** (and whatever you need for interactions/messages).
+
+## App process responsibilities
+
+- Subscribe to **`voiceStateUpdate`** to reflect “who is where” in your controller UI (via your **state API**, not by overloading Shardwire).
+- Use **`moveMemberVoice`** (and related voice actions) for join-to-speak or stage moves—always branch on `result.ok`.
+- Handle **`interactionCreate`** for slash/dashboard commands that only **delegate** to your player service (HTTP to the same host as Lavalink, or an internal queue).
+
+Strict startup with `expectedScope: musicControlSecretScope` keeps this process from silently receiving broader Discord powers than you intended ([Strict startup](/docs/guides/strict-startup)).
+
+## Dashboard (React)
+
+Use **`@shardwire/react`** for the Shardwire slice only:
+
+```tsx
+import { useMemo } from 'react';
+import { useShardwireBridge, useShardwireCapabilities, useShardwireEvent } from '@shardwire/react';
+
+const options = useMemo(
+	() => ({
+		url: import.meta.env.VITE_SHARDWIRE_URL,
+		secret: import.meta.env.VITE_SHARDWIRE_SECRET,
+		appName: 'music-control',
+	}),
+	[],
+);
+
+// useShardwireBridge(options, { strict: true, manifest: musicControlManifest, botIntents: [...] })
+
+// useShardwireEvent(
+//   app,
+//   'voiceStateUpdate',
+//   ({ state }) => {
+//     void fetch('/api/voice/presence', {
+//       method: 'POST',
+//       body: JSON.stringify({ guildId: state.guildId, userId: state.userId, channelId: state.channelId }),
+//     });
+//   },
+//   { guildId: 'YOUR_GUILD_ID' },
+//   ready,
+// );
+```
+
+Player position, queue, and “now playing” should come from **`fetch('/api/player/...')`** or a small WebSocket **you** own—see [Custom domain contracts (spike)](/docs/concepts/custom-domain-contracts) for why not to tunnel those through Shardwire core.
+
+## Related
+
+- [Secret cookbook](/docs/operations/secret-cookbook) if the dashboard and the bot host share multiple secrets
+- [Remote bridge (wss)](/docs/operations/remote-bridge) when the dashboard runs in the browser against a remote bot host

@@ -1,0 +1,107 @@
+---
+title: 'Recipe: moderation worker'
+description: 'End-to-end pattern: app process listens for messages and applies delete/timeout actions with a manifest, scoped secret, strict startup, and expectedScope.'
+---
+
+This recipe is an **opinionated** shape for a moderation sidecar: one bot bridge, one app process, narrow actions, strict startup.
+
+## Prerequisites
+
+- Bot bridge already running with intents that include **`GuildMessages`** and **`MessageContent`** if you read message text, plus **`GuildMembers`** if you use timeouts on members ([Bot bridge](/docs/guides/bot-bridge)).
+- Shared secret configured on the bot and in the app environment.
+
+## Manifest (contract)
+
+```ts
+import { defineShardwireApp, generateSecretScope } from 'shardwire';
+
+export const moderationManifest = defineShardwireApp({
+	name: 'moderation-worker',
+	events: ['messageCreate'],
+	actions: ['deleteMessage', 'timeoutMember'],
+	filters: {
+		messageCreate: ['guildId', 'channelId', 'userId'],
+	},
+});
+
+export const moderationMinimumSecret = generateSecretScope(moderationManifest);
+```
+
+`generateSecretScope` is the **minimum** `allow` shape for a scoped secret entry on the bot ([Capabilities & scoped secrets](/docs/concepts/capabilities-and-scopes)).
+
+## Bot bridge (excerpt)
+
+Use the same intents your manifest implies. For `messageCreate` with member timeouts you need at least:
+
+- `Guilds`, `GuildMessages`, `MessageContent`, `GuildMembers`
+
+```ts
+import { createBotBridge } from 'shardwire';
+
+const bridge = createBotBridge({
+	token: process.env.DISCORD_TOKEN!,
+	intents: ['Guilds', 'GuildMessages', 'MessageContent', 'GuildMembers'],
+	server: {
+		port: 3001,
+		secrets: [
+			{
+				id: 'moderation',
+				value: process.env.SHARDWIRE_SECRET_MODERATION!,
+				allow: moderationMinimumSecret,
+			},
+		],
+	},
+});
+
+await bridge.ready();
+```
+
+## App process
+
+Register handlers **before** strict `ready`. Branch on every action result.
+
+```ts
+import { connectBotBridge } from 'shardwire';
+import { moderationManifest } from './moderation-manifest.js';
+
+const app = connectBotBridge({
+	url: process.env.SHARDWIRE_URL!,
+	secret: process.env.SHARDWIRE_SECRET_MODERATION!,
+	appName: moderationManifest.name,
+});
+
+app.on('messageCreate', async ({ message }) => {
+	// Example policy only — replace with your rules engine.
+	if (message.guildId && message.content.includes('banned-phrase')) {
+		const result = await app.actions.deleteMessage({
+			channelId: message.channelId,
+			messageId: message.id,
+		});
+		if (!result.ok) {
+			console.error('deleteMessage failed', result.error);
+		}
+	}
+});
+
+await app.ready({
+	strict: true,
+	manifest: moderationManifest,
+	botIntents: ['Guilds', 'GuildMessages', 'MessageContent', 'GuildMembers'],
+	expectedScope: moderationMinimumSecret,
+});
+```
+
+## Why `expectedScope` here
+
+`expectedScope` fails startup if the negotiated surface is **broader** than this allow-list—so a misconfigured bot secret cannot silently grant extra actions to this app ([Strict startup](/docs/guides/strict-startup)).
+
+## Verify
+
+- `app.capabilities()` includes `messageCreate`, `deleteMessage`, `timeoutMember`.
+- Run [`diagnoseShardwireApp`](/docs/reference/contracts-and-diagnostics/diagnose-shardwire-app/) in a REPL or unit test with the same `botIntents` and subscriptions you use in production.
+- Print failures with [`formatShardwireDiagnosis`](/docs/reference/contracts-and-diagnostics/format-shardwire-diagnosis/) in CI ([CI contract validation](/docs/operations/ci-contract-validation)).
+
+## Next steps
+
+- [Incremental adoption](/docs/guides/incremental-adoption) for splitting more logic out of a monolith.
+- [Secret cookbook](/docs/operations/secret-cookbook) for multiple app consumers.

@@ -1,6 +1,6 @@
 ---
-title: "App Bridge"
-description: "Connect the app-side client, subscribe to events, invoke built-in actions, and branch on typed results."
+title: 'App Bridge'
+description: 'Connect the app-side client, subscribe to events, invoke built-in actions, and branch on typed results.'
 ---
 
 The app bridge is the consumer side of the system.
@@ -11,9 +11,9 @@ The app bridge is the consumer side of the system.
 import { connectBotBridge } from 'shardwire';
 
 const app = connectBotBridge({
-  url: 'ws://127.0.0.1:3001/shardwire',
-  secret: process.env.SHARDWIRE_SECRET!,
-  appName: 'moderation-worker',
+	url: 'ws://127.0.0.1:3001/shardwire',
+	secret: process.env.SHARDWIRE_SECRET!,
+	appName: 'moderation-worker',
 });
 ```
 
@@ -21,11 +21,11 @@ const app = connectBotBridge({
 
 ```ts
 app.on('messageCreate', ({ message }) => {
-  if (!message.content?.includes('!ping')) return;
-  void app.actions.sendMessage({
-    channelId: message.channelId,
-    content: 'pong',
-  });
+	if (!message.content?.includes('!ping')) return;
+	void app.actions.sendMessage({
+		channelId: message.channelId,
+		content: 'pong',
+	});
 });
 ```
 
@@ -35,13 +35,13 @@ Always treat actions as typed request/response calls with explicit failure handl
 
 ```ts
 const result = await app.actions.timeoutMember({
-  guildId,
-  userId,
-  durationMs: 60_000,
+	guildId,
+	userId,
+	durationMs: 60_000,
 });
 
 if (!result.ok) {
-  console.error(result.error.code, result.error.details);
+	console.error(result.error.code, result.error.details);
 }
 ```
 
@@ -49,24 +49,28 @@ if (!result.ok) {
 
 ```ts
 app.on(
-  'voiceStateUpdate',
-  ({ state }) => {
-    if (state.channelId !== 'voice-room-1') return;
-    console.log('in target voice room:', state.userId);
-  },
-  { voiceChannelId: 'voice-room-1' },
+	'voiceStateUpdate',
+	({ state }) => {
+		if (state.channelId !== 'voice-room-1') return;
+		console.log('in target voice room:', state.userId);
+	},
+	{ voiceChannelId: 'voice-room-1' },
 );
 
 const moved = await app.actions.moveMemberVoice({
-  guildId,
-  userId,
-  channelId: 'voice-room-1',
+	guildId,
+	userId,
+	channelId: 'voice-room-1',
 });
 
 if (!moved.ok) {
-  console.error(moved.error.code, moved.error.message);
+	console.error(moved.error.code, moved.error.message);
 }
 ```
+
+## React dashboards
+
+Optional **`@shardwire/react`** provides hooks around `connectBotBridge` so dashboard UIs do not need to wire lifecycle by hand. See the README in the repository (`packages/react`) and the [music controller recipe](/docs/guides/recipe-music-controller). Core `shardwire` stays free of a React peer dependency.
 
 ## What belongs here
 
