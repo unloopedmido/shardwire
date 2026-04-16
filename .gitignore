@@ -2,5 +2,6 @@ node_modules
 apps/website/dist
 apps/website/.astro
 packages/shardwire/dist
+packages/react/dist
 packages/shardwire/coverage
 .vscode
