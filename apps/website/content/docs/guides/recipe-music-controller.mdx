@@ -66,7 +66,7 @@ Use **`@shardwire/react`** for the Shardwire slice only:
 
 ```tsx
 import { useMemo } from 'react';
-import { useShardwireBridge, useShardwireCapabilities, useShardwireEvent } from '@shardwire/react';
+import { useShardwireConnection, useShardwireListener } from '@shardwire/react';
 
 const options = useMemo(
 	() => ({
@@ -77,20 +77,19 @@ const options = useMemo(
 	[],
 );
 
-// useShardwireBridge(options, { strict: true, manifest: musicControlManifest, botIntents: [...] })
+// const sw = useShardwireConnection(options, { strict: true, manifest: musicControlManifest, botIntents: [...] })
 
-// useShardwireEvent(
-//   app,
-//   'voiceStateUpdate',
-//   ({ state }) => {
+// useShardwireListener(sw.status === 'ready' ? sw.app : null, {
+//   event: 'voiceStateUpdate',
+//   onEvent: ({ state }) => {
 //     void fetch('/api/voice/presence', {
 //       method: 'POST',
 //       body: JSON.stringify({ guildId: state.guildId, userId: state.userId, channelId: state.channelId }),
 //     });
 //   },
-//   { guildId: 'YOUR_GUILD_ID' },
-//   ready,
-// );
+//   filter: { guildId: 'YOUR_GUILD_ID' },
+//   enabled: sw.status === 'ready',
+// });
 ```
 
 Player position, queue, and “now playing” should come from **`fetch('/api/player/...')`** or a small WebSocket **you** own—see [Custom domain contracts (spike)](/docs/advanced/custom-domain-contracts) for why not to tunnel those through Shardwire core.

@@ -166,9 +166,9 @@ Use this during startup and troubleshooting.
 
 Optional workspace package for dashboards and controllers (v1.9.0+). Core **`shardwire`** does not bundle **`react`**. For **`@shardwire/react`**, install **`react`** and **`@shardwire/react`** (which pulls in compatible **`shardwire`**); add **`shardwire`** explicitly if you import it directly too.
 
-- `useShardwireBridge(options, ready?)` — connect on mount, `await ready(...)`, close on unmount; memoize `options` when stable.
-- `useShardwireCapabilities(app, isReady)` — negotiated caps when connected.
-- `useShardwireEvent(app, event, handler, filter?, enabled?)` — subscription with a stable handler ref.
+- `useShardwireConnection(options, ready?)` — connect on mount, `await ready(...)`, close on unmount; returns discriminated status (`connecting` | `ready` + `capabilities` | `error`); reconnect key covers URL/secret/reconnect/metrics shape (not `logger` identity).
+- `ShardwireProvider` / `useShardwire()` — same connection via React context.
+- `useShardwireListener(app, { event, onEvent, filter?, enabled? })` — subscription with stable handler ref and deterministic filter fingerprint.
 
 Repo entry: `packages/react/README.md`. For app-specific RPC or shared state beside Shardwire, see **Concepts → Custom domain contracts**.
 
