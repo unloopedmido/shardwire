@@ -34,11 +34,11 @@ Per-symbol pages follow `https://shardwire.js.org/docs/reference/<section>/<keba
 
 ## 3. Implementation rules
 
-- Use **ESM** (`import` / `export`); avoid CommonJS in new examples unless matching an existing legacy file.
+- Use **ESM** (`import` / `export`); avoid CommonJS in new projects unless matching an existing legacy file.
 - **`shardwire`** must be a real dependency in **both** bot and app packages; import paths and entrypoints (`shardwire` vs `shardwire/client`) must match what the docs show for that runtime (Node vs browser bundlers).
 - **`ECONNREFUSED` / connection errors:** Verify **bridge listen URL** on the bot, **client URL** on the app, reachable host/port, and TLS/HTTP scheme—then verify the **secret** matches on both sides before chasing application bugs.
 
 ## 4. Discovery strategy
 
-- If the user’s feature is not covered above, search this repo under **`examples/`** for working patterns, then fall back to the docs URLs in §2.
+- If the user’s feature is not covered above, check **`packages/create-shardwire/templates/`** for scaffold patterns, then fall back to the docs URLs in §2.
 - **Do not invent** methods, events, or action names—confirm against reference pages or `getShardwireCatalog` / manifest flows described in the docs.

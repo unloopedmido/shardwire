@@ -35,24 +35,25 @@ If you have already split “API server + worker” or “control plane + data p
 
 ## See It Work
 
-From the monorepo root after install:
+Scaffold a project, then run the bot and app from the generated `README.md`:
 
-```text
-$ cd examples/minimal-bridge
-$ npm install
-$ cp .env.example .env   # fill DISCORD_TOKEN, SHARDWIRE_SECRET, optional ids and SHARDWIRE_URL
-$ npm run register       # register slash commands (once)
-$ npm run bot            # terminal A: bot + bridge
-$ npm run app            # terminal B: app client
+```bash
+npm create shardwire@latest
+cd your-project
+npm install
+cp .env.example .env   # fill DISCORD_TOKEN, SHARDWIRE_SECRET, optional ids and SHARDWIRE_URL
+npm run register       # register slash commands (once), if your template includes them
+npm run bot            # terminal A: bot + bridge
+npm run app            # terminal B: app client (Express Server) or see template for Vite
 ```
 
-You should see the app connect to the bridge and handle traffic defined in the example sources. Adjust URLs and secrets if you change the default listen address.
+**Express Server** templates also serve **`GET /health`** on **`PORT`** (default **3000**). Adjust URLs and secrets if you change the default listen address.
 
 ---
 
 ## Install
 
-Cloning only adds source; `npm install` pulls dependencies like any Node project. When you run examples or a bot, processes reach Discord and the bridge WebSocket you configure. Keep tokens and bridge secrets in `.env` or your host’s secret store (examples use names like `SHARDWIRE_SECRET`); never commit real values. To clean up, stop processes and delete the checkout; drop a published dependency from a project with `npm uninstall <name>`.
+Cloning only adds source; `npm install` pulls dependencies like any Node project. When you run a bot or scaffolded app, processes reach Discord and the bridge WebSocket you configure. Keep tokens and bridge secrets in `.env` or your host’s secret store (templates use names like `SHARDWIRE_SECRET`); never commit real values. To clean up, stop processes and delete the checkout; drop a published dependency from a project with `npm uninstall <name>`.
 
 **Start a new project (recommended):**
 
@@ -88,7 +89,7 @@ Useful root scripts:
 | `npm run docs:dev`                    | Next.js docs + reference dev server                                           |
 | `npm run docs:build` / `docs:preview` | Static export build and local preview                                         |
 
-Examples under `examples/` use `file:` dependencies back to `packages/*` so you can iterate without publishing.
+Scaffold templates live under [`packages/create-shardwire/templates/`](packages/create-shardwire/templates/) if you need to read source without generating a project.
 
 </details>
 
@@ -97,9 +98,9 @@ Examples under `examples/` use `file:` dependencies back to `packages/*` so you 
 ## Getting Started
 
 1. **Skim concepts** — [How it works](https://shardwire.js.org/docs/concepts/how-it-works/) (bot vs app, secrets, capabilities).
-2. **Scaffold or copy an example** — `npm create shardwire@latest` or pick `examples/minimal-bridge`, `examples/react-vite-dashboard`, or `examples/workspace-monorepo`.
+2. **Scaffold** — `npm create shardwire@latest` (**Express Server** or **React App**). Template sources: [express-server](https://github.com/unloopedmido/shardwire/tree/main/packages/create-shardwire/templates/express-server), [react-vite](https://github.com/unloopedmido/shardwire/tree/main/packages/create-shardwire/templates/react-vite).
 3. **Configure environment** — `.env` with Discord credentials and a shared bridge secret (for example `SHARDWIRE_SECRET`) that matches on both sides.
-4. **Register commands** (if your template uses slash commands) — `npm run register` in the template or example.
+4. **Register commands** (if your template uses slash commands) — `npm run register` in the generated project.
 5. **Run bot and app** — two processes in development; production layout is your choice (see [Keeping it alive](https://shardwire.js.org/docs/guides/keeping-it-alive/)).
 
 ---
@@ -115,9 +116,8 @@ The **bot process** owns the Discord gateway session and hosts a **bridge server
 | --------------------------- | ----------------------------------------------------------- |
 | `packages/shardwire`        | Core bridge + Node client (`shardwire`, `shardwire/client`) |
 | `packages/react`            | Optional React hooks for app-side UIs                       |
-| `packages/create-shardwire` | Interactive project scaffold                                |
+| `packages/create-shardwire` | Interactive project scaffold and templates                |
 | `apps/website`              | Public documentation site (Fumadocs + Next.js)              |
-| `examples/*`                | Runnable references wired to local `file:` packages         |
 
 Source of truth for APIs and guides is the published documentation, not this file alone.
 

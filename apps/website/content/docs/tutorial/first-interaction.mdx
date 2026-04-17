@@ -3,7 +3,7 @@ title: 'Your first slash command'
 description: 'Register a /hello command, reply from the app, then change the text and restart only the app—no gateway reconnect.'
 ---
 
-This guide matches the **`npm create shardwire`** **Minimal** template (default): a **register** script (**`src/register.ts`**) plus **`interactionCreate`** in **`src/app.ts`**. If you are working **inside the Shardwire repo**, the [**minimal-bridge**](https://github.com/unloopedmido/shardwire/tree/main/examples/minimal-bridge) example is the same idea with plain **`.js`** sources and a local **`file:`** dependency—use **`src/app.js`** wherever this page says **`src/app.ts`**.
+This guide matches the **`npm create shardwire`** **Express Server** template (default): a **register** script (**`src/register.ts`**) plus **`interactionCreate`** in **`src/app.ts`** (alongside Express **`GET /health`** on **`PORT`**). Scaffold with **`npm create shardwire`** or read the template source under [**packages/create-shardwire/templates/express-server**](https://github.com/unloopedmido/shardwire/tree/main/packages/create-shardwire/templates/express-server) on GitHub.
 
 <Callout type="info" title="What you will feel">
 
@@ -13,7 +13,7 @@ After this works, change the reply string in **`src/app.ts`**, save, and **resta
 
 ## Prerequisites
 
-- Finished [**Getting started**](/docs/getting-started) with the **Minimal** scaffold or equivalent (bot + app running).
+- Finished [**Getting started**](/docs/getting-started) with the **Express Server** scaffold or equivalent (bot + app running).
 - **Node.js 22+**.
 - A **Discord Application ID** (same as your bot’s application) and a **guild id** where you can install the bot (guild commands appear instantly for testing).
 
@@ -64,15 +64,13 @@ Edit the reply text in **`src/app.ts`**, save, **restart only terminal B**. Run 
 
 ## What the app code is doing
 
-Your **`connectBotBridge`** call (above this handler in **`src/app.ts`**) sets **`appName`** to the scaffold’s manifest name derived from the project directory— leave it as generated so capabilities and filtering stay consistent.
-
-You listen for **`interactionCreate`**, check for a **slash** interaction (**`chatInput`**) and your command name, then call **`replyToInteraction`**. Always branch on **`result.ok`**:
+Your **`connectBotBridge`** call (above this handler in **`src/app.ts`**) sets **`appName`** to the scaffold’s manifest name derived from the project directory— leave it as generated so capabilities and filtering stay consistent. The Express Server template names the bridge client **`bridge`**:
 
 ```ts
-app.on('interactionCreate', async ({ interaction }) => {
+bridge.on('interactionCreate', async ({ interaction }) => {
   if (interaction.kind !== 'chatInput' || interaction.commandName !== 'hello') return;
 
-  const result = await app.actions.replyToInteraction({
+  const result = await bridge.actions.replyToInteraction({
     interactionId: interaction.id,
     content: 'Hello from Shardwire!',
   });
@@ -82,6 +80,8 @@ app.on('interactionCreate', async ({ interaction }) => {
   }
 });
 ```
+
+You listen for **`interactionCreate`**, check for a **slash** interaction (**`chatInput`**) and your command name, then call **`replyToInteraction`**. Always branch on **`result.ok`**.
 
 <Callout type="tip" title="Nothing happens?">
 

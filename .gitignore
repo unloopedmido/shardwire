@@ -3,7 +3,6 @@ apps/website/dist
 apps/website/.astro
 packages/shardwire/dist
 packages/react/dist
-examples/**/dist
 packages/create-shardwire/dist
 packages/shardwire/coverage
 .vscode

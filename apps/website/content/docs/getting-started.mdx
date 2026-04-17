@@ -1,6 +1,6 @@
 ---
 title: 'Getting started'
-description: 'The fastest way to see Shardwire working: scaffold or clone an example, set two secrets, run two commands.'
+description: 'The fastest way to see Shardwire working: scaffold, set two secrets, run two commands.'
 ---
 
 You are **two small programs** away from a working bot: one starts **The Connection** on the bot side, the other connects your **app** and listens for events.
@@ -9,14 +9,12 @@ You are **two small programs** away from a working bot: one starts **The Connect
 
 | Path | Best for | How |
 | --- | --- | --- |
-| **`npm create shardwire` → Minimal (default)** | New project anywhere; **`shardwire` from npm**; **TypeScript** + **tsx** | Run **`npm create shardwire`** (interactive default template is **Minimal — Node + TypeScript**). Or **`npm create shardwire my-app`**, then **`cd`** into the folder and follow the printed steps |
-| **minimal-bridge** | Same bridge shape **inside this repo** (plain **`.js`**, `file:` **shardwire**) | [**minimal-bridge on GitHub**](https://github.com/unloopedmido/shardwire/tree/main/examples/minimal-bridge) — mirrors the Minimal scaffold for contributors |
-| **React + Vite** | Browser dashboard / UI with **`@shardwire/react`** | [**react-vite-dashboard**](https://github.com/unloopedmido/shardwire/tree/main/examples/react-vite-dashboard) |
-| **npm workspaces** | `packages/bot` + `packages/app` with one root **`.env`** | [**workspace-monorepo**](https://github.com/unloopedmido/shardwire/tree/main/examples/workspace-monorepo) |
+| **`npm create shardwire` → Express Server (default)** | New project anywhere; **`shardwire` from npm**; **TypeScript** + **tsx** + **Express** (`GET /health`) | Run **`npm create shardwire`** (interactive default is **Express Server**). Or **`npm create shardwire my-app`**, then **`cd`** into the folder and follow the printed steps. Template source: [**express-server** on GitHub](https://github.com/unloopedmido/shardwire/tree/main/packages/create-shardwire/templates/express-server) |
+| **`npm create shardwire` → React App** | Browser dashboard / UI with **`@shardwire/react`** | Choose **React App** in the prompt, or **`npm create shardwire -t react-vite`**. Template source: [**react-vite** on GitHub](https://github.com/unloopedmido/shardwire/tree/main/packages/create-shardwire/templates/react-vite) |
 
 <Callout type="info" title="Scaffold from npm (golden path)">
 
-The default **Minimal** template is two **TypeScript** entrypoints (**`src/bot.ts`**, **`src/app.ts`**) run with **`tsx`**. After **`npm install`**, copy **`.env.example`** → **`.env`**, set **`DISCORD_TOKEN`** and **`SHARDWIRE_SECRET`**, then run **`npm run bot`** and **`npm run app`** in two terminals. Slash-command registration is **`npm run register`** (**`src/register.ts`**) — see [**First slash command**](/docs/tutorial/first-interaction).
+The default **Express Server** template is **TypeScript** entrypoints (**`src/bot.ts`**, **`src/app.ts`**) run with **`tsx`**. The app process starts **Express** on **`PORT`** (default **3000**) with **`GET /health`**, then connects the bridge client. After **`npm install`**, copy **`.env.example`** → **`.env`**, set **`DISCORD_TOKEN`** and **`SHARDWIRE_SECRET`**, then run **`npm run bot`** and **`npm run app`** in two terminals. Slash-command registration is **`npm run register`** (**`src/register.ts`**) — see [**First slash command**](/docs/tutorial/first-interaction).
 
 </Callout>
 
@@ -29,7 +27,7 @@ The default **Minimal** template is two **TypeScript** entrypoints (**`src/bot.t
 
 <Step>
 
-Create a `.env` next to the example (or scaffold) with **`DISCORD_TOKEN`** and **`SHARDWIRE_SECRET`** (same secret in both processes). For **Vite** examples, also set **`VITE_SHARDWIRE_SECRET`** to the **same** value — see [**Connection and authentication**](/docs/troubleshooting#connection-and-auth-errors) if the app cannot connect.
+Create a `.env` next to the scaffold with **`DISCORD_TOKEN`** and **`SHARDWIRE_SECRET`** (same secret in both processes). For **React App** (Vite), also set **`VITE_SHARDWIRE_SECRET`** to the **same** value — see [**Connection and authentication**](/docs/troubleshooting#connection-and-auth-errors) if the app cannot connect.
 
 </Step>
 
@@ -82,7 +80,7 @@ app.on('messageCreate', ({ message }) => console.log(message.content));
 await app.ready();
 ```
 
-If you used **`npm create shardwire`** (Minimal template), **`appName`** is already set in **`src/app.ts`** to match your project’s generated manifest name.
+If you used **`npm create shardwire`** (Express Server template), **`appName`** is already set in **`src/app.ts`** to match your project’s generated manifest name.
 
 <Callout type="warn" title="Import path on the app">
 
@@ -92,7 +90,7 @@ In **Vite / browser** bundles, always import from **`shardwire/client`** so the 
 
 ## What “good” looks like
 
-- The bot terminal prints that the bridge is ready (`bot bridge ready` in official examples).
+- The bot terminal prints that the bridge is ready (`bot bridge ready` in official templates).
 - The app terminal prints **capabilities** (what events and actions you can use), or the Vite page shows **ready** with capabilities JSON.
 - Sending a message your bot can see shows up in the app logs (or UI).
 
