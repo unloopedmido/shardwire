@@ -9,9 +9,25 @@ This guide assumes you already followed [**Getting started**](/docs/getting-star
 
 `useShardwire()` returns a **discriminated union**: `connecting` → `ready` | `error`. Render UI from `status` before calling `useShardwireListener` or using `app.actions`.
 
+**`useShardwireApp()`** returns **`AppBridge | null`**: **`null`** while connecting or on error, and the bridge instance when **`status === 'ready'`**—a small helper if you only need the client reference.
+
+## `useShardwireListener` from context
+
+Inside **`ShardwireProvider`**, you can call **`useShardwireListener({ event, onEvent, filter?, enabled? })`** with a **single** argument. The hook subscribes when the provider connection is **`ready`** (and when **`enabled`** is not **`false`**). You do not pass **`AppBridge`** or duplicate **`enabled: conn.status === 'ready'`**.
+
+The two-argument form **`useShardwireListener(app, props)`** is still supported (for example with **`useShardwireConnection`** and **no** provider).
+
+## `useShardwireAction`
+
+**`useShardwireAction(actionName)`** exposes **`invoke`**, **`isPending`**, **`lastResult`**, **`lastError`**, and **`reset`** for **`AppBridge.actions`**. **`invoke`** rejects with an **`Error`** if the connection is not **`ready`** (same idea as rendering from **`status`** first). Requires **`ShardwireProvider`**.
+
+## Diagnostics import
+
+**`diagnoseShardwireApp`** and **`formatShardwireDiagnosis`** are re-exported from **`@shardwire/react`** as well as **`shardwire/client`**, so dashboard code can depend on a single package entry when building error UI.
+
 ## Strict `ready` and manifests
 
-With **`ready={{ strict: true, manifest, botIntents }}`**, the manifest must list every built-in **event** and **action** you rely on, and **`botIntents`** must cover catalog **required intents** for those events. If startup fails, use **`diagnoseShardwireApp`** and **`formatShardwireDiagnosis`** from **`shardwire/client`** (see [**Strict startup failed**](/docs/troubleshooting#strict-startup-failed)).
+With **`ready={{ strict: true, manifest, botIntents }}`**, the manifest must list every built-in **event** and **action** you rely on, and **`botIntents`** must cover catalog **required intents** for those events. If startup fails, use **`diagnoseShardwireApp`** and **`formatShardwireDiagnosis`** from **`@shardwire/react`** or **`shardwire/client`** (see [**Strict startup failed**](/docs/troubleshooting#strict-startup-failed)).
 
 ## Reconnects and `logger`
 
@@ -23,6 +39,6 @@ Inline filter objects are **fingerprinted** so `{ guildId }` does not resubscrib
 
 ## Further reading
 
-- **`@shardwire/react`** on npm — see the package README for **`ShardwireProvider`**, **`useShardwire`**, and **`useShardwireListener`**
+- **`@shardwire/react`** on npm — see the package README for **`ShardwireProvider`**, **`useShardwire`**, **`useShardwireListener`**, **`useShardwireAction`**, and **`useShardwireApp`**
 - [**Troubleshooting → Vite**](/docs/troubleshooting#vite-and-zlib-sync)
 - [**`connectBotBridge`**](/docs/reference/bridge-apis/connect-bot-bridge/)

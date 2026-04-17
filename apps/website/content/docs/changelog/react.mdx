@@ -7,6 +7,14 @@ This page lists releases for **`@shardwire/react`**. It versions **independently
 
 npm: [`@shardwire/react`](https://www.npmjs.com/package/@shardwire/react) · Core library history: [**shardwire**](/docs/changelog/shardwire).
 
+## 0.4.0
+
+- **`useShardwireListener` overload:** Call with **one argument** (props only) inside **`ShardwireProvider`** to subscribe using the context connection—no manual **`AppBridge`** / **`enabled: status === 'ready'`** boilerplate. The two-argument form **`useShardwireListener(app, props)`** is unchanged (e.g. with **`useShardwireConnection`** without a provider).
+- **`useShardwireAction`:** Typed **`invoke`**, **`isPending`**, **`lastResult`**, **`lastError`**, **`reset`** for **`AppBridge.actions`** when the connection is **`ready`**; **`invoke`** rejects while not ready.
+- **`useShardwireApp`:** Returns **`AppBridge | null`** from the provider ( **`null`** until **`ready`**).
+- **`useShardwireOptional`:** **`ShardwireConnection | null`** without throwing outside a provider (used internally so hooks follow Rules of React; advanced composition).
+- **Re-exports:** **`diagnoseShardwireApp`** and **`formatShardwireDiagnosis`** from **`shardwire/client`** for one-import dashboards.
+
 ## 0.3.2
 
 - **Docs:** **npm README** — Shields.io badges (version, downloads, license, Node, React peer); install and lead copy tuned for npm/GitHub. No hook API changes.

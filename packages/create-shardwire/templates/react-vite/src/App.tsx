@@ -1,6 +1,11 @@
 import { useMemo, useState } from 'react';
 import { defineShardwireApp } from 'shardwire/client';
-import { ShardwireProvider, useShardwire, useShardwireListener } from '@shardwire/react';
+import {
+	ShardwireProvider,
+	useShardwire,
+	useShardwireAction,
+	useShardwireListener,
+} from '@shardwire/react';
 
 const manifest = defineShardwireApp({
 	name: '{{MANIFEST_NAME}}',
@@ -11,10 +16,11 @@ const manifest = defineShardwireApp({
 function Dashboard() {
 	const conn = useShardwire();
 	const [lastMessage, setLastMessage] = useState<string>('—');
+	const sendMessage = useShardwireAction('sendMessage');
+	const demoChannelId = import.meta.env.VITE_DEMO_CHANNEL_ID as string | undefined;
 
-	useShardwireListener(conn.status === 'ready' ? conn.app : null, {
+	useShardwireListener({
 		event: 'messageCreate',
-		enabled: conn.status === 'ready',
 		onEvent: ({ message }) => {
 			setLastMessage(`${message.channelId}: ${message.content ?? ''}`);
 		},
@@ -62,6 +68,43 @@ function Dashboard() {
 			<p>
 				<strong>Last messageCreate:</strong> <span className="dashboard-muted">{lastMessage}</span>
 			</p>
+			<section className="dashboard-section" aria-labelledby="action-demo-heading">
+				<h2 id="action-demo-heading" className="dashboard-heading">
+					<code>useShardwireAction</code> (optional)
+				</h2>
+				<p className="dashboard-muted">
+					Set <code>VITE_DEMO_CHANNEL_ID</code> in <code>.env</code> to enable the button (see{' '}
+					<code>.env.example</code>).
+				</p>
+				<button
+					type="button"
+					className="dashboard-panel"
+					disabled={!demoChannelId || sendMessage.isPending}
+					onClick={() => {
+						if (!demoChannelId) return;
+						void sendMessage.invoke({
+							channelId: demoChannelId,
+							content: 'Hello from @shardwire/react',
+						});
+					}}
+				>
+					{sendMessage.isPending ? 'Sending…' : 'Send test message'}
+				</button>
+				{sendMessage.lastResult ? (
+					<pre
+						className="dashboard-pre"
+						aria-label="Last action result JSON"
+						style={{ whiteSpace: 'pre-wrap' }}
+					>
+						{JSON.stringify(sendMessage.lastResult, null, 2)}
+					</pre>
+				) : null}
+				{sendMessage.lastError ? (
+					<p role="alert" className="dashboard-muted">
+						{sendMessage.lastError.message}
+					</p>
+				) : null}
+			</section>
 		</div>
 	);
 }

@@ -98,6 +98,16 @@ For conceptual background, read [How it works](https://shardwire.js.org/docs/con
 
 The hooks manage **client lifecycle** and **subscription** to Shardwire session state. They are thin wrappers over the same client types you would use from plain TypeScript—use this package when React is already in the stack.
 
+- **`ShardwireProvider` / `useShardwire`** — one `AppBridge` per subtree; connection status is a discriminated union (`connecting`, `ready`, `error`).
+- **`useShardwireApp`** — returns `AppBridge | null` (`null` until `ready`).
+- **`useShardwireConnection`** — same lifecycle without a provider (bring your own state).
+- **`useShardwireListener`** — subscribe to bot events. Inside a provider, call **`useShardwireListener({ event, onEvent, ... })`** (single argument). With **`useShardwireConnection`**, pass **`useShardwireListener(app, { ... })`**.
+- **`useShardwireAction`** — typed **`invoke`**, **`isPending`**, **`lastResult`**, **`lastError`**, **`reset`** for `AppBridge.actions` when `ready`.
+- **`useShardwireOptional`** — read the connection from context or `null` outside a provider (advanced; most apps use **`useShardwire`**).
+- **`diagnoseShardwireApp`** / **`formatShardwireDiagnosis`** — re-exported from **`shardwire/client`** for strict-startup error UI.
+
+See the [React cookbook](https://shardwire.js.org/docs/guides/react-cookbook/) for patterns (manifests, filters, reconnect keys).
+
 <details>
 <summary><b>Details</b> — reference material</summary>
 

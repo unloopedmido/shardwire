@@ -1,7 +1,7 @@
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { ShardwireProvider, useShardwire } from './shardwire-provider';
+import { ShardwireProvider, useShardwire, useShardwireApp } from './shardwire-provider';
 
 vi.mock('shardwire/client', () => {
 	const ready = vi.fn().mockResolvedValue(undefined);
@@ -17,6 +17,11 @@ vi.mock('shardwire/client', () => {
 function Consumer() {
 	const c = useShardwire();
 	return <span data-testid="status">{c.status}</span>;
+}
+
+function AppConsumer() {
+	const app = useShardwireApp();
+	return <span data-testid="has-app">{app ? 'yes' : 'no'}</span>;
 }
 
 describe('useShardwire', () => {
@@ -38,5 +43,17 @@ describe('useShardwire', () => {
 
 		const el = await findByTestId('status');
 		expect(['connecting', 'ready']).toContain(el.textContent);
+	});
+
+	it('useShardwireApp becomes non-null when connection is ready', async () => {
+		const { getByTestId } = render(
+			<ShardwireProvider options={{ url: 'ws://localhost', secret: 's' }}>
+				<AppConsumer />
+			</ShardwireProvider>,
+		);
+
+		await waitFor(() => {
+			expect(getByTestId('has-app').textContent).toBe('yes');
+		});
 	});
 });
