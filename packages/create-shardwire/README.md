@@ -25,7 +25,7 @@ npm create shardwire@latest
 
 ## The Problem
 
-Starting a split-process Discord project means repeating the same decisions: workspace vs single package, TypeScript vs JavaScript, Vite vs plain Node, where slash-command registration lives, and how `.env` is wired for **both** bot and app.
+Starting a split-process Discord project means repeating the same decisions: TypeScript vs JavaScript, Vite vs plain Node, where slash-command registration lives, and how `.env` is wired for **both** bot and app.
 
 `create-shardwire` encodes those decisions as **maintained templates** so you get a running baseline and can focus on product code. If you have used `npm create vite` or `create-next-app`, the flow is the same idea with different defaults.
 
@@ -35,7 +35,7 @@ Starting a split-process Discord project means repeating the same decisions: wor
 
 ```text
 $ npm create shardwire@latest
-# follow prompts: project name, template (minimal / react-vite / workspace), options
+# follow prompts: project name, template (Express Server / React App), options
 $ cd your-project
 $ npm install
 $ cp .env.example .env
@@ -89,16 +89,15 @@ Templates live under `templates/` and are copied (with substitutions) during pro
 
 ## How It Works
 
-The CLI asks a short set of questions, renders a **template** into a target directory, and writes a `package.json` wired to published `shardwire` / `@shardwire/react` versions (or workspace equivalents when you develop inside this monorepo).
+The CLI asks a short set of questions, renders a **template** into a target directory, and writes a `package.json` wired to published `shardwire` / `@shardwire/react` versions (or workspace equivalents when you develop inside the Shardwire monorepo).
 
 <details>
 <summary><b>Details</b> — templates</summary>
 
-| Template       | When to pick it                               |
-| -------------- | --------------------------------------------- |
-| **minimal**    | Smallest Node bot + Node app pair             |
-| **react-vite** | Vite + React app UI talking to the bridge     |
-| **workspace**  | npm workspaces splitting bot and app packages |
+| Template           | When to pick it                                                       |
+| ------------------ | --------------------------------------------------------------------- |
+| **Express Server** | Node bot + Express (`GET /health`) + bridge client in one app process |
+| **React App**      | Vite + React UI (`@shardwire/react`) talking to the bridge            |
 
 If a template name changes, trust the interactive prompt list over this table.
 

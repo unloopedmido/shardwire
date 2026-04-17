@@ -1,6 +1,6 @@
 <div align="center">
 
-# Your Shardwire project (React + Vite)
+# Your Shardwire project (React App)
 
 ### Vite-powered React UI talking to a Node bot through `@shardwire/react` and `shardwire`.
 
@@ -76,7 +76,7 @@ Requires **Node.js 22+**.
 
 ## How It Works
 
-The bot process (`bot/bot.ts`) mirrors the minimal template: Discord.js + bridge. The Vite app wraps your React tree with `ShardwireProvider` and uses hooks from `@shardwire/react` to interact with the session.
+The bot process (`bot/bot.ts`) mirrors the Express Server template: Discord.js + bridge. The Vite app wraps your React tree with `ShardwireProvider` and uses hooks from `@shardwire/react` to interact with the session.
 
 <details>
 <summary><b>Details</b> — production split</summary>

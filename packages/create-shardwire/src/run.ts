@@ -32,8 +32,6 @@ function buildVars(slug: string): Record<string, string> {
 		MANIFEST_NAME: manifestName,
 		SHARDWIRE_VERSION,
 		REACT_PKG_VERSION,
-		WORKSPACE_BOT_PKG: `${slug}-bot`,
-		WORKSPACE_APP_PKG: `${slug}-app`,
 	};
 }
 
@@ -52,7 +50,7 @@ export async function run(argv: string[]): Promise<void> {
 
 	if (args.yes) {
 		rawTarget = args.target?.trim() || 'shardwire-app';
-		template = args.template ?? 'minimal';
+		template = args.template ?? 'express-server';
 		packageManager = args.packageManager ?? 'npm';
 		runInstallDeps = args.install;
 	} else {
@@ -134,7 +132,7 @@ export async function run(argv: string[]): Promise<void> {
 
 	const run = (script: string) => scriptRun(packageManager, script);
 
-	if (template === 'minimal' || template === 'workspace') {
+	if (template === 'express-server') {
 		lines.push(
 			`  ${pc.dim('cp .env.example .env')}   ${pc.dim('# set DISCORD_TOKEN + SHARDWIRE_SECRET')}`,
 		);

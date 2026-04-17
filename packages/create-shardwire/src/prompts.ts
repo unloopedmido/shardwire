@@ -39,7 +39,7 @@ export async function runInteractivePrompts(initialName?: string): Promise<Promp
 			label: t.title,
 			hint: t.hint,
 		})),
-		initialValue: 'minimal' satisfies TemplateId,
+		initialValue: 'express-server' satisfies TemplateId,
 	});
 	if (isCancel(template)) {
 		return;

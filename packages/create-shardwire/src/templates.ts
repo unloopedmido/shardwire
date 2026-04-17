@@ -1,4 +1,4 @@
-export type TemplateId = 'minimal' | 'react-vite' | 'workspace';
+export type TemplateId = 'express-server' | 'react-vite';
 
 export type TemplateMeta = {
 	id: TemplateId;
@@ -9,22 +9,16 @@ export type TemplateMeta = {
 
 export const TEMPLATES: readonly TemplateMeta[] = [
 	{
-		id: 'minimal',
-		title: 'Minimal — Node + TypeScript',
-		description: 'Two tsx entrypoints: bot bridge + app. Best for learning and servers.',
-		hint: 'tsx · single package · fastest cold start',
+		id: 'express-server',
+		title: 'Express Server',
+		description: 'Node bot + Express HTTP (GET /health) + bridge client in the app process.',
+		hint: 'tsx · express · two terminals',
 	},
 	{
 		id: 'react-vite',
-		title: 'React + Vite',
+		title: 'React App',
 		description: 'Browser dashboard with @shardwire/react, strict manifest, Vite dev server.',
 		hint: 'Vite · env prefix VITE_* · two terminals + browser',
-	},
-	{
-		id: 'workspace',
-		title: 'npm workspaces',
-		description: 'packages/bot + packages/app sharing one root .env — good for split deploys.',
-		hint: 'monorepo · shared secrets · npm -w scripts',
 	},
 ];
 

@@ -1,8 +1,8 @@
 <div align="center">
 
-# Your Shardwire project (minimal)
+# Your Shardwire project (Express Server)
 
-### Node bot process + Node app process connected by the Shardwire bridge.
+### Node bot process + Node app process (Express HTTP + bridge client) connected by the Shardwire bridge.
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-326ce5?style=flat-square)](https://opensource.org/licenses/MIT)
 [![Node](https://img.shields.io/badge/node-%E2%89%A522-339933?style=flat-square&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
@@ -17,7 +17,7 @@
 
 ---
 
-Running the bot hits Discord; the app opens a WebSocket to the bridge URL you configure. Keep `DISCORD_TOKEN`, the bridge secret, and related IDs in `.env` (start from `.env.example`); never commit real values. Stop both processes and delete this folder when you want it gone.
+Running the bot hits Discord; the app opens a WebSocket to the bridge URL you configure and serves **`GET /health`** on **`PORT`** (default **3000**). Keep `DISCORD_TOKEN`, the bridge secret, and related IDs in `.env` (start from `.env.example`); never commit real values. Stop both processes and delete this folder when you want it gone.
 
 ```bash
 npm install
@@ -28,7 +28,7 @@ cp .env.example .env
 
 ## The Problem
 
-You want the smallest runnable layout: **TypeScript sources**, **tsx** for local runs, and two scripts you can supervise in separate terminals while you learn the bridge.
+You want a runnable layout with **Express** for HTTP (health checks, future routes) plus **TypeScript** sources, **tsx** for local runs, and two scripts you can supervise in separate terminals while you learn the bridge.
 
 ---
 
@@ -39,7 +39,7 @@ $ npm install
 $ cp .env.example .env   # set DISCORD_TOKEN, SHARDWIRE_SECRET, ids as prompted in file comments
 $ npm run register
 $ npm run bot    # terminal A
-$ npm run app    # terminal B
+$ npm run app    # terminal B — HTTP + bridge client
 ```
 
 ---
@@ -55,11 +55,11 @@ Requires **Node.js 22+** (see `engines` in `package.json`).
 <details>
 <summary><b>Details</b> — scripts</summary>
 
-| Script             | What it runs                                              |
-| ------------------ | --------------------------------------------------------- |
-| `npm run bot`      | `tsx src/bot.ts` — Discord session + bridge host          |
-| `npm run app`      | `tsx src/app.ts` — bridge client                          |
-| `npm run register` | `tsx src/register.ts` — slash command registration helper |
+| Script             | What it runs                                                    |
+| ------------------ | --------------------------------------------------------------- |
+| `npm run bot`      | `tsx src/bot.ts` — Discord session + bridge host                |
+| `npm run app`      | `tsx src/app.ts` — Express (`GET /health`) + `connectBotBridge` |
+| `npm run register` | `tsx src/register.ts` — slash command registration helper       |
 
 </details>
 
@@ -75,7 +75,7 @@ Requires **Node.js 22+** (see `engines` in `package.json`).
 
 ## How It Works
 
-`src/bot.ts` owns the Discord client and publishes the bridge. `src/app.ts` connects with the shared secret and URL from your environment variables.
+`src/bot.ts` owns the Discord client and publishes the bridge (default **port 3001**). `src/app.ts` starts Express on **`PORT`** (default **3000**), then connects with the shared secret and **`SHARDWIRE_URL`**.
 
 <details>
 <summary><b>Details</b> — where to look next</summary>

@@ -13,8 +13,18 @@ export type ParsedArgs = {
 	help: boolean;
 };
 
-const TEMPLATE_IDS = new Set<string>(['minimal', 'react-vite', 'workspace']);
+const CANONICAL_TEMPLATE_IDS = new Set<string>(['express-server', 'react-vite']);
+/** Deprecated CLI ids mapped to current {@link TemplateId}. */
+const LEGACY_TEMPLATE_ALIASES: Record<string, TemplateId> = {
+	minimal: 'express-server',
+};
+
 const PM = new Set<string>(['npm', 'pnpm', 'yarn']);
+
+export function normalizeTemplateId(raw: string): TemplateId | undefined {
+	const mapped = LEGACY_TEMPLATE_ALIASES[raw] ?? raw;
+	return CANONICAL_TEMPLATE_IDS.has(mapped) ? (mapped as TemplateId) : undefined;
+}
 
 export function parseArgs(argv: string[]): ParsedArgs {
 	const out: ParsedArgs = {
@@ -45,8 +55,11 @@ export function parseArgs(argv: string[]): ParsedArgs {
 		}
 		if (a === '--template' || a === '-t') {
 			const v = argv[++i];
-			if (v && TEMPLATE_IDS.has(v)) {
-				out.template = v as TemplateId;
+			if (v) {
+				const n = normalizeTemplateId(v);
+				if (n) {
+					out.template = n;
+				}
 			}
 			continue;
 		}
@@ -76,7 +89,7 @@ ${pc.dim('Usage')}
   npm create shardwire [directory] [options]
 
 ${pc.dim('Options')}
-  -t, --template <id>     ${pc.dim('minimal | react-vite | workspace')}
+  -t, --template <id>     ${pc.dim('express-server | react-vite')} ${pc.dim('(minimal → express-server)')}
       --pm <name>         ${pc.dim('npm | pnpm | yarn')} (default: npm)
   -y, --yes               ${pc.dim('skip prompts (use defaults)')}
       --no-install        ${pc.dim('do not run install after scaffold')}
@@ -85,6 +98,6 @@ ${pc.dim('Options')}
 ${pc.dim('Examples')}
   npm create shardwire
   npm create shardwire my-discord-app --template react-vite
-  npm create shardwire -y --template minimal
+  npm create shardwire -y --template express-server
 `.trimStart();
 }
