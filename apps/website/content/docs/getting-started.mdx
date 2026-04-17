@@ -9,14 +9,14 @@ You are **two small programs** away from a working bot: one starts **The Connect
 
 | Path | Best for | How |
 | --- | --- | --- |
-| **`npm create shardwire`** | New project outside this repo; uses **`shardwire` from npm** | Run **`npm create shardwire`** (or **`npm create shardwire my-app`**), then follow the printed steps |
-| **minimal-bridge** | Smallest Node-only example inside the monorepo | [**minimal-bridge on GitHub**](https://github.com/unloopedmido/shardwire/tree/main/examples/minimal-bridge) |
+| **`npm create shardwire` → Minimal (default)** | New project anywhere; **`shardwire` from npm**; **TypeScript** + **tsx** | Run **`npm create shardwire`** (interactive default template is **Minimal — Node + TypeScript**). Or **`npm create shardwire my-app`**, then **`cd`** into the folder and follow the printed steps |
+| **minimal-bridge** | Same bridge shape **inside this repo** (plain **`.js`**, `file:` **shardwire**) | [**minimal-bridge on GitHub**](https://github.com/unloopedmido/shardwire/tree/main/examples/minimal-bridge) — mirrors the Minimal scaffold for contributors |
 | **React + Vite** | Browser dashboard / UI with **`@shardwire/react`** | [**react-vite-dashboard**](https://github.com/unloopedmido/shardwire/tree/main/examples/react-vite-dashboard) |
 | **npm workspaces** | `packages/bot` + `packages/app` with one root **`.env`** | [**workspace-monorepo**](https://github.com/unloopedmido/shardwire/tree/main/examples/workspace-monorepo) |
 
-<Callout type="info" title="Scaffold from npm">
+<Callout type="info" title="Scaffold from npm (golden path)">
 
-**`npm create shardwire`** drops a minimal **bot + app** project (same idea as **minimal-bridge**). After install, copy **`.env.example`** to **`.env`**, set **`DISCORD_TOKEN`** and **`SHARDWIRE_SECRET`**, then run **`npm run bot`** and **`npm run app`** in two terminals.
+The default **Minimal** template is two **TypeScript** entrypoints (**`src/bot.ts`**, **`src/app.ts`**) run with **`tsx`**. After **`npm install`**, copy **`.env.example`** → **`.env`**, set **`DISCORD_TOKEN`** and **`SHARDWIRE_SECRET`**, then run **`npm run bot`** and **`npm run app`** in two terminals. Slash-command registration is **`npm run register`** (**`src/register.ts`**) — see [**First slash command**](/docs/tutorial/first-interaction).
 
 </Callout>
 
@@ -81,6 +81,8 @@ const app = connectBotBridge({
 app.on('messageCreate', ({ message }) => console.log(message.content));
 await app.ready();
 ```
+
+If you used **`npm create shardwire`** (Minimal template), **`appName`** is already set in **`src/app.ts`** to match your project’s generated manifest name.
 
 <Callout type="warn" title="Import path on the app">
 
