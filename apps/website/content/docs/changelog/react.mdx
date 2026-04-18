@@ -7,6 +7,15 @@ This page lists releases for **`@shardwire/react`**. It versions **independently
 
 npm: [`@shardwire/react`](https://www.npmjs.com/package/@shardwire/react) · Core library history: [**shardwire**](/docs/changelog/shardwire).
 
+## 0.5.0
+
+- **`useShardwireMutation`:** Preferred hook for **`AppBridge.actions`** (pending state, **`lastResult`** including structured **`{ ok: false }`**, **`lastError`** for throws and action failures). **`useShardwireAction`** remains an alias.
+- **Capabilities:** **`useShardwireCapabilities`** and **`useShardwireCapability`** read negotiated capabilities and per-event/action explanations (optional explicit **`AppBridge`** overload).
+- **`useShardwireEventState`:** Latest event payload or reducer-driven state from **`app.on`** (optional explicit **`AppBridge`** overload).
+- **`useShardwirePreflight`:** Wraps **`app.preflight`** with **`status`**, **`report`**, **`error`**, and **`refresh()`** (optional explicit **`AppBridge`** overload).
+- **Testing:** **`MockShardwireProvider`**, **`createMockShardwireAppBridge`**, and **`createMockShardwireConnection`** for unit tests.
+- **Connection keys:** Reconnect when **`debug`** or **metrics** callback identity changes; **`useShardwireConnection`** also reconnects when strict-startup **`ready`** inputs change (aligned with **`ShardwireProvider`**).
+
 ## 0.4.0
 
 - **`useShardwireListener` overload:** Call with **one argument** (props only) inside **`ShardwireProvider`** to subscribe using the context connection—no manual **`AppBridge`** / **`enabled: status === 'ready'`** boilerplate. The two-argument form **`useShardwireListener(app, props)`** is unchanged (e.g. with **`useShardwireConnection`** without a provider).

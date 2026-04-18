@@ -7,9 +7,13 @@ This guide assumes you already followed [**Getting started**](/docs/getting-star
 
 ## Connection state
 
-`useShardwire()` returns a **discriminated union**: `connecting` → `ready` | `error`. Render UI from `status` before calling `useShardwireListener` or using `app.actions`.
+`useShardwire()` returns a **discriminated union**: `connecting` → `ready` | `error`. Call `useShardwireListener(...)` unconditionally and let the hook wait for `ready`; render UI from `status` before invoking actions or reading `ready`-only fields.
 
 **`useShardwireApp()`** returns **`AppBridge | null`**: **`null`** while connecting or on error, and the bridge instance when **`status === 'ready'`**—a small helper if you only need the client reference.
+
+## Capabilities
+
+Use **`useShardwireCapabilities()`** to read the current negotiated capabilities and **`useShardwireCapability({ kind, name })`** to explain whether a built-in event or action is currently allowed. This is the easiest way to gate UI without manually inspecting raw capability arrays.
 
 ## `useShardwireListener` from context
 
@@ -19,11 +23,19 @@ The two-argument form **`useShardwireListener(app, props)`** is still supported 
 
 ## `useShardwireAction`
 
-**`useShardwireAction(actionName)`** exposes **`invoke`**, **`isPending`**, **`lastResult`**, **`lastError`**, and **`reset`** for **`AppBridge.actions`**. **`invoke`** rejects with an **`Error`** if the connection is not **`ready`** (same idea as rendering from **`status`** first). Requires **`ShardwireProvider`**.
+Prefer **`useShardwireMutation(actionName)`** for new code. It exposes **`invoke`**, **`isPending`**, **`lastResult`**, **`lastError`**, and **`reset`** for **`AppBridge.actions`**. **`invoke`** rejects with an **`Error`** if the connection is not **`ready`**. **`lastResult`** stores the latest invocation result, including structured `{ ok: false }` failures; **`lastError`** mirrors the latest thrown/not-ready error and action-failure message for simple alert UI. **`useShardwireAction(actionName)`** is the compatibility alias.
+
+## Event state
+
+Use **`useShardwireEventState({ event })`** when you just want the latest payload in component state, or pass **`initialState`** + **`reduce`** to derive list/counter/reducer-driven UI from event streams without hand-writing subscription glue.
 
 ## Diagnostics import
 
 **`diagnoseShardwireApp`** and **`formatShardwireDiagnosis`** are re-exported from **`@shardwire/react`** as well as **`shardwire/client`**, so dashboard code can depend on a single package entry when building error UI.
+
+## Preflight
+
+Use **`useShardwirePreflight(desired, options?)`** to wrap **`app.preflight(...)`** in React state. The hook runs automatically by default and returns the latest **`report`**, **`status`**, and a **`refresh()`** function for re-check buttons.
 
 ## Strict `ready` and manifests
 
@@ -31,7 +43,7 @@ With **`ready={{ strict: true, manifest, botIntents }}`**, the manifest must lis
 
 ## Reconnects and `logger`
 
-`useShardwireConnection` **reconnects** when connection-affecting fields of **`options`** change (URL, secret, app name, etc.). The **`logger`** callback identity is **ignored** for that comparison so inline `logger: { debug: () => ... }` does not thrash connections. To swap loggers intentionally, **remount** the hook or set a parent **`key`**.
+`useShardwireConnection` **reconnects** when connection-affecting fields of **`options`** change (URL, secret, app name, debug, metrics callback identity, etc.) or when strict-startup **`ready`** inputs change (`strict`, `manifest`, `botIntents`, `expectedScope`). The **`logger`** callback identity is still **ignored** for that comparison so inline `logger: { debug: () => ... }` does not thrash connections. To swap loggers intentionally, **remount** the hook or set a parent **`key`**.
 
 ## Filters and `useShardwireListener`
 
@@ -39,6 +51,6 @@ Inline filter objects are **fingerprinted** so `{ guildId }` does not resubscrib
 
 ## Further reading
 
-- **`@shardwire/react`** on npm — see the package README for **`ShardwireProvider`**, **`useShardwire`**, **`useShardwireListener`**, **`useShardwireAction`**, and **`useShardwireApp`**
+- **`@shardwire/react`** on npm — see the package README for **`useShardwireMutation`**, **`useShardwireEventState`**, **`useShardwireCapability`**, **`useShardwirePreflight`**, and test helpers
 - [**Troubleshooting → Vite**](/docs/troubleshooting#vite-and-zlib-sync)
 - [**`connectBotBridge`**](/docs/reference/bridge-apis/connect-bot-bridge/)
