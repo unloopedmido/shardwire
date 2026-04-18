@@ -12,7 +12,7 @@ export type ShardwireConnection =
 /**
  * Connects an {@link AppBridge} on mount, awaits {@link AppBridge.ready}, and closes on unmount.
  *
- * Reconnects when connection-affecting fields of `options` change (see `shardwireConnectionKey`). To change
+ * Reconnects when connection-affecting fields of `options` or `readyOptions` change. To change
  * {@link AppBridgeOptions.logger} without remounting, the identity of the logger callback is ignored — remount or set a parent `key`.
  */
 export function useShardwireConnection(
@@ -30,7 +30,8 @@ export function useShardwireConnection(
 	const optionsRef = useRef(options);
 	optionsRef.current = options;
 
-	const key = shardwireConnectionKey(options);
+	const connectionKey = shardwireConnectionKey(options);
+	const readyKey = shardwireReadyKey(readyOptions);
 
 	useEffect(() => {
 		const opts = optionsRef.current;
@@ -64,7 +65,73 @@ export function useShardwireConnection(
 			void instance.close();
 			setConnection({ status: 'connecting', app: null });
 		};
-	}, [key]);
+	}, [connectionKey, readyKey]);
 
 	return connection;
+}
+
+function shardwireReadyKey(readyOptions: AppBridgeReadyOptions | undefined): string {
+	if (!readyOptions) {
+		return '';
+	}
+
+	return JSON.stringify({
+		strict: readyOptions.strict ?? false,
+		manifest: normalizeManifest(readyOptions.manifest),
+		botIntents: sortStrings(readyOptions.botIntents),
+		expectedScope: normalizeExpectedScope(readyOptions.expectedScope),
+	});
+}
+
+function normalizeManifest(manifest: AppBridgeReadyOptions['manifest']): Record<string, unknown> | null {
+	if (!manifest) {
+		return null;
+	}
+
+	const filters = manifest.filters
+		? (Object.entries(manifest.filters) as Array<[string, readonly string[] | undefined]>)
+				.sort(([left], [right]) => left.localeCompare(right))
+				.reduce<Record<string, readonly string[]>>((acc, [eventName, keys]) => {
+					if (keys && keys.length > 0) {
+						acc[eventName] = sortNonEmptyStrings(keys);
+					}
+					return acc;
+				}, {})
+		: null;
+
+	return {
+		name: manifest.name,
+		events: sortStrings(manifest.events),
+		actions: sortStrings(manifest.actions),
+		...(filters && Object.keys(filters).length > 0 ? { filters } : {}),
+	};
+}
+
+function normalizeExpectedScope(expectedScope: AppBridgeReadyOptions['expectedScope']): Record<string, unknown> | null {
+	if (!expectedScope) {
+		return null;
+	}
+
+	return {
+		events: normalizeScopeList(expectedScope.events),
+		actions: normalizeScopeList(expectedScope.actions),
+	};
+}
+
+function normalizeScopeList(values: '*' | readonly string[] | undefined): '*' | readonly string[] | null {
+	if (values === '*') {
+		return '*';
+	}
+	return values ? sortStrings(values) : null;
+}
+
+function sortStrings(values: readonly string[] | undefined): readonly string[] | null {
+	if (!values || values.length === 0) {
+		return null;
+	}
+	return sortNonEmptyStrings(values);
+}
+
+function sortNonEmptyStrings(values: readonly string[]): readonly string[] {
+	return [...values].sort();
 }

@@ -1,5 +1,8 @@
 import type { AppBridgeMetricsHooks, AppBridgeOptions } from 'shardwire/client';
 
+const functionIds = new WeakMap<Function, number>();
+let nextFunctionId = 1;
+
 /**
  * Serializable subset of {@link AppBridgeOptions} used to decide when to tear down and rebuild a bridge.
  * `logger` is intentionally omitted — changing logger identity requires remounting the component or changing a parent `key`.
@@ -12,6 +15,7 @@ export function shardwireConnectionKey(options: AppBridgeOptions): string {
 		appName: options.appName ?? '',
 		reconnect: normalizeReconnect(options.reconnect),
 		requestTimeoutMs: options.requestTimeoutMs ?? null,
+		debug: options.debug ?? false,
 		metrics: metricsFingerprint(options.metrics),
 	};
 	return JSON.stringify(payload);
@@ -27,7 +31,22 @@ function normalizeReconnect(reconnect: AppBridgeOptions['reconnect']): Record<st
 	};
 }
 
-function metricsFingerprint(metrics: AppBridgeMetricsHooks | undefined): { onActionComplete: boolean } | null {
+function metricsFingerprint(metrics: AppBridgeMetricsHooks | undefined): { onActionComplete: number | null } | null {
 	if (!metrics) return null;
-	return { onActionComplete: typeof metrics.onActionComplete === 'function' };
+	return { onActionComplete: functionIdentity(metrics.onActionComplete) };
+}
+
+function functionIdentity(fn: Function | undefined): number | null {
+	if (!fn) {
+		return null;
+	}
+
+	const existing = functionIds.get(fn);
+	if (existing !== undefined) {
+		return existing;
+	}
+
+	const id = nextFunctionId++;
+	functionIds.set(fn, id);
+	return id;
 }

@@ -100,10 +100,15 @@ The hooks manage **client lifecycle** and **subscription** to Shardwire session 
 
 - **`ShardwireProvider` / `useShardwire`** — one `AppBridge` per subtree; connection status is a discriminated union (`connecting`, `ready`, `error`).
 - **`useShardwireApp`** — returns `AppBridge | null` (`null` until `ready`).
-- **`useShardwireConnection`** — same lifecycle without a provider (bring your own state).
-- **`useShardwireListener`** — subscribe to bot events. Inside a provider, call **`useShardwireListener({ event, onEvent, ... })`** (single argument). With **`useShardwireConnection`**, pass **`useShardwireListener(app, { ... })`**.
-- **`useShardwireAction`** — typed **`invoke`**, **`isPending`**, **`lastResult`**, **`lastError`**, **`reset`** for `AppBridge.actions` when `ready`.
+- **`useShardwireConnection`** — same lifecycle without a provider (bring your own state). Recreates the bridge when connection-affecting `options` or strict-startup `ready` inputs change.
+- **`useShardwireCapabilities`** / **`useShardwireCapability`** — read negotiated capabilities and explain whether a built-in event or action is currently usable.
+- **`useShardwirePreflight`** — runs `app.preflight(...)` and exposes the latest report plus a `refresh()` function.
+- **`useShardwireEventState`** — build event-driven UI state without hand-writing subscription + reducer glue for every component.
+- **`useShardwireMutation`** — preferred typed mutation hook for `AppBridge.actions`; returns **`invoke`**, **`isPending`**, **`lastResult`**, **`lastError`**, **`reset`**.
+- **`useShardwireAction`** — compatibility alias for **`useShardwireMutation`**.
+- **`useShardwireListener`** — low-level event subscription hook. Call it unconditionally; the hook waits until the bridge is `ready`. Inside a provider, use **`useShardwireListener({ event, onEvent, ... })`** (single argument). With **`useShardwireConnection`**, pass **`useShardwireListener(app, { ... })`**.
 - **`useShardwireOptional`** — read the connection from context or `null` outside a provider (advanced; most apps use **`useShardwire`**).
+- **`MockShardwireProvider`** / **`createMockShardwireAppBridge`** / **`createMockShardwireConnection`** — lightweight test helpers for component tests.
 - **`diagnoseShardwireApp`** / **`formatShardwireDiagnosis`** — re-exported from **`shardwire/client`** for strict-startup error UI.
 
 See the [React cookbook](https://shardwire.js.org/docs/guides/react-cookbook/) for patterns (manifests, filters, reconnect keys).
