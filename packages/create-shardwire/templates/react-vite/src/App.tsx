@@ -2,9 +2,12 @@ import { useMemo, useState } from 'react';
 import { defineShardwireApp } from 'shardwire/client';
 import {
 	ShardwireProvider,
+	useShardwireCapabilities,
+	useShardwireCapability,
+	useShardwireEventState,
+	useShardwireMutation,
+	useShardwirePreflight,
 	useShardwire,
-	useShardwireAction,
-	useShardwireListener,
 } from '@shardwire/react';
 
 const manifest = defineShardwireApp({
@@ -15,16 +18,12 @@ const manifest = defineShardwireApp({
 
 function Dashboard() {
 	const conn = useShardwire();
-	const [lastMessage, setLastMessage] = useState<string>('—');
-	const sendMessage = useShardwireAction('sendMessage');
+	const capabilities = useShardwireCapabilities();
+	const sendMessageCapability = useShardwireCapability({ kind: 'action', name: 'sendMessage' });
+	const lastMessage = useShardwireEventState({ event: 'messageCreate' });
+	const sendMessage = useShardwireMutation('sendMessage');
+	const preflight = useShardwirePreflight({ events: ['messageCreate'], actions: ['sendMessage'] });
 	const demoChannelId = import.meta.env.VITE_DEMO_CHANNEL_ID as string | undefined;
-
-	useShardwireListener({
-		event: 'messageCreate',
-		onEvent: ({ message }) => {
-			setLastMessage(`${message.channelId}: ${message.content ?? ''}`);
-		},
-	});
 
 	if (conn.status === 'connecting') {
 		return (
@@ -62,15 +61,27 @@ function Dashboard() {
 					aria-label="Bridge capabilities JSON"
 					style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
 				>
-					{JSON.stringify(conn.capabilities, null, 2)}
+					{JSON.stringify(capabilities ?? conn.capabilities, null, 2)}
 				</pre>
 			</section>
 			<p>
-				<strong>Last messageCreate:</strong> <span className="dashboard-muted">{lastMessage}</span>
+				<strong>Last messageCreate:</strong>{' '}
+				<span className="dashboard-muted">
+					{lastMessage.state
+						? `${lastMessage.state.message.channelId}: ${lastMessage.state.message.content ?? ''}`
+						: '—'}
+				</span>
+			</p>
+			<p className="dashboard-muted">
+				<strong>sendMessage capability:</strong> {sendMessageCapability?.reasonCode ?? 'waiting'}
+			</p>
+			<p className="dashboard-muted">
+				<strong>Preflight:</strong>{' '}
+				{preflight.report ? (preflight.report.ok ? 'ok' : 'issues found') : preflight.status}
 			</p>
 			<section className="dashboard-section" aria-labelledby="action-demo-heading">
 				<h2 id="action-demo-heading" className="dashboard-heading">
-					<code>useShardwireAction</code> (optional)
+					<code>useShardwireMutation</code> (preferred)
 				</h2>
 				<p className="dashboard-muted">
 					Set <code>VITE_DEMO_CHANNEL_ID</code> in <code>.env</code> to enable the button (see{' '}
@@ -79,7 +90,11 @@ function Dashboard() {
 				<button
 					type="button"
 					className="dashboard-panel"
-					disabled={!demoChannelId || sendMessage.isPending}
+					disabled={
+						!demoChannelId ||
+						sendMessage.isPending ||
+						sendMessageCapability?.allowedByBridge === false
+					}
 					onClick={() => {
 						if (!demoChannelId) return;
 						void sendMessage.invoke({

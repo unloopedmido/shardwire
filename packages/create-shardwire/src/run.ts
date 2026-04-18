@@ -15,7 +15,7 @@ import { getTemplate } from './templates.js';
 import type { TemplateId } from './templates.js';
 
 const SHARDWIRE_VERSION = '^2.0.3';
-const REACT_PKG_VERSION = '^0.4.0';
+const REACT_PKG_VERSION = '^0.5.0';
 
 function isDirEmpty(path: string): boolean {
 	if (!existsSync(path)) {
