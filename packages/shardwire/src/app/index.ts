@@ -48,6 +48,16 @@ interface PendingRequest {
 	timer: ReturnType<typeof setTimeout>;
 }
 
+class AppConnectError extends Error {
+	constructor(
+		public readonly code: 'TIMEOUT' | 'DISCONNECTED' | 'UNAUTHORIZED',
+		message: string,
+	) {
+		super(withErrorDocsLink(message, 'connection-and-auth-errors'));
+		this.name = 'AppConnectError';
+	}
+}
+
 class AppRequestError extends Error {
 	constructor(
 		public readonly code: 'TIMEOUT' | 'DISCONNECTED' | 'UNAUTHORIZED',
@@ -123,7 +133,7 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
 	let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 	let connectPromise: Promise<void> | null = null;
 	let connectResolve: (() => void) | null = null;
-	let connectReject: ((error: Error) => void) | null = null;
+	let connectReject: ((error: AppConnectError) => void) | null = null;
 	let authTimeoutTimer: ReturnType<typeof setTimeout> | null = null;
 	let capabilityError: BridgeCapabilityError | null = null;
 
@@ -146,10 +156,10 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
 		connectPromise = null;
 	}
 
-	function rejectConnect(message: string): void {
+	function rejectConnect(error: AppConnectError): void {
 		clearAuthTimeout();
 		if (connectReject) {
-			connectReject(new Error(withErrorDocsLink(message, 'connection-and-auth-errors')));
+			connectReject(error);
 		}
 		connectResolve = null;
 		connectReject = null;
@@ -292,9 +302,10 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
 			connectReject = reject;
 		});
 
-		socket = createNodeWebSocket(options.url);
+		const activeSocket = createNodeWebSocket(options.url);
+		socket = activeSocket;
 
-		socket.on('open', () => {
+		activeSocket.on('open', () => {
 			isAuthed = false;
 			subscribedEntries.clear();
 			currentConnectionId = null;
@@ -313,13 +324,13 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
 			);
 			authTimeoutTimer = setTimeout(() => {
 				if (!isAuthed) {
-					rejectConnect('App bridge authentication timed out.');
-					socket?.close();
+					rejectConnect(new AppConnectError('TIMEOUT', 'App bridge authentication timed out.'));
+					activeSocket.close();
 				}
 			}, requestTimeoutMs);
 		});
 
-		socket.on('message', (raw) => {
+		activeSocket.on('message', (raw) => {
 			try {
 				const serialized = typeof raw === 'string' ? raw : String(raw);
 				const envelope = parseEnvelope(serialized);
@@ -340,9 +351,9 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
 					}
 					case 'auth.error': {
 						const payload = envelope.payload as AuthErrorPayload;
-						rejectConnect(payload.message);
+						rejectConnect(new AppConnectError('UNAUTHORIZED', payload.message));
 						rejectAllPending('UNAUTHORIZED', payload.message);
-						socket?.close();
+						activeSocket.close();
 						break;
 					}
 					case 'action.result':
@@ -376,20 +387,27 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
 			}
 		});
 
-		socket.on('close', () => {
-			rejectConnect('App bridge connection closed.');
-			isAuthed = false;
-			currentConnectionId = null;
-			currentCapabilities = { events: [], actions: [] };
-			subscribedEntries.clear();
-			rejectAllPending('DISCONNECTED', 'App bridge connection closed before action completed.');
-			if (!isClosed) {
-				scheduleReconnect();
+		activeSocket.on('close', () => {
+			clearAuthTimeout();
+			if (socket === activeSocket) {
+				socket = null;
+				rejectConnect(new AppConnectError('DISCONNECTED', 'App bridge connection closed.'));
+				isAuthed = false;
+				currentConnectionId = null;
+				currentCapabilities = { events: [], actions: [] };
+				subscribedEntries.clear();
+				rejectAllPending('DISCONNECTED', 'App bridge connection closed before action completed.');
+				if (!isClosed) {
+					scheduleReconnect();
+				}
 			}
 		});
 
-		socket.on('error', (error) => {
+		activeSocket.on('error', (error) => {
 			logger.warn('App bridge socket error.', { error: String(error) });
+			if (!isAuthed && socket === activeSocket) {
+				rejectConnect(new AppConnectError('DISCONNECTED', 'App bridge connection failed.'));
+			}
 		});
 
 		return connectPromise;
@@ -403,12 +421,13 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
 		try {
 			await connect();
 		} catch (error) {
+			const code = error instanceof AppConnectError ? error.code : 'DISCONNECTED';
 			return {
 				ok: false,
 				requestId: sendOptions?.requestId ?? 'unknown',
 				ts: Date.now(),
 				error: {
-					code: 'UNAUTHORIZED',
+					code,
 					message:
 						error instanceof Error
 							? error.message
@@ -601,7 +620,8 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
 			currentCapabilities = { events: [], actions: [] };
 			capabilityError = null;
 			subscribedEntries.clear();
-			rejectConnect('App bridge has been closed.');
+			rejectConnect(new AppConnectError('DISCONNECTED', 'App bridge has been closed.'));
+			clearAuthTimeout();
 			if (reconnectTimer) {
 				clearTimeout(reconnectTimer);
 				reconnectTimer = null;
@@ -612,14 +632,19 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
 			}
 			await new Promise<void>((resolve) => {
 				const current = socket;
-				if (!current) {
+				if (!current || current.readyState === 3) {
+					if (socket === current) {
+						socket = null;
+					}
 					resolve();
 					return;
 				}
 				current.once('close', () => resolve());
 				current.close();
 			});
-			socket = null;
+			if (socket === null || socket?.readyState === 3) {
+				socket = null;
+			}
 		},
 		connected() {
 			return Boolean(socket && socket.readyState === 1 && isAuthed);

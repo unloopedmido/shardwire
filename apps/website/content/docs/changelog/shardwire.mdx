@@ -7,6 +7,14 @@ This page lists releases for the **`shardwire`** package.
 
 npm: [`shardwire`](https://www.npmjs.com/package/shardwire) · Also see [**@shardwire/react**](/docs/changelog/react) if you use the hooks package.
 
+## 2.0.4
+
+- **Bridge `ready()`:** `await createBotBridge(...).ready()` (and factory variants) now waits for the WebSocket server to be listening **and** for the Discord runtime; **`status().ready`** is true only when both are ready. Listen failures (for example port collisions) reject **`ready()`** instead of surfacing later as silent connection failures.
+- **`connectBotBridge`:** failed initial connections and close/auth edge cases yield **accurate error codes** on action calls (`TIMEOUT`, `UNAUTHORIZED`, or `DISCONNECTED` instead of always `UNAUTHORIZED`); **`close()`** resolves after the socket closes, including when the peer closed first.
+- **`DedupeCache`:** expired entries are pruned on get/set so stale keys do not accumulate unbounded.
+- **Workflows:** `deferThenEditInteractionReply` / `deferUpdateThenEditInteractionReply` accept **`edit` without `interactionId`** (the interaction id comes from the defer step). Remove redundant `interactionId` from the edit payload if TypeScript flags it.
+- **Build:** package **`build`** script passes **`--clean`** to **`tsup`** for repeatable output.
+
 ## 2.0.3
 
 - **Docs:** **npm README** — Shields.io badges (version, downloads, license, Node from **`engines`**), calmer lead without GitHub **`IMPORTANT`** callouts; trust notes folded into **Install**. No runtime TypeScript API changes.

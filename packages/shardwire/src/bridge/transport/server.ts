@@ -72,6 +72,7 @@ export class BridgeTransportServer {
 	private readonly heartbeatMs: number;
 	private readonly authTimeoutMs = 5000;
 	private readonly interval: ReturnType<typeof setInterval>;
+	private readonly readyPromise: Promise<void>;
 	private readonly connections = new Map<WebSocket, BridgeConnectionState>();
 	private readonly stickyEvents = new Map<BotEventName, BotEventPayloadMap[BotEventName]>();
 	private readonly actionSemaphore: AsyncSemaphore;
@@ -79,6 +80,7 @@ export class BridgeTransportServer {
 	private readonly idempotencyTtlMs: number;
 	private readonly idempotencyScope: 'connection' | 'secret';
 	private readonly authBuckets = new Map<string, { count: number; resetAt: number }>();
+	private listening = false;
 
 	constructor(private readonly config: BridgeTransportServerConfig) {
 		this.logger = withLogger(config.logger);
@@ -96,11 +98,33 @@ export class BridgeTransportServer {
 			maxPayload: config.options.server.maxPayloadBytes ?? 65536,
 		});
 
+		this.readyPromise = new Promise<void>((resolve, reject) => {
+			this.wss.once('listening', () => {
+				this.listening = true;
+				resolve();
+			});
+			this.wss.once('error', (error) => {
+				if (!this.listening) {
+					reject(error);
+				}
+			});
+		});
+
 		this.wss.on('connection', (socket, request) => this.handleConnection(socket, request));
-		this.wss.on('error', (error) => this.logger.error('Bridge transport server error.', { error: String(error) }));
+		this.wss.on('error', (error) => {
+			this.logger.error('Bridge transport server error.', { error: String(error) });
+		});
 		this.interval = setInterval(() => {
 			this.checkHeartbeats();
 		}, this.heartbeatMs);
+	}
+
+	ready(): Promise<void> {
+		return this.readyPromise;
+	}
+
+	isListening(): boolean {
+		return this.listening;
 	}
 
 	connectionCount(): number {
@@ -141,7 +165,8 @@ export class BridgeTransportServer {
 		this.connections.clear();
 		await new Promise<void>((resolve, reject) => {
 			this.wss.close((error) => {
-				if (error) {
+				this.listening = false;
+				if (error && error.message !== 'The server is not running') {
 					reject(error);
 					return;
 				}

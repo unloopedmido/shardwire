@@ -35,6 +35,43 @@ async function getFreePort(): Promise<number> {
 }
 
 describe('discord-first bridge validation', () => {
+	it('surfaces bridge listen failures through bot.ready', async () => {
+		const port = await getFreePort();
+		const blocker = createServer();
+		await new Promise<void>((resolve, reject) => {
+			blocker.listen(port, '127.0.0.1', () => resolve());
+			blocker.on('error', reject);
+		});
+
+		const runtime = new FakeDiscordRuntime();
+		const bot = createBotBridgeWithRuntime(
+			{
+				token: 'fake-token',
+				intents: ['Guilds'],
+				server: {
+					port,
+					secrets: ['secret'],
+				},
+			},
+			runtime,
+		);
+
+		try {
+			await expect(bot.ready()).rejects.toThrow(/EADDRINUSE|listen/i);
+		} finally {
+			await new Promise<void>((resolve, reject) => {
+				blocker.close((error) => {
+					if (error) {
+						reject(error);
+						return;
+					}
+					resolve();
+				});
+			});
+			await bot.close().catch(() => undefined);
+		}
+	});
+
 	it('throws for invalid bot bridge config', () => {
 		expect(() =>
 			createBotBridge({
@@ -334,6 +371,25 @@ describe('discord-first bridge validation', () => {
 
 		await app.close();
 		await bot.close();
+	});
+
+	it('returns DISCONNECTED when an action cannot connect to the bridge', async () => {
+		const port = await getFreePort();
+		const app = connectBotBridge({
+			url: `ws://127.0.0.1:${port}/shardwire`,
+			secret: 'secret',
+			requestTimeoutMs: 100,
+		});
+
+		const result = await app.actions.sendMessage({
+			channelId: 'c1',
+			content: 'hello',
+		});
+
+		expect(result.ok).toBe(false);
+		if (!result.ok) {
+			expect(result.error.code).toBe('DISCONNECTED');
+		}
 	});
 
 	it('preflight succeeds when desired caps match negotiated secret scope', async () => {

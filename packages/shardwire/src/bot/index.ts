@@ -98,7 +98,7 @@ export function createBotBridgeWithRuntime(options: BotBridgeOptions, runtime: D
 
 	return {
 		async ready() {
-			await runtime.ready();
+			await Promise.all([server.ready(), runtime.ready()]);
 		},
 		async close() {
 			for (const unsubscribe of unsubscribers) {
@@ -108,7 +108,7 @@ export function createBotBridgeWithRuntime(options: BotBridgeOptions, runtime: D
 		},
 		status() {
 			return {
-				ready: runtime.isReady(),
+				ready: runtime.isReady() && server.isListening(),
 				connectionCount: server.connectionCount(),
 			};
 		},

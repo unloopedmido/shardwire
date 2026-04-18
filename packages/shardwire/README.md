@@ -42,14 +42,14 @@ import { createBotBridge } from 'shardwire';
 const bridge = createBotBridge({
 	// discord.js client, listen options, secret, ...
 });
-await bridge.start();
+await bridge.ready();
 ```
 
 ```ts
 // App process: connect as a client
 import { connectBotBridge } from 'shardwire/client';
 
-const session = await connectBotBridge({
+const session = connectBotBridge({
 	url: process.env.SHARDWIRE_URL!,
 	secret: process.env.SHARDWIRE_SECRET!,
 });

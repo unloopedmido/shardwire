@@ -19,7 +19,7 @@ export async function deferThenEditInteractionReply(
 	args: {
 		interactionId: DeferInteractionActionPayload['interactionId'];
 		defer?: Pick<DeferInteractionActionPayload, 'ephemeral'>;
-		edit: EditInteractionReplyActionPayload;
+		edit: Omit<EditInteractionReplyActionPayload, 'interactionId'>;
 	},
 	options?: AppBridgeActionInvokeOptions,
 ): Promise<ActionResult<BotActionResultDataMap['editInteractionReply']>> {
@@ -28,7 +28,7 @@ export async function deferThenEditInteractionReply(
 	if (!deferResult.ok) {
 		return deferResult;
 	}
-	return app.actions.editInteractionReply(edit, options);
+	return app.actions.editInteractionReply({ interactionId, ...edit }, options);
 }
 
 /**
@@ -40,7 +40,7 @@ export async function deferUpdateThenEditInteractionReply(
 	app: Pick<AppBridge, 'actions'>,
 	args: {
 		interactionId: DeferUpdateInteractionActionPayload['interactionId'];
-		edit: EditInteractionReplyActionPayload;
+		edit: Omit<EditInteractionReplyActionPayload, 'interactionId'>;
 	},
 	options?: AppBridgeActionInvokeOptions,
 ): Promise<ActionResult<BotActionResultDataMap['editInteractionReply']>> {
@@ -49,5 +49,5 @@ export async function deferUpdateThenEditInteractionReply(
 	if (!deferResult.ok) {
 		return deferResult;
 	}
-	return app.actions.editInteractionReply(edit, options);
+	return app.actions.editInteractionReply({ interactionId, ...edit }, options);
 }

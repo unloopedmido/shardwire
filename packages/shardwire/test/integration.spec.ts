@@ -43,6 +43,40 @@ async function waitFor(assertion: () => void, timeoutMs = 4000, intervalMs = 25)
 }
 
 describe('discord-first bridge integration', () => {
+	it('close resolves after the socket has already been closed remotely', async () => {
+		const port = await getFreePort();
+		const runtime = new FakeDiscordRuntime();
+		const bot = createBotBridgeWithRuntime(
+			{
+				token: 'fake-token',
+				intents: ['Guilds', 'GuildMessages'],
+				server: {
+					port,
+					secrets: ['shared-secret'],
+				},
+			},
+			runtime,
+		);
+
+		const app = connectBotBridge({
+			url: `ws://127.0.0.1:${port}/shardwire`,
+			secret: 'shared-secret',
+		});
+
+		await Promise.all([bot.ready(), app.ready()]);
+		await bot.close();
+		await waitFor(() => {
+			expect(app.connected()).toBe(false);
+		});
+
+		const closeResult = await Promise.race([
+			app.close().then(() => 'closed'),
+			new Promise<'timed-out'>((resolve) => setTimeout(() => resolve('timed-out'), 500)),
+		]);
+
+		expect(closeResult).toBe('closed');
+	});
+
 	it('delivers only subscribed events and keeps ready sticky', async () => {
 		const port = await getFreePort();
 		const runtime = new FakeDiscordRuntime();
@@ -1073,7 +1107,7 @@ describe('discord-first bridge integration', () => {
 		const deferEdit = await deferThenEditInteractionReply(app, {
 			interactionId: 'ix-1',
 			defer: { ephemeral: true },
-			edit: { interactionId: 'ix-1', content: 'done' },
+			edit: { content: 'done' },
 		});
 		expect(deferEdit.ok).toBe(true);
 		if (deferEdit.ok) {

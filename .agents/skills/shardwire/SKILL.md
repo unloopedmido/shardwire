@@ -37,6 +37,7 @@ Per-symbol pages follow `https://shardwire.js.org/docs/reference/<section>/<keba
 - Use **ESM** (`import` / `export`); avoid CommonJS in new projects unless matching an existing legacy file.
 - **`shardwire`** must be a real dependency in **both** bot and app packages; import paths and entrypoints (`shardwire` vs `shardwire/client`) must match what the docs show for that runtime (Node vs browser bundlers).
 - **`ECONNREFUSED` / connection errors:** Verify **bridge listen URL** on the bot, **client URL** on the app, reachable host/port, and TLS/HTTP scheme—then verify the **secret** matches on both sides before chasing application bugs.
+- **`await createBotBridge(...).ready()`** resolves only after the bridge WebSocket is **listening** and the Discord runtime is ready; treat **`status().ready`** the same way when checking liveness.
 
 ## 4. Discovery strategy
 
