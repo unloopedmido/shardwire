@@ -27,6 +27,7 @@ describe('DX catalog', () => {
 		expect(cat.actions).toContain('sendDirectMessage');
 		expect(cat.actions).toContain('bulkDeleteMessages');
 		expect(cat.actions).toContain('fetchGuild');
+		expect(cat.actions).toContain('fetchVoiceState');
 		expect(cat.actions).toContain('unbanMember');
 	});
 });

@@ -552,6 +552,7 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
 		fetchThread: (payload, sendOptions) => invokeAction('fetchThread', payload, sendOptions),
 		fetchGuild: (payload, sendOptions) => invokeAction('fetchGuild', payload, sendOptions),
 		fetchMember: (payload, sendOptions) => invokeAction('fetchMember', payload, sendOptions),
+		fetchVoiceState: (payload, sendOptions) => invokeAction('fetchVoiceState', payload, sendOptions),
 		banMember: (payload, sendOptions) => invokeAction('banMember', payload, sendOptions),
 		unbanMember: (payload, sendOptions) => invokeAction('unbanMember', payload, sendOptions),
 		kickMember: (payload, sendOptions) => invokeAction('kickMember', payload, sendOptions),

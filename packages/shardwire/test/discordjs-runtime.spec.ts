@@ -491,6 +491,7 @@ describe('DiscordJsRuntimeAdapter', () => {
 			suppress: false,
 			requestToSpeakTimestamp: null,
 		};
+		guildMember.voice = { ...guildMember.voice, ...voiceState };
 		guildMember.fetch = vi.fn(async () => ({
 			...guildMember,
 			voice: { ...guildMember.voice, ...voiceState },
@@ -602,6 +603,10 @@ describe('DiscordJsRuntimeAdapter', () => {
 			guildId: 'guild-1',
 			userId: 'user-1',
 		});
+		const fetchVoiceState = await adapter.executeAction('fetchVoiceState', {
+			guildId: 'guild-1',
+			userId: 'user-1',
+		});
 		const banMember = await adapter.executeAction('banMember', {
 			guildId: 'guild-1',
 			userId: 'user-1',
@@ -688,6 +693,7 @@ describe('DiscordJsRuntimeAdapter', () => {
 		expect(fetchThread).toMatchObject({ id: 'thread-1', parentId: 'channel-1' });
 		expect(fetchGuild).toMatchObject({ id: 'guild-1', name: 'Guild' });
 		expect(fetchMember).toMatchObject({ id: 'user-1', guildId: 'guild-1' });
+		expect(fetchVoiceState).toMatchObject({ userId: 'user-1', channelId: 'voice-1' });
 		expect(banMember).toEqual({ guildId: 'guild-1', userId: 'user-1' });
 		expect(unbanMember).toEqual({ guildId: 'guild-1', userId: 'user-1' });
 		expect(kickMember).toEqual({ guildId: 'guild-1', userId: 'user-1' });

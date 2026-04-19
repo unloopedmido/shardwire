@@ -632,6 +632,14 @@ export interface FetchMemberActionPayload {
 }
 
 /**
+ * @see https://shardwire.js.org/docs/reference/action-models/fetch-voice-state-action-payload/
+ */
+export interface FetchVoiceStateActionPayload {
+	guildId: Snowflake;
+	userId: Snowflake;
+}
+
+/**
  * @see https://shardwire.js.org/docs/reference/action-models/ban-member-action-payload/
  */
 export interface BanMemberActionPayload {
@@ -834,6 +842,7 @@ export interface BotActionPayloadMap {
 	fetchThread: FetchThreadActionPayload;
 	fetchGuild: FetchGuildActionPayload;
 	fetchMember: FetchMemberActionPayload;
+	fetchVoiceState: FetchVoiceStateActionPayload;
 	banMember: BanMemberActionPayload;
 	unbanMember: UnbanMemberActionPayload;
 	kickMember: KickMemberActionPayload;
@@ -971,6 +980,7 @@ export interface BotActionResultDataMap {
 	fetchThread: BridgeThread;
 	fetchGuild: BridgeGuild;
 	fetchMember: BridgeGuildMember;
+	fetchVoiceState: BridgeVoiceState;
 	banMember: MemberModerationActionResult;
 	unbanMember: MemberModerationActionResult;
 	kickMember: MemberModerationActionResult;

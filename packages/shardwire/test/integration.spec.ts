@@ -799,6 +799,18 @@ describe('discord-first bridge integration', () => {
 			guildId,
 			roles: ['role-1'],
 		}));
+		runtime.setActionHandler('fetchVoiceState', async ({ guildId, userId }) => ({
+			guildId,
+			userId,
+			channelId: 'voice-1',
+			selfMute: false,
+			selfDeaf: false,
+			selfVideo: false,
+			selfStream: false,
+			serverMute: false,
+			serverDeaf: false,
+			suppress: false,
+		}));
 
 		const app = connectBotBridge({
 			url: `ws://127.0.0.1:${port}/shardwire`,
@@ -820,12 +832,14 @@ describe('discord-first bridge integration', () => {
 		});
 		const msgResult = await app.actions.fetchMessage({ channelId: 'ch-1', messageId: 'm-1' });
 		const memberResult = await app.actions.fetchMember({ guildId: 'g-1', userId: 'u-1' });
+		const voiceStateResult = await app.actions.fetchVoiceState({ guildId: 'g-1', userId: 'u-1' });
 
 		expect(deferResult.ok).toBe(true);
 		expect(replyResult.ok).toBe(true);
 		expect(modalResult.ok).toBe(true);
 		expect(msgResult.ok).toBe(true);
 		expect(memberResult.ok).toBe(true);
+		expect(voiceStateResult.ok).toBe(true);
 		if (deferResult.ok) {
 			expect(deferResult.data.interactionId).toBe('int-1');
 		}
@@ -834,6 +848,9 @@ describe('discord-first bridge integration', () => {
 		}
 		if (memberResult.ok) {
 			expect(memberResult.data.roles).toEqual(['role-1']);
+		}
+		if (voiceStateResult.ok) {
+			expect(voiceStateResult.data.channelId).toBe('voice-1');
 		}
 
 		await app.close();

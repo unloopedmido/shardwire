@@ -50,6 +50,7 @@ export const BOT_ACTION_NAMES = [
 	'fetchThread',
 	'fetchGuild',
 	'fetchMember',
+	'fetchVoiceState',
 	'banMember',
 	'unbanMember',
 	'kickMember',

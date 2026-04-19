@@ -34,6 +34,7 @@
     "fetch-member-action-payload",
     "fetch-message-action-payload",
     "fetch-thread-action-payload",
+    "fetch-voice-state-action-payload",
     "follow-up-interaction-action-payload",
     "kick-member-action-payload",
     "member-moderation-action-result",

@@ -7,6 +7,12 @@ This page lists releases for the **`shardwire`** package.
 
 npm: [`shardwire`](https://www.npmjs.com/package/shardwire) · Also see [**@shardwire/react**](/docs/changelog/react) if you use the hooks package.
 
+## 2.1.0
+
+- **Voice state reads:** added **`fetchVoiceState({ guildId, userId })`** as a built-in action that returns the normalized **`BridgeVoiceState`** snapshot for the target guild member.
+- Regenerated action-model reference docs for the new **`FetchVoiceStateActionPayload`** and the updated action payload/result maps.
+- Updated the Shardwire skill guidance so voice-state read/write coverage now includes **`fetchVoiceState`** alongside the existing voice event and mutation actions.
+
 ## 2.0.4
 
 - **Bridge `ready()`:** `await createBotBridge(...).ready()` (and factory variants) now waits for the WebSocket server to be listening **and** for the Discord runtime; **`status().ready`** is true only when both are ready. Listen failures (for example port collisions) reject **`ready()`** instead of surfacing later as silent connection failures.

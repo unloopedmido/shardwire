@@ -43,6 +43,7 @@ Per-symbol pages follow `https://shardwire.js.org/docs/reference/<section>/<keba
 
 - If the user’s feature is not covered above, check **`packages/create-shardwire/templates/`** for scaffold patterns, then fall back to the docs URLs in §2.
 - **Do not invent** methods, events, or action names—confirm against reference pages or `getShardwireCatalog` / manifest flows described in the docs.
+- For voice features, the built-in surface includes **`voiceStateUpdate`**, **`fetchVoiceState`**, **`moveMemberVoice`**, **`setMemberMute`**, **`setMemberDeaf`**, and **`setMemberSuppressed`**.
 
 ## 5. `@shardwire/react` (high level)
 

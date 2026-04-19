@@ -194,6 +194,7 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
 			fetchThread: (payload) => this.fetchThread(payload),
 			fetchGuild: (payload) => this.fetchGuild(payload),
 			fetchMember: (payload) => this.fetchMember(payload),
+			fetchVoiceState: (payload) => this.fetchVoiceState(payload),
 			banMember: (payload) => this.banMember(payload),
 			unbanMember: (payload) => this.unbanMember(payload),
 			kickMember: (payload) => this.kickMember(payload),
@@ -900,6 +901,12 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
 		const guild = await this.client.guilds.fetch(payload.guildId);
 		const member = await guild.members.fetch(payload.userId);
 		return serializeGuildMember(member);
+	}
+
+	private async fetchVoiceState(payload: BotActionPayloadMap['fetchVoiceState']) {
+		const guild = await this.client.guilds.fetch(payload.guildId);
+		const member = await guild.members.fetch(payload.userId);
+		return serializeVoiceState(member.voice);
 	}
 
 	private async banMember(payload: BotActionPayloadMap['banMember']) {
