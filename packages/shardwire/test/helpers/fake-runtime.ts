@@ -22,6 +22,7 @@ export class FakeDiscordRuntime implements DiscordRuntimeAdapter {
 	private readyState = false;
 	private readonly eventHandlers: EventHandlers = {};
 	private readonly actionHandlers: ActionHandlerMap = {};
+	private client: unknown = null;
 
 	async ready(): Promise<void> {
 		this.readyState = true;
@@ -62,6 +63,14 @@ export class FakeDiscordRuntime implements DiscordRuntimeAdapter {
 			throw new Error(`No fake action handler registered for "${name}".`);
 		}
 		return handler(payload as never) as Promise<BotActionResultDataMap[K]>;
+	}
+
+	getClient(): unknown {
+		return this.client;
+	}
+
+	setClient(client: unknown): void {
+		this.client = client;
 	}
 
 	emit<K extends BotEventName>(name: K, payload: BotEventPayloadMap[K]): void {

@@ -1144,4 +1144,78 @@ describe('discord-first bridge integration', () => {
 		await app.close();
 		await bot.close();
 	});
+
+	it('returns FORBIDDEN for runRaw when raw passthrough is disabled', async () => {
+		const runtime = new FakeDiscordRuntime();
+		const bridge = createBotBridgeWithRuntime(
+			{
+				token: 'fake-token',
+				intents: ['Guilds'],
+				mode: 'single-process',
+			},
+			runtime,
+		);
+		const app = bridge.app();
+		expect(app).not.toBeNull();
+		if (!app) {
+			throw new Error('single-process app bridge was not created');
+		}
+		await bridge.ready();
+
+		const denied = await app.raw('guilds.fetch', ['123']);
+		expect(denied.ok).toBe(false);
+		if (!denied.ok) {
+			expect(denied.error.code).toBe('FORBIDDEN');
+		}
+
+		await bridge.close();
+	});
+
+	it('runs app bridge in single-process mode without websocket transport', async () => {
+		const runtime = new FakeDiscordRuntime();
+		runtime.setActionHandler('sendMessage', async ({ channelId, content }) => ({
+			id: 'msg-raw-1',
+			channelId,
+			content,
+			attachments: [],
+			embeds: [],
+		}));
+		runtime.setActionHandler('runRaw', async ({ method, args }) => ({
+			method,
+			args: args ?? [],
+		}));
+		const clientRef = { tag: 'discord-client' };
+		runtime.setClient(clientRef);
+
+		const bridge = createBotBridgeWithRuntime(
+			{
+				token: 'fake-token',
+				intents: ['Guilds', 'GuildMessages'],
+				mode: 'single-process',
+				exposeClient: true,
+				raw: { enabled: true, allow: ['guilds.fetch'] },
+			},
+			runtime,
+		);
+		const app = bridge.app();
+		expect(bridge.mode()).toBe('single-process');
+		expect(bridge.client()).toBe(clientRef);
+		expect(app).not.toBeNull();
+		if (!app) {
+			throw new Error('single-process app bridge was not created');
+		}
+
+		await bridge.ready();
+		const sent = await app.actions.sendMessage({
+			channelId: 'channel-1',
+			content: 'hello single',
+		});
+		expect(sent.ok).toBe(true);
+		const raw = await app.raw('guilds.fetch', ['guild-1']);
+		expect(raw.ok).toBe(true);
+		if (raw.ok) {
+			expect(raw.data).toEqual({ method: 'guilds.fetch', args: ['guild-1'] });
+		}
+		await bridge.close();
+	});
 });

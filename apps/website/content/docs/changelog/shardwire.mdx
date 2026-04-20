@@ -7,6 +7,13 @@ This page lists releases for the **`shardwire`** package.
 
 npm: [`shardwire`](https://www.npmjs.com/package/shardwire) · Also see [**@shardwire/react**](/docs/changelog/react) if you use the hooks package.
 
+## 2.2.0
+
+- Added bridge modes on `createBotBridge`: **`split`** (default), **`hybrid`** (split + optional `bot.client()` exposure), and **`single-process`** (no WebSocket transport; app bridge via `bot.app()`).
+- Added optional raw passthrough action support: bot-side `raw.enabled` + `raw.allow`/`raw.deny`, app-side `app.actions.runRaw(...)` and `app.raw(...)`.
+- Added single-process in-memory app bridge implementation with strict-ready/preflight support and parity with the app bridge API shape.
+- Added docs for migration paths, hybrid mode, single-process mode, and Discord.js parity mapping.
+
 ## 2.1.1
 
 - Dependency refresh release from PR 24: bumped package dependencies/devDependencies to newer compatible versions with no public API changes.

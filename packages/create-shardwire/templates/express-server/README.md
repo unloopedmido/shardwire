@@ -40,6 +40,7 @@ $ cp .env.example .env   # set DISCORD_TOKEN, SHARDWIRE_SECRET, ids as prompted 
 $ npm run register
 $ npm run bot    # terminal A
 $ npm run app    # terminal B — HTTP + bridge client
+# or: npm run single  # one-process mode (no websocket transport)
 ```
 
 ---
@@ -59,6 +60,7 @@ Requires **Node.js 22+** (see `engines` in `package.json`).
 | ------------------ | --------------------------------------------------------------- |
 | `npm run bot`      | `tsx src/bot.ts` — Discord session + bridge host                |
 | `npm run app`      | `tsx src/app.ts` — Express (`GET /health`) + `connectBotBridge` |
+| `npm run single`   | `tsx src/single-process.ts` — single-process bridge + app logic |
 | `npm run register` | `tsx src/register.ts` — slash command registration helper       |
 
 </details>

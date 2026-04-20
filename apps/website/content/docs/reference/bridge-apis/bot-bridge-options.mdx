@@ -15,7 +15,20 @@ Reference for `BotBridgeOptions`, exported as part of the public Shardwire surfa
 export interface BotBridgeOptions {
 	token: string;
 	intents: readonly BotIntentName[];
-	server: {
+	/** `split` = current two-process bridge, `hybrid` = split + exposed discord.js client, `single-process` = in-process app bridge with no WebSocket transport. */
+	mode?: 'split' | 'hybrid' | 'single-process';
+	/** When true, exposes the underlying discord.js client via `bot.client()` for incremental migration. */
+	exposeClient?: boolean;
+	raw?: {
+		/** Enables `app.actions.runRaw(...)` (disabled by default). */
+		enabled?: boolean;
+		/** Allowed method paths. `'*'` allows all methods except blocked internals. */
+		allow?: '*' | readonly string[];
+		/** Explicitly deny method paths (applied after `allow`). */
+		deny?: readonly string[];
+	};
+	/** Bridge WebSocket server settings (required unless `mode: 'single-process'`). */
+	server?: {
 		port: number;
 		host?: string;
 		path?: string;

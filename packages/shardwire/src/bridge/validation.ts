@@ -100,11 +100,51 @@ function normalizeSecretEntry(secret: BotBridgeSecret, index: number): Normalize
 }
 
 export function assertBotBridgeOptions(options: BotBridgeOptions): void {
+	const mode = options.mode ?? (options.exposeClient ? 'hybrid' : 'split');
 	if (!isNonEmptyString(options.token)) {
 		throw new Error(withErrorDocsLink('Bot bridge requires `token`.', 'bot-token-required'));
 	}
+	if (
+		options.mode !== undefined &&
+		options.mode !== 'split' &&
+		options.mode !== 'hybrid' &&
+		options.mode !== 'single-process'
+	) {
+		throw new Error(
+			withErrorDocsLink('Bot bridge option `mode` must be split, hybrid, or single-process.', 'bot-mode-invalid'),
+		);
+	}
+	if (options.exposeClient !== undefined && typeof options.exposeClient !== 'boolean') {
+		throw new TypeError('Bot bridge option `exposeClient` must be a boolean when provided.');
+	}
+	if (options.raw !== undefined && typeof options.raw !== 'object') {
+		throw new TypeError('Bot bridge option `raw` must be an object when provided.');
+	}
+	if (options.raw?.enabled !== undefined && typeof options.raw.enabled !== 'boolean') {
+		throw new TypeError('Bot bridge option `raw.enabled` must be a boolean when provided.');
+	}
+	if (options.raw?.allow !== undefined && options.raw.allow !== '*' && !Array.isArray(options.raw.allow)) {
+		throw new TypeError('Bot bridge option `raw.allow` must be "*" or an array of method paths.');
+	}
+	if (Array.isArray(options.raw?.allow) && options.raw.allow.some((entry) => !isNonEmptyString(entry))) {
+		throw new TypeError('Bot bridge option `raw.allow` entries must be non-empty strings.');
+	}
+	if (options.raw?.deny !== undefined && !Array.isArray(options.raw.deny)) {
+		throw new TypeError('Bot bridge option `raw.deny` must be an array of method paths.');
+	}
+	if (Array.isArray(options.raw?.deny) && options.raw.deny.some((entry) => !isNonEmptyString(entry))) {
+		throw new TypeError('Bot bridge option `raw.deny` entries must be non-empty strings.');
+	}
 	if (!Array.isArray(options.intents) || options.intents.length === 0) {
 		throw new Error(withErrorDocsLink('Bot bridge requires at least one intent.', 'bot-intents-required'));
+	}
+	if (mode === 'single-process') {
+		return;
+	}
+	if (!options.server) {
+		throw new Error(
+			withErrorDocsLink('Bot bridge requires `server` unless mode is single-process.', 'bot-server-required'),
+		);
 	}
 	assertPositiveNumber('server.port', options.server.port);
 	if (options.server.heartbeatMs !== undefined) {
@@ -158,6 +198,9 @@ export function assertBotBridgeOptions(options: BotBridgeOptions): void {
 }
 
 export function normalizeSecrets(options: BotBridgeOptions): NormalizedSecretConfig[] {
+	if (!options.server) {
+		return [];
+	}
 	return options.server.secrets.map((secret, index) => normalizeSecretEntry(secret, index));
 }
 
@@ -207,7 +250,11 @@ export function assertAppBridgeOptions(options: AppBridgeOptions): void {
 export function resolveCapabilitiesForSecret(
 	intents: readonly BotIntentName[],
 	secret: NormalizedSecretConfig,
+	options?: {
+		rawEnabled?: boolean;
+	},
 ): BridgeCapabilities {
+	const rawEnabled = options?.rawEnabled ?? false;
 	const availableEvents = getAvailableEvents(intents);
 	const events =
 		secret.scope.events === '*'
@@ -217,9 +264,11 @@ export function resolveCapabilitiesForSecret(
 				});
 	const actions =
 		secret.scope.actions === '*'
-			? [...BOT_ACTION_NAMES]
+			? BOT_ACTION_NAMES.filter((action) => (rawEnabled ? true : action !== 'runRaw'))
 			: BOT_ACTION_NAMES.filter((action) => {
-					return secret.scope.actions !== '*' && secret.scope.actions.has(action);
+					return (
+						(rawEnabled || action !== 'runRaw') && secret.scope.actions !== '*' && secret.scope.actions.has(action)
+					);
 				});
 
 	return {

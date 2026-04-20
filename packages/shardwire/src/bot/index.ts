@@ -5,11 +5,12 @@ import type {
 	BotBridgeOptions,
 	ReadyEventPayload,
 } from '../discord/types';
-import { getAvailableEvents } from '../discord/catalog';
+import { BOT_ACTION_NAMES, getAvailableEvents } from '../discord/catalog';
 import { ActionExecutionError, type DiscordRuntimeAdapter } from '../discord/runtime/adapter';
 import { createDiscordJsRuntimeAdapter } from '../discord/runtime/discordjs-adapter';
 import { BridgeTransportServer, authenticateSecret } from '../bridge/transport/server';
 import { assertBotBridgeOptions, normalizeSecrets, resolveCapabilitiesForSecret } from '../bridge/validation';
+import { createInProcessAppBridge } from '../app/in-process';
 
 /**
  * Create the bot-process bridge: Discord gateway/runtime plus a WebSocket server for app connections.
@@ -21,6 +22,7 @@ export function createBotBridge(options: BotBridgeOptions): BotBridge {
 		token: options.token,
 		intents: options.intents,
 		...(options.logger ? { logger: options.logger } : {}),
+		...(options.raw ? { raw: options.raw } : {}),
 	});
 	return createBotBridgeWithRuntime(options, runtime);
 }
@@ -33,13 +35,56 @@ export function createBotBridge(options: BotBridgeOptions): BotBridge {
  */
 export function createBotBridgeWithRuntime(options: BotBridgeOptions, runtime: DiscordRuntimeAdapter): BotBridge {
 	assertBotBridgeOptions(options);
-	const secrets = normalizeSecrets(options);
+	const mode = options.mode ?? (options.exposeClient ? 'hybrid' : 'split');
+	const rawEnabled = options.raw?.enabled ?? false;
+	const exposeClient = options.exposeClient ?? mode === 'hybrid';
+	const client = exposeClient ? (runtime.getClient?.() ?? null) : null;
 	const availableEvents = getAvailableEvents(options.intents);
+
+	if (mode === 'single-process') {
+		const capabilities = {
+			events: [...availableEvents],
+			actions: BOT_ACTION_NAMES.filter((action) => (rawEnabled ? true : action !== 'runRaw')),
+		};
+		const appBridge = createInProcessAppBridge({ runtime, capabilities });
+		return {
+			async ready() {
+				await runtime.ready();
+				await appBridge.ready();
+			},
+			async close() {
+				await appBridge.close();
+			},
+			status() {
+				return {
+					ready: runtime.isReady(),
+					connectionCount: 0,
+				};
+			},
+			mode() {
+				return mode;
+			},
+			client() {
+				return client;
+			},
+			app() {
+				return appBridge;
+			},
+		};
+	}
+
+	const serverOptions = options.server;
+	if (!serverOptions) {
+		throw new Error('Bot bridge server options are required in split/hybrid mode.');
+	}
+	const secrets = normalizeSecrets(options);
 	const server = new BridgeTransportServer({
-		options,
+		options: { ...options, server: serverOptions },
 		...(options.logger ? { logger: options.logger } : {}),
 		authenticate: (payload) =>
-			authenticateSecret(payload, secrets, (secret) => resolveCapabilitiesForSecret(options.intents, secret)),
+			authenticateSecret(payload, secrets, (secret) =>
+				resolveCapabilitiesForSecret(options.intents, secret, { rawEnabled }),
+			),
 		onActionRequest: async (connection, actionName, payload, requestId) => {
 			if (!connection.capabilities.actions.includes(actionName)) {
 				return {
@@ -111,6 +156,15 @@ export function createBotBridgeWithRuntime(options: BotBridgeOptions, runtime: D
 				ready: runtime.isReady() && server.isListening(),
 				connectionCount: server.connectionCount(),
 			};
+		},
+		mode() {
+			return mode;
+		},
+		client() {
+			return client;
+		},
+		app() {
+			return null;
 		},
 	};
 }

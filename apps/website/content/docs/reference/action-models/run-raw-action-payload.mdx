@@ -1,0 +1,30 @@
+---
+title: "RunRawActionPayload"
+description: "Reference for `RunRawActionPayload`, exported as part of the public Shardwire surface."
+---
+
+`interface` exported from `src/discord/types.ts`.
+
+## Summary
+
+Reference for `RunRawActionPayload`, exported as part of the public Shardwire surface.
+
+## Signature
+
+```ts
+export interface RunRawActionPayload {
+	/** Dot-path function on the underlying discord.js client (example: `guilds.fetch`). */
+	method: string;
+	/** Positional arguments to pass to the target function. */
+	args?: readonly unknown[];
+}
+```
+
+## Structure
+
+<AutoTypeTable path="../../packages/shardwire/src/discord/types.ts" name="RunRawActionPayload" />
+
+## Related Guides
+
+- [How it works](/docs/concepts/how-it-works)
+- [connectBotBridge](/docs/reference/bridge-apis/connect-bot-bridge)

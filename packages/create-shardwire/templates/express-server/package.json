@@ -10,6 +10,7 @@
 	"scripts": {
 		"bot": "tsx src/bot.ts",
 		"app": "tsx src/app.ts",
+		"single": "tsx src/single-process.ts",
 		"register": "tsx src/register.ts"
 	},
 	"dependencies": {

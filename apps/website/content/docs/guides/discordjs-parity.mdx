@@ -1,0 +1,43 @@
+---
+title: 'Discord.js parity map'
+description: 'Map common discord.js client/event/action mental models to Shardwire APIs for incremental migration.'
+---
+
+Use this page when you ask: **“Where is `client.on(...)` or `channel.send(...)` in Shardwire?”**
+
+## Event mapping
+
+| discord.js | Shardwire |
+| --- | --- |
+| `client.on('interactionCreate', fn)` | `app.on('interactionCreate', fn)` |
+| `client.on('messageCreate', fn)` | `app.on('messageCreate', fn)` |
+| `client.on('guildMemberAdd', fn)` | `app.on('guildMemberAdd', fn)` |
+| `client.on('voiceStateUpdate', fn)` | `app.on('voiceStateUpdate', fn)` |
+
+## Action mapping
+
+| discord.js style | Shardwire action |
+| --- | --- |
+| `channel.send(...)` | `app.actions.sendMessage(...)` |
+| `interaction.reply(...)` | `app.actions.replyToInteraction(...)` |
+| `guild.members.ban(...)` | `app.actions.banMember(...)` |
+| `member.roles.add(...)` | `app.actions.addMemberRole(...)` |
+| `member.voice.setMute(...)` | `app.actions.setMemberMute(...)` |
+
+## Migration modes
+
+| Goal | Recommended mode |
+| --- | --- |
+| Keep your current discord.js client and add app-side handlers gradually | `createBotBridge({ mode: 'hybrid', exposeClient: true })` |
+| Start simple without transport overhead | `createBotBridge({ mode: 'single-process' })` + `bot.app()` |
+| Full split architecture (bot/app independent deploys) | `createBotBridge({ mode: 'split' })` + `connectBotBridge(...)` |
+
+## Break-glass support: raw passthrough
+
+If a method is not yet in the built-in action catalog, enable raw passthrough on the bot and call:
+
+```ts
+const result = await app.raw('guilds.fetch', ['123456789012345678']);
+```
+
+Use **allowlists** (`raw.allow`) so only intended method paths are callable.
