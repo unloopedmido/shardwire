@@ -1519,7 +1519,11 @@ export interface BotBridge {
  */
 export interface AppBridge {
 	actions: AppBridgeActions;
-	raw<T = unknown>(method: string, args?: readonly unknown[], options?: AppBridgeActionInvokeOptions): Promise<ActionResult<T>>;
+	raw<T = unknown>(
+		method: string,
+		args?: readonly unknown[],
+		options?: AppBridgeActionInvokeOptions,
+	): Promise<ActionResult<T>>;
 	/**
 	 * Awaits WebSocket authentication. Throws {@link BridgeCapabilityError} when handlers reference disallowed events.
 	 * With `strict`, validates manifest / intents / optional `expectedScope` after negotiation; throws {@link ShardwireStrictStartupError} on failure.

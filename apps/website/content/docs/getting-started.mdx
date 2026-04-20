@@ -88,6 +88,46 @@ In **Vite / browser** bundles, always import from **`shardwire/client`** so the 
 
 </Callout>
 
+## Migration paths from raw discord.js
+
+If you already have a `discord.js` codebase, you can migrate incrementally:
+
+- **Hybrid mode:** keep your existing client logic while adding app-side Shardwire subscriptions/actions.
+- **Single-process mode:** keep bot + app APIs in one process now, split later when you need scale.
+- **Raw passthrough:** call supported `discord.js` methods through `app.raw(...)` as a break-glass fallback.
+
+```ts
+import { createBotBridge } from 'shardwire';
+
+const bot = createBotBridge({
+  mode: 'hybrid',
+  exposeClient: true,
+  token: process.env.DISCORD_TOKEN!,
+  intents: ['Guilds', 'GuildMessages', 'MessageContent'],
+  raw: { enabled: true, allow: ['guilds.fetch', 'channels.fetch'] },
+  server: { port: 3001, secrets: [process.env.SHARDWIRE_SECRET!] },
+});
+await bot.ready();
+
+const client = bot.client(); // optional underlying discord.js Client
+```
+
+```ts
+import { createBotBridge } from 'shardwire';
+
+const bridge = createBotBridge({
+  mode: 'single-process',
+  token: process.env.DISCORD_TOKEN!,
+  intents: ['Guilds', 'GuildMessages', 'MessageContent'],
+  raw: { enabled: true, allow: ['guilds.fetch'] },
+});
+const app = bridge.app();
+await bridge.ready();
+
+if (!app) throw new Error('single-process app bridge unavailable');
+await app.raw('guilds.fetch', ['123456789012345678']);
+```
+
 ## What “good” looks like
 
 - The bot terminal prints that the bridge is ready (`bot bridge ready` in official templates).

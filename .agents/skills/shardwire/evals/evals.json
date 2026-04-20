@@ -30,6 +30,12 @@
 			"prompt": "I need to react moderation events by emoji and then bulk-delete spam. Show a Shardwire app flow using filters and safe action result handling.",
 			"expected_output": "Uses reaction subscriptions with `emoji` and/or `messageId` filters plus app.actions.bulkDeleteMessages with ActionResult ok/error branching and intent/scope checks.",
 			"files": []
+		},
+		{
+			"id": 6,
+			"prompt": "I’m migrating from raw discord.js and want hybrid mode first, then single-process in local dev. Show createBotBridge options, client exposure, and raw passthrough guardrails.",
+			"expected_output": "Covers createBotBridge modes (`hybrid`/`single-process`), `bot.client()`, `bot.app()`, and safe `app.raw`/`runRaw` usage with raw allowlists.",
+			"files": []
 		}
 	]
 }

@@ -23,6 +23,14 @@ Between **Body** and **Brain** is **The Connection** (a WebSocket to the bridge)
 
 You do **not** need to master transport details to ship your first bot—treat **The Connection** as “how my app talks to the bridge.”
 
+## Bridge modes
+
+- **`split`** (default): bot process + app process over WebSocket.
+- **`hybrid`**: split mode plus optional access to the underlying discord.js client via **`bot.client()`**.
+- **`single-process`**: no WebSocket transport; call **`bot.app()`** to get an in-process app bridge.
+
+`single-process` is ideal for small bots or local migration stages, then you can move to split mode later without rewriting app handlers.
+
 ## Secrets: the password for your bridge
 
 **Secrets** are how the bridge knows **which app is allowed**. You configure one or more secret strings on the **bot** side; each **app** presents the same secret (or a **scoped** secret with tighter permissions—advanced).

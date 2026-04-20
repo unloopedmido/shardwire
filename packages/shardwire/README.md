@@ -93,6 +93,14 @@ Build artifacts live under `dist/` on npm; TypeScript types ship with the packag
 
 `shardwire` pairs a **bot-hosted bridge** with a **client** that speaks the same protocol. Authentication is based on a **shared secret** (optionally scoped); mismatches fail closed—treat URL and secret as one unit when debugging.
 
+### Migration-friendly modes
+
+- `createBotBridge({ mode: 'split' })` — default two-process architecture.
+- `createBotBridge({ mode: 'hybrid', exposeClient: true })` — split mode plus optional `bot.client()` access to the underlying discord.js client.
+- `createBotBridge({ mode: 'single-process' })` — no WebSocket transport; use `bot.app()` to run app handlers in-process.
+
+For unsupported Discord surface, enable raw passthrough (`raw.enabled`) and call `app.raw(...)` / `app.actions.runRaw(...)` with a strict allowlist.
+
 <details>
 <summary><b>Details</b> — troubleshooting and releases</summary>
 

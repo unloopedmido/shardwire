@@ -663,8 +663,10 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
 				actions: [...currentCapabilities.actions],
 			};
 		},
-		raw(method, args, invokeOptions) {
-			return invokeAction('runRaw', { method, ...(args !== undefined ? { args } : {}) }, invokeOptions);
+		raw<T = unknown>(method: string, args?: readonly unknown[], invokeOptions?: AppBridgeActionInvokeOptions) {
+			return invokeAction('runRaw', { method, ...(args !== undefined ? { args } : {}) }, invokeOptions) as Promise<
+				ActionResult<T>
+			>;
 		},
 		catalog() {
 			return getShardwireCatalog();

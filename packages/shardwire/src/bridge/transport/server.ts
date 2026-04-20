@@ -55,7 +55,7 @@ interface BridgeConnectionState {
 }
 
 interface BridgeTransportServerConfig {
-	options: BotBridgeOptions;
+	options: BotBridgeOptions & { server: NonNullable<BotBridgeOptions['server']> };
 	logger?: ShardwireLogger;
 	authenticate: (payload: AuthHelloPayload) => AuthSuccess | AuthFailure;
 	onActionRequest: (

@@ -8,6 +8,7 @@ description: Use for Shardwire, Discord split-process bridging (`createBotBridge
 ## 1. Core architecture (mental model)
 
 - **Split-process bridge:** One process runs the **bot** (Discord gateway, intents, bridge server). Another runs the **app** (handlers, business logic, actions). Do not collapse them unless the user explicitly wants a single-process setup.
+- **Modes:** `createBotBridge` supports **`split`** (default), **`hybrid`** (split + optional `bot.client()` exposure), and **`single-process`** (no WebSocket transport; app bridge via `bot.app()`).
 - **Communication:** The app connects to the bot over a **WebSocket** bridge; events and actions flow through that channel.
 - **Identity:** A **shared secret** (with optional scoping) authenticates the app to the bridge. Mismatches fail closed—treat secret and URL as one unit when debugging auth.
 
@@ -44,6 +45,7 @@ Per-symbol pages follow `https://shardwire.js.org/docs/reference/<section>/<keba
 - If the user’s feature is not covered above, check **`packages/create-shardwire/templates/`** for scaffold patterns, then fall back to the docs URLs in §2.
 - **Do not invent** methods, events, or action names—confirm against reference pages or `getShardwireCatalog` / manifest flows described in the docs.
 - For voice features, the built-in surface includes **`voiceStateUpdate`**, **`fetchVoiceState`**, **`moveMemberVoice`**, **`setMemberMute`**, **`setMemberDeaf`**, and **`setMemberSuppressed`**.
+- Raw passthrough is available through **`app.actions.runRaw(...)`** / **`app.raw(...)`** only when bot-side `raw.enabled` is true; respect `raw.allow` and `raw.deny` policy.
 
 ## 5. `@shardwire/react` (high level)
 

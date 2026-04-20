@@ -158,7 +158,13 @@ function normalizeRawResult(value: unknown, depth = 0): unknown {
 		}
 		return out;
 	}
-	return String(value);
+	if (typeof value === 'symbol') {
+		return value.toString();
+	}
+	if (typeof value === 'function') {
+		return `[Function ${value.name || 'anonymous'}]`;
+	}
+	return '[Unsupported]';
 }
 
 export function mapDiscordErrorToActionExecutionError(error: unknown): ActionExecutionError | null {
@@ -219,7 +225,7 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
 		});
 		this.rawEnabled = options.raw?.enabled ?? false;
 		this.rawAllow = options.raw?.allow === '*' ? '*' : new Set(options.raw?.allow ?? []);
-		this.rawDeny = new Set([...(options.raw?.deny ?? []), ...RAW_METHOD_BLOCKLIST]);
+		this.rawDeny = new Set([...(options.raw?.deny ?? []), ...Array.from(RAW_METHOD_BLOCKLIST)]);
 		this.client.once(Events.ClientReady, () => {
 			this.hasReady = true;
 		});
@@ -1240,7 +1246,7 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
 		if (typeof target !== 'function') {
 			throw new ActionExecutionError('INVALID_REQUEST', `runRaw target "${method}" is not a callable function.`);
 		}
-		const args = Array.isArray(payload.args) ? [...payload.args] : [];
+		const args = Array.isArray(payload.args) ? payload.args : [];
 		const value = await Promise.resolve((target as (...params: unknown[]) => unknown).apply(owner, args));
 		return normalizeRawResult(value);
 	}

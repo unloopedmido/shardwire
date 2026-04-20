@@ -115,6 +115,11 @@ export function createMockShardwireAppBridge(
 
 	return {
 		actions,
+		raw<T = unknown>(method: string, args?: readonly unknown[], invokeOptions?: AppBridgeActionInvokeOptions) {
+			return actions.runRaw({ method, ...(args !== undefined ? { args } : {}) }, invokeOptions) as Promise<
+				ActionResult<T>
+			>;
+		},
 		async ready() {},
 		async close() {
 			connected = false;

@@ -1,6 +1,6 @@
 {
 	"name": "@shardwire/react",
-	"version": "0.5.1",
+	"version": "0.5.2",
 	"description": "Optional React hooks for Shardwire app bridges (dashboards and controllers).",
 	"homepage": "https://shardwire.js.org/",
 	"repository": {
@@ -43,7 +43,7 @@
 		"test": "vitest run"
 	},
 	"dependencies": {
-		"shardwire": "^2.1.1"
+		"shardwire": "^2.2.0"
 	},
 	"peerDependencies": {
 		"react": ">=18.0.0"

@@ -16,6 +16,9 @@ export interface BotBridge {
 	ready(): Promise<void>;
 	close(): Promise<void>;
 	status(): { ready: boolean; connectionCount: number };
+	mode(): 'split' | 'hybrid' | 'single-process';
+	client(): unknown | null;
+	app(): AppBridge | null;
 }
 ```
 

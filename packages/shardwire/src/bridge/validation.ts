@@ -104,8 +104,15 @@ export function assertBotBridgeOptions(options: BotBridgeOptions): void {
 	if (!isNonEmptyString(options.token)) {
 		throw new Error(withErrorDocsLink('Bot bridge requires `token`.', 'bot-token-required'));
 	}
-	if (options.mode !== undefined && options.mode !== 'split' && options.mode !== 'hybrid' && options.mode !== 'single-process') {
-		throw new Error(withErrorDocsLink('Bot bridge option `mode` must be split, hybrid, or single-process.', 'bot-mode-invalid'));
+	if (
+		options.mode !== undefined &&
+		options.mode !== 'split' &&
+		options.mode !== 'hybrid' &&
+		options.mode !== 'single-process'
+	) {
+		throw new Error(
+			withErrorDocsLink('Bot bridge option `mode` must be split, hybrid, or single-process.', 'bot-mode-invalid'),
+		);
 	}
 	if (options.exposeClient !== undefined && typeof options.exposeClient !== 'boolean') {
 		throw new TypeError('Bot bridge option `exposeClient` must be a boolean when provided.');
@@ -135,7 +142,9 @@ export function assertBotBridgeOptions(options: BotBridgeOptions): void {
 		return;
 	}
 	if (!options.server) {
-		throw new Error(withErrorDocsLink('Bot bridge requires `server` unless mode is single-process.', 'bot-server-required'));
+		throw new Error(
+			withErrorDocsLink('Bot bridge requires `server` unless mode is single-process.', 'bot-server-required'),
+		);
 	}
 	assertPositiveNumber('server.port', options.server.port);
 	if (options.server.heartbeatMs !== undefined) {
@@ -257,7 +266,9 @@ export function resolveCapabilitiesForSecret(
 		secret.scope.actions === '*'
 			? BOT_ACTION_NAMES.filter((action) => (rawEnabled ? true : action !== 'runRaw'))
 			: BOT_ACTION_NAMES.filter((action) => {
-					return (rawEnabled || action !== 'runRaw') && secret.scope.actions !== '*' && secret.scope.actions.has(action);
+					return (
+						(rawEnabled || action !== 'runRaw') && secret.scope.actions !== '*' && secret.scope.actions.has(action)
+					);
 				});
 
 	return {

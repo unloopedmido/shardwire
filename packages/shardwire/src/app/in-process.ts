@@ -19,10 +19,14 @@ import type {
 import { BridgeCapabilityError, ShardwireStrictStartupError } from '../discord/types';
 import type { DiscordRuntimeAdapter, ActionExecutionError } from '../discord/runtime/adapter';
 import { matchesEventSubscription, serializeEventSubscription } from '../bridge/subscriptions';
-import { buildBridgeCapabilityErrorDetails, explainCapability as explainShardwireCapability } from '../dx/explain-capability';
+import {
+	buildBridgeCapabilityErrorDetails,
+	explainCapability as explainShardwireCapability,
+} from '../dx/explain-capability';
 import { buildPreflightReport } from '../dx/preflight';
 import { diagnoseShardwireApp } from '../dx/diagnose-app';
 import { getShardwireCatalog } from '../dx/shardwire-catalog';
+import { BOT_ACTION_NAMES } from '../discord/catalog';
 import { createRequestId } from '../utils/id';
 import { withErrorDocsLink } from '../utils/docs-links';
 
@@ -46,7 +50,9 @@ function mapActionExecutionError(error: unknown): ActionFailure['error'] | null 
 		return {
 			code: candidate.code as ActionFailure['error']['code'],
 			message:
-				error instanceof Error ? error.message : withErrorDocsLink('Raw action execution failed.', 'action-execution-errors'),
+				error instanceof Error
+					? error.message
+					: withErrorDocsLink('Raw action execution failed.', 'action-execution-errors'),
 			...(candidate.details !== undefined ? { details: candidate.details } : {}),
 		};
 	}
@@ -94,7 +100,10 @@ export function createInProcessAppBridge(options: {
 		if (runtimeUnsubscribers.has(name)) {
 			return;
 		}
-		runtimeUnsubscribers.set(name, runtime.on(name, (payload) => dispatch(name, payload)));
+		runtimeUnsubscribers.set(
+			name,
+			runtime.on(name, (payload) => dispatch(name, payload)),
+		);
 	}
 
 	async function invokeAction<K extends BotActionName>(
@@ -160,53 +169,20 @@ export function createInProcessAppBridge(options: {
 		}
 	}
 
-	const actions: AppBridgeActions = {
-		sendMessage: (payload, sendOptions) => invokeAction('sendMessage', payload, sendOptions),
-		sendDirectMessage: (payload, sendOptions) => invokeAction('sendDirectMessage', payload, sendOptions),
-		editMessage: (payload, sendOptions) => invokeAction('editMessage', payload, sendOptions),
-		deleteMessage: (payload, sendOptions) => invokeAction('deleteMessage', payload, sendOptions),
-		pinMessage: (payload, sendOptions) => invokeAction('pinMessage', payload, sendOptions),
-		unpinMessage: (payload, sendOptions) => invokeAction('unpinMessage', payload, sendOptions),
-		bulkDeleteMessages: (payload, sendOptions) => invokeAction('bulkDeleteMessages', payload, sendOptions),
-		replyToInteraction: (payload, sendOptions) => invokeAction('replyToInteraction', payload, sendOptions),
-		deferInteraction: (payload, sendOptions) => invokeAction('deferInteraction', payload, sendOptions),
-		deferUpdateInteraction: (payload, sendOptions) => invokeAction('deferUpdateInteraction', payload, sendOptions),
-		followUpInteraction: (payload, sendOptions) => invokeAction('followUpInteraction', payload, sendOptions),
-		editInteractionReply: (payload, sendOptions) => invokeAction('editInteractionReply', payload, sendOptions),
-		deleteInteractionReply: (payload, sendOptions) => invokeAction('deleteInteractionReply', payload, sendOptions),
-		updateInteraction: (payload, sendOptions) => invokeAction('updateInteraction', payload, sendOptions),
-		showModal: (payload, sendOptions) => invokeAction('showModal', payload, sendOptions),
-		fetchMessage: (payload, sendOptions) => invokeAction('fetchMessage', payload, sendOptions),
-		fetchChannel: (payload, sendOptions) => invokeAction('fetchChannel', payload, sendOptions),
-		fetchThread: (payload, sendOptions) => invokeAction('fetchThread', payload, sendOptions),
-		fetchGuild: (payload, sendOptions) => invokeAction('fetchGuild', payload, sendOptions),
-		fetchMember: (payload, sendOptions) => invokeAction('fetchMember', payload, sendOptions),
-		fetchVoiceState: (payload, sendOptions) => invokeAction('fetchVoiceState', payload, sendOptions),
-		banMember: (payload, sendOptions) => invokeAction('banMember', payload, sendOptions),
-		unbanMember: (payload, sendOptions) => invokeAction('unbanMember', payload, sendOptions),
-		kickMember: (payload, sendOptions) => invokeAction('kickMember', payload, sendOptions),
-		addMemberRole: (payload, sendOptions) => invokeAction('addMemberRole', payload, sendOptions),
-		removeMemberRole: (payload, sendOptions) => invokeAction('removeMemberRole', payload, sendOptions),
-		addMessageReaction: (payload, sendOptions) => invokeAction('addMessageReaction', payload, sendOptions),
-		removeOwnMessageReaction: (payload, sendOptions) => invokeAction('removeOwnMessageReaction', payload, sendOptions),
-		timeoutMember: (payload, sendOptions) => invokeAction('timeoutMember', payload, sendOptions),
-		removeMemberTimeout: (payload, sendOptions) => invokeAction('removeMemberTimeout', payload, sendOptions),
-		createChannel: (payload, sendOptions) => invokeAction('createChannel', payload, sendOptions),
-		editChannel: (payload, sendOptions) => invokeAction('editChannel', payload, sendOptions),
-		deleteChannel: (payload, sendOptions) => invokeAction('deleteChannel', payload, sendOptions),
-		createThread: (payload, sendOptions) => invokeAction('createThread', payload, sendOptions),
-		archiveThread: (payload, sendOptions) => invokeAction('archiveThread', payload, sendOptions),
-		moveMemberVoice: (payload, sendOptions) => invokeAction('moveMemberVoice', payload, sendOptions),
-		setMemberMute: (payload, sendOptions) => invokeAction('setMemberMute', payload, sendOptions),
-		setMemberDeaf: (payload, sendOptions) => invokeAction('setMemberDeaf', payload, sendOptions),
-		setMemberSuppressed: (payload, sendOptions) => invokeAction('setMemberSuppressed', payload, sendOptions),
-		runRaw: (payload, sendOptions) => invokeAction('runRaw', payload, sendOptions),
-	};
+	const actions = Object.fromEntries(
+		BOT_ACTION_NAMES.map((name) => [
+			name,
+			(payload: unknown, sendOptions?: AppBridgeActionInvokeOptions) =>
+				invokeAction(name, payload as never, sendOptions),
+		]),
+	) as AppBridgeActions;
 
 	return {
 		actions,
-		raw(method, args, invokeOptions) {
-			return invokeAction('runRaw', { method, ...(args !== undefined ? { args } : {}) }, invokeOptions);
+		raw<T = unknown>(method: string, args?: readonly unknown[], invokeOptions?: AppBridgeActionInvokeOptions) {
+			return invokeAction('runRaw', { method, ...(args !== undefined ? { args } : {}) }, invokeOptions) as Promise<
+				ActionResult<T>
+			>;
 		},
 		async ready(readyOptions?: AppBridgeReadyOptions) {
 			if (closed) {
@@ -217,7 +193,10 @@ export function createInProcessAppBridge(options: {
 			if (readyOptions?.strict) {
 				if (!readyOptions.manifest) {
 					throw new TypeError(
-						withErrorDocsLink('in-process app bridge: `ready({ strict: true })` requires `manifest`.', 'strict-manifest-required'),
+						withErrorDocsLink(
+							'in-process app bridge: `ready({ strict: true })` requires `manifest`.',
+							'strict-manifest-required',
+						),
 					);
 				}
 				const report = diagnoseShardwireApp(

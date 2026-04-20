@@ -46,6 +46,7 @@
     "remove-member-timeout-action-payload",
     "remove-own-message-reaction-action-payload",
     "reply-to-interaction-action-payload",
+    "run-raw-action-payload",
     "send-direct-message-action-payload",
     "send-message-action-payload",
     "set-member-deaf-action-payload",
