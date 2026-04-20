@@ -25,18 +25,18 @@
 		"prepublishOnly": "npm run build"
 	},
 	"dependencies": {
-		"@clack/prompts": "^0.11.0",
+		"@clack/prompts": "^1.2.0",
 		"picocolors": "^1.1.1",
 		"validate-npm-package-name": "^7.0.2"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
 		"@types/node": "^25.6.0",
-		"eslint": "^10.2.0",
+		"eslint": "^10.2.1",
 		"globals": "^17.5.0",
 		"prettier": "^3.8.3",
 		"tsup": "^8.5.1",
-		"typescript": "^6.0.2",
+		"typescript": "^6.0.3",
 		"typescript-eslint": "^8.58.2",
 		"vitest": "^4.1.4"
 	},
