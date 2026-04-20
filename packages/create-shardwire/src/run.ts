@@ -14,8 +14,8 @@ import { isValidNpmName, manifestNameFromSlug } from './lib/validate.js';
 import { getTemplate } from './templates.js';
 import type { TemplateId } from './templates.js';
 
-const SHARDWIRE_VERSION = '^2.1.0';
-const REACT_PKG_VERSION = '^0.5.0';
+const SHARDWIRE_VERSION = '^2.1.1';
+const REACT_PKG_VERSION = '^0.5.1';
 
 function isDirEmpty(path: string): boolean {
 	if (!existsSync(path)) {
