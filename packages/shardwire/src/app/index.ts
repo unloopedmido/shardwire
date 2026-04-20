@@ -340,7 +340,10 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
 						reconnectAttempts = 0;
 						isAuthed = true;
 						currentConnectionId = payload.connectionId;
-						currentCapabilities = payload.capabilities;
+						currentCapabilities = {
+							events: [...payload.capabilities.events],
+							actions: [...payload.capabilities.actions],
+						};
 						logger.debug('auth.ok; bridge authenticated', {
 							connectionId: payload.connectionId,
 							capabilities: payload.capabilities,
@@ -571,6 +574,7 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
 		setMemberMute: (payload, sendOptions) => invokeAction('setMemberMute', payload, sendOptions),
 		setMemberDeaf: (payload, sendOptions) => invokeAction('setMemberDeaf', payload, sendOptions),
 		setMemberSuppressed: (payload, sendOptions) => invokeAction('setMemberSuppressed', payload, sendOptions),
+		runRaw: (payload, sendOptions) => invokeAction('runRaw', payload, sendOptions),
 	};
 
 	return {
@@ -658,6 +662,9 @@ export function connectBotBridge(options: AppBridgeOptions): AppBridge {
 				events: [...currentCapabilities.events],
 				actions: [...currentCapabilities.actions],
 			};
+		},
+		raw(method, args, invokeOptions) {
+			return invokeAction('runRaw', { method, ...(args !== undefined ? { args } : {}) }, invokeOptions);
 		},
 		catalog() {
 			return getShardwireCatalog();

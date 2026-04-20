@@ -74,6 +74,17 @@ const INTERACTION_CACHE_TTL_MS = 15 * 60 * 1000;
 const DISCORD_FORBIDDEN_CODES = new Set<number>([50001, 50013]);
 const DISCORD_NOT_FOUND_CODES = new Set<number>([10003, 10004, 10007, 10008, 10011, 10062]);
 const DISCORD_INVALID_REQUEST_CODES = new Set<number>([50035]);
+const RAW_METHOD_BLOCKLIST = new Set<string>([
+	'login',
+	'destroy',
+	'on',
+	'off',
+	'once',
+	'emit',
+	'removeAllListeners',
+	'setMaxListeners',
+]);
+const RAW_FORBIDDEN_SEGMENTS = new Set<string>(['__proto__', 'prototype', 'constructor']);
 
 function isSendCapableChannel(channel: unknown): channel is SendCapableChannel {
 	return Boolean(channel && typeof (channel as { send?: unknown }).send === 'function');
@@ -117,6 +128,39 @@ function extractDiscordErrorDetails(error: unknown): { status?: number; code?: n
 	return {};
 }
 
+function normalizeRawResult(value: unknown, depth = 0): unknown {
+	if (value === null || value === undefined) {
+		return value;
+	}
+	if (depth > 6) {
+		return '[MaxDepth]';
+	}
+	if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+		return value;
+	}
+	if (typeof value === 'bigint') {
+		return value.toString();
+	}
+	if (value instanceof Date) {
+		return value.toISOString();
+	}
+	if (Array.isArray(value)) {
+		return value.map((item) => normalizeRawResult(item, depth + 1));
+	}
+	if (typeof value === 'object') {
+		const withJson = value as { toJSON?: () => unknown };
+		if (typeof withJson.toJSON === 'function') {
+			return normalizeRawResult(withJson.toJSON(), depth + 1);
+		}
+		const out: Record<string, unknown> = {};
+		for (const [key, entry] of Object.entries(value as Record<string, unknown>)) {
+			out[key] = normalizeRawResult(entry, depth + 1);
+		}
+		return out;
+	}
+	return String(value);
+}
+
 export function mapDiscordErrorToActionExecutionError(error: unknown): ActionExecutionError | null {
 	const details = extractDiscordErrorDetails(error);
 	const message = details.message ?? (error instanceof Error ? error.message : 'Discord action failed.');
@@ -157,6 +201,9 @@ export function mapDiscordErrorToActionExecutionError(error: unknown): ActionExe
 export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
 	private readonly client: Client;
 	private readonly logger;
+	private readonly rawEnabled: boolean;
+	private readonly rawAllow: '*' | Set<string>;
+	private readonly rawDeny: Set<string>;
 	private readonly interactionCache = new DedupeCache<Interaction>(INTERACTION_CACHE_TTL_MS);
 	private readonly actionHandlers: {
 		[K in BotActionName]: (payload: BotActionPayloadMap[K]) => Promise<BotActionResultDataMap[K]>;
@@ -170,6 +217,9 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
 		this.client = new Client({
 			intents: intentBits,
 		});
+		this.rawEnabled = options.raw?.enabled ?? false;
+		this.rawAllow = options.raw?.allow === '*' ? '*' : new Set(options.raw?.allow ?? []);
+		this.rawDeny = new Set([...(options.raw?.deny ?? []), ...RAW_METHOD_BLOCKLIST]);
 		this.client.once(Events.ClientReady, () => {
 			this.hasReady = true;
 		});
@@ -213,6 +263,7 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
 			setMemberMute: (payload) => this.setMemberMute(payload),
 			setMemberDeaf: (payload) => this.setMemberDeaf(payload),
 			setMemberSuppressed: (payload) => this.setMemberSuppressed(payload),
+			runRaw: (payload) => this.runRaw(payload),
 		};
 	}
 
@@ -223,6 +274,10 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
 
 	isReady(): boolean {
 		return this.hasReady && this.client.isReady();
+	}
+
+	getClient(): Client {
+		return this.client;
 	}
 
 	ready(): Promise<void> {
@@ -1146,6 +1201,48 @@ export class DiscordJsRuntimeAdapter implements DiscordRuntimeAdapter {
 		await member.voice.setSuppressed(payload.suppressed);
 		const refreshed = await member.fetch(true);
 		return serializeVoiceState(refreshed.voice);
+	}
+
+	private async runRaw(payload: BotActionPayloadMap['runRaw']) {
+		if (!this.rawEnabled) {
+			throw new ActionExecutionError(
+				'FORBIDDEN',
+				'Raw passthrough is disabled for this bot bridge. Enable `raw.enabled` in createBotBridge options.',
+			);
+		}
+		const method = payload.method?.trim();
+		if (!method) {
+			throw new ActionExecutionError('INVALID_REQUEST', 'runRaw requires a non-empty `method` path.');
+		}
+		const parts = method.split('.');
+		if (parts.some((segment) => RAW_FORBIDDEN_SEGMENTS.has(segment))) {
+			throw new ActionExecutionError('FORBIDDEN', `runRaw method "${method}" is blocked.`);
+		}
+		if (this.rawDeny.has(method) || this.rawDeny.has(parts[parts.length - 1] ?? '')) {
+			throw new ActionExecutionError('FORBIDDEN', `runRaw method "${method}" is denied by bot policy.`);
+		}
+		if (this.rawAllow !== '*' && !this.rawAllow.has(method)) {
+			throw new ActionExecutionError(
+				'FORBIDDEN',
+				`runRaw method "${method}" is not allowed. Add it to createBotBridge({ raw: { allow: [...] } }).`,
+			);
+		}
+
+		let owner: unknown = this.client as unknown;
+		let target: unknown = owner;
+		for (const part of parts) {
+			if (!target || (typeof target !== 'object' && typeof target !== 'function')) {
+				throw new ActionExecutionError('NOT_FOUND', `runRaw path "${method}" was not found on discord.js client.`);
+			}
+			owner = target;
+			target = (target as Record<string, unknown>)[part];
+		}
+		if (typeof target !== 'function') {
+			throw new ActionExecutionError('INVALID_REQUEST', `runRaw target "${method}" is not a callable function.`);
+		}
+		const args = Array.isArray(payload.args) ? [...payload.args] : [];
+		const value = await Promise.resolve((target as (...params: unknown[]) => unknown).apply(owner, args));
+		return normalizeRawResult(value);
 	}
 }
 

@@ -69,6 +69,7 @@ export const BOT_ACTION_NAMES = [
 	'setMemberMute',
 	'setMemberDeaf',
 	'setMemberSuppressed',
+	'runRaw',
 ] as const satisfies readonly BotActionName[];
 
 const DISCORD_GATEWAY_INTENT_ENTRIES = Object.entries(GatewayIntentBits).filter(

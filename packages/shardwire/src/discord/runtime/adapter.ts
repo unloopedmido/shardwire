@@ -2,6 +2,7 @@ import type {
 	BotActionName,
 	BotActionPayloadMap,
 	BotActionResultDataMap,
+	BotBridgeOptions,
 	BotEventName,
 	BotEventPayloadMap,
 	BotIntentName,
@@ -14,6 +15,7 @@ export interface DiscordRuntimeOptions {
 	token: string;
 	intents: readonly BotIntentName[];
 	logger?: ShardwireLogger;
+	raw?: BotBridgeOptions['raw'];
 }
 
 export interface DiscordRuntimeAdapter {
@@ -22,6 +24,7 @@ export interface DiscordRuntimeAdapter {
 	isReady(): boolean;
 	on<K extends BotEventName>(name: K, handler: (payload: BotEventPayloadMap[K]) => void): Unsubscribe;
 	executeAction<K extends BotActionName>(name: K, payload: BotActionPayloadMap[K]): Promise<BotActionResultDataMap[K]>;
+	getClient?(): unknown | null;
 }
 
 export class ActionExecutionError extends Error {

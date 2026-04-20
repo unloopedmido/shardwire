@@ -99,6 +99,30 @@ describe('discord-first bridge validation', () => {
 		).toThrow(/maxConnections/i);
 	});
 
+	it('supports single-process mode without server config', () => {
+		expect(() =>
+			createBotBridge({
+				token: 'fake-token',
+				intents: ['Guilds'],
+				mode: 'single-process',
+			}),
+		).not.toThrow();
+	});
+
+	it('throws for invalid mode option', () => {
+		expect(() =>
+			createBotBridge({
+				token: 'fake-token',
+				intents: ['Guilds'],
+				mode: 'invalid' as never,
+				server: {
+					port: 3001,
+					secrets: ['secret'],
+				},
+			}),
+		).toThrow(/mode/i);
+	});
+
 	it('throws for invalid idempotency options', () => {
 		expect(() =>
 			createBotBridge({

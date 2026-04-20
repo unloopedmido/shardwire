@@ -819,6 +819,16 @@ export interface SetMemberSuppressedActionPayload {
 }
 
 /**
+ * @see https://shardwire.js.org/docs/reference/action-models/run-raw-action-payload/
+ */
+export interface RunRawActionPayload {
+	/** Dot-path function on the underlying discord.js client (example: `guilds.fetch`). */
+	method: string;
+	/** Positional arguments to pass to the target function. */
+	args?: readonly unknown[];
+}
+
+/**
  * @see https://shardwire.js.org/docs/reference/action-models/bot-action-payload-map/
  */
 export interface BotActionPayloadMap {
@@ -861,6 +871,7 @@ export interface BotActionPayloadMap {
 	setMemberMute: SetMemberMuteActionPayload;
 	setMemberDeaf: SetMemberDeafActionPayload;
 	setMemberSuppressed: SetMemberSuppressedActionPayload;
+	runRaw: RunRawActionPayload;
 }
 
 /**
@@ -999,6 +1010,7 @@ export interface BotActionResultDataMap {
 	setMemberMute: BridgeVoiceState;
 	setMemberDeaf: BridgeVoiceState;
 	setMemberSuppressed: BridgeVoiceState;
+	runRaw: unknown;
 }
 
 /**
@@ -1317,7 +1329,20 @@ export interface ActionErrorDetails {
 export interface BotBridgeOptions {
 	token: string;
 	intents: readonly BotIntentName[];
-	server: {
+	/** `split` = current two-process bridge, `hybrid` = split + exposed discord.js client, `single-process` = in-process app bridge with no WebSocket transport. */
+	mode?: 'split' | 'hybrid' | 'single-process';
+	/** When true, exposes the underlying discord.js client via `bot.client()` for incremental migration. */
+	exposeClient?: boolean;
+	raw?: {
+		/** Enables `app.actions.runRaw(...)` (disabled by default). */
+		enabled?: boolean;
+		/** Allowed method paths. `'*'` allows all methods except blocked internals. */
+		allow?: '*' | readonly string[];
+		/** Explicitly deny method paths (applied after `allow`). */
+		deny?: readonly string[];
+	};
+	/** Bridge WebSocket server settings (required unless `mode: 'single-process'`). */
+	server?: {
 		port: number;
 		host?: string;
 		path?: string;
@@ -1484,6 +1509,9 @@ export interface BotBridge {
 	ready(): Promise<void>;
 	close(): Promise<void>;
 	status(): { ready: boolean; connectionCount: number };
+	mode(): 'split' | 'hybrid' | 'single-process';
+	client(): unknown | null;
+	app(): AppBridge | null;
 }
 
 /**
@@ -1491,6 +1519,7 @@ export interface BotBridge {
  */
 export interface AppBridge {
 	actions: AppBridgeActions;
+	raw<T = unknown>(method: string, args?: readonly unknown[], options?: AppBridgeActionInvokeOptions): Promise<ActionResult<T>>;
 	/**
 	 * Awaits WebSocket authentication. Throws {@link BridgeCapabilityError} when handlers reference disallowed events.
 	 * With `strict`, validates manifest / intents / optional `expectedScope` after negotiation; throws {@link ShardwireStrictStartupError} on failure.
