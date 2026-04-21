@@ -1,11 +1,12 @@
 import 'dotenv/config';
 import { createBotBridge } from 'shardwire';
+import { browserSecretId, browserSecretScope } from '../src/shardwire-manifest.js';
 
-const secret = process.env.SHARDWIRE_SECRET;
+const browserSecret = process.env.SHARDWIRE_BROWSER_SECRET;
 const token = process.env.DISCORD_TOKEN;
 
-if (!secret || !token) {
-	console.error('Missing DISCORD_TOKEN or SHARDWIRE_SECRET (.env or environment)');
+if (!browserSecret || !token) {
+	console.error('Missing DISCORD_TOKEN or SHARDWIRE_BROWSER_SECRET (.env or environment)');
 	process.exit(1);
 }
 
@@ -14,7 +15,13 @@ const bridge = createBotBridge({
 	intents: ['Guilds', 'GuildMessages', 'GuildMembers', 'MessageContent'],
 	server: {
 		port: 3001,
-		secrets: [secret],
+		secrets: [
+			{
+				id: browserSecretId,
+				value: browserSecret,
+				allow: browserSecretScope,
+			},
+		],
 	},
 });
 

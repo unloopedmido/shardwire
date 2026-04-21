@@ -136,11 +136,14 @@ export async function run(argv: string[]): Promise<void> {
 		lines.push(
 			`  ${pc.dim('cp .env.example .env')}   ${pc.dim('# set DISCORD_TOKEN + SHARDWIRE_SECRET')}`,
 		);
+		lines.push(
+			`  ${pc.dim(run('register'))}  ${pc.dim('# once, if you want the included /hello slash command')}`,
+		);
 		lines.push(`  ${pc.dim(run('bot'))}  ${pc.dim('# terminal 1')}`);
 		lines.push(`  ${pc.dim(run('app'))}  ${pc.dim('# terminal 2')}`);
 	} else {
 		lines.push(
-			`  ${pc.dim('cp .env.example .env')}   ${pc.dim('# set tokens + matching VITE_SHARDWIRE_SECRET')}`,
+			`  ${pc.dim('cp .env.example .env')}   ${pc.dim('# set DISCORD_TOKEN + browser-scoped VITE_* secrets')}`,
 		);
 		lines.push(`  ${pc.dim(run('bot'))}  ${pc.dim('# terminal 1')}`);
 		lines.push(`  ${pc.dim(run('dev'))}  ${pc.dim('# terminal 2')}`);

@@ -65,7 +65,7 @@ At runtime, traffic follows your Discord.js configuration (Discord gateway/REST)
 npm install shardwire
 ```
 
-Requires **Node.js 22+**.
+Requires **Node.js 18+** to install and run the bot-side bridge. If you call **`connectBotBridge`** from a **Node app process** (instead of the browser), use **Node.js 22+** so **`globalThis.WebSocket`** is available.
 
 <details>
 <summary><b>Details</b> — entrypoints</summary>

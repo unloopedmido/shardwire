@@ -42,7 +42,7 @@ function Root() {
 		<ShardwireProvider
 			options={{
 				url: import.meta.env.VITE_SHARDWIRE_URL,
-				secret: import.meta.env.VITE_SHARDWIRE_SECRET,
+				secret: import.meta.env.VITE_SHARDWIRE_SECRET, // browser-scoped secret
 			}}
 		>
 			<Dashboard />
@@ -71,7 +71,7 @@ Expect **`react` 18+** as a peer dependency and **`shardwire`** for the client t
 npm install @shardwire/react shardwire
 ```
 
-Requires **Node.js 22+** for development tooling; browser targets follow your bundler’s supported React version.
+Requires **Node.js 18+** to install the package. Your actual app follows your bundler/framework runtime floor; for example, the official Vite template uses **`^20.19.0 || >=22.12.0`**. If you also run **`connectBotBridge`** in a separate **Node** app process, that process still needs **Node.js 22+**.
 
 <details>
 <summary><b>Details</b> — package shape</summary>
@@ -88,7 +88,7 @@ For conceptual background, read [How it works](https://shardwire.js.org/docs/con
 
 ## Getting Started
 
-1. Confirm your bot exposes a bridge and you have URL + secret available to the **browser-safe** surface you intend to use (see main docs for capability and secret scoping guidance).
+1. Confirm your bot exposes a bridge and you have a **browser-scoped** URL + secret pair available to the surface you intend to use (see main docs for capability and secret scoping guidance).
 2. Wrap your tree in `ShardwireProvider` (or the pattern shown in the current docs).
 3. Use the documented hooks to send actions and read connection state.
 

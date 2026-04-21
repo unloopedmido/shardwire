@@ -48,12 +48,13 @@ npm run app            # terminal B: app client (Express Server) or see template
 ```
 
 **Express Server** templates also serve **`GET /health`** on **`PORT`** (default **3000**). Adjust URLs and secrets if you change the default listen address.
+The **React App** template instead uses **`SHARDWIRE_BROWSER_SECRET`** plus matching **`VITE_*`** values so the browser gets a scoped secret rather than a broad internal one.
 
 ---
 
 ## Install
 
-Cloning only adds source; `npm install` pulls dependencies like any Node project. When you run a bot or scaffolded app, processes reach Discord and the bridge WebSocket you configure. Keep tokens and bridge secrets in `.env` or your host’s secret store (templates use names like `SHARDWIRE_SECRET`); never commit real values. To clean up, stop processes and delete the checkout; drop a published dependency from a project with `npm uninstall <name>`.
+Cloning only adds source; `npm install` pulls dependencies like any Node project. When you run a bot or scaffolded app, processes reach Discord and the bridge WebSocket you configure. Keep tokens and bridge secrets in `.env` or your host’s secret store (templates use names like `SHARDWIRE_SECRET` or `SHARDWIRE_BROWSER_SECRET`); never commit real values. To clean up, stop processes and delete the checkout; drop a published dependency from a project with `npm uninstall <name>`.
 
 **Start a new project (recommended):**
 
@@ -69,7 +70,7 @@ npm install shardwire
 npm install @shardwire/react
 ```
 
-Requires **Node.js 22+** (see `engines` in each package).
+Published packages install on **Node.js 18+**. The runtime floor depends on which path you use: the **Express Server** template and any **Node** app process that calls **`connectBotBridge`** still require **Node.js 22+**, while the **React App** template follows Vite’s **`^20.19.0 || >=22.12.0`** support window.
 
 <details>
 <summary><b>Details</b> — work on this monorepo locally</summary>
@@ -99,7 +100,7 @@ Scaffold templates live under [`packages/create-shardwire/templates/`](packages/
 
 1. **Skim concepts** — [How it works](https://shardwire.js.org/docs/concepts/how-it-works/) (bot vs app, secrets, capabilities).
 2. **Scaffold** — `npm create shardwire@latest` (**Express Server** or **React App**). Template sources: [express-server](https://github.com/unloopedmido/shardwire/tree/main/packages/create-shardwire/templates/express-server), [react-vite](https://github.com/unloopedmido/shardwire/tree/main/packages/create-shardwire/templates/react-vite).
-3. **Configure environment** — `.env` with Discord credentials and a shared bridge secret (for example `SHARDWIRE_SECRET`) that matches on both sides.
+3. **Configure environment** — `.env` with Discord credentials and the secret layout your template expects: `SHARDWIRE_SECRET` for the Express/Node app path, or `SHARDWIRE_BROWSER_SECRET` plus matching `VITE_*` values for the browser dashboard path.
 4. **Register commands** (if your template uses slash commands) — `npm run register` in the generated project.
 5. **Run bot and app** — two processes in development; production layout is your choice (see [Keeping it alive](https://shardwire.js.org/docs/guides/keeping-it-alive/)).
 

@@ -5,7 +5,7 @@
 ### Vite-powered React UI talking to a Node bot through `@shardwire/react` and `shardwire`.
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-326ce5?style=flat-square)](https://opensource.org/licenses/MIT)
-[![Node](https://img.shields.io/badge/node-%E2%89%A522-339933?style=flat-square&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![Node](https://img.shields.io/badge/node-%E2%89%A520.19%20%7C%20%E2%89%A522.12-339933?style=flat-square&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-61dafb?style=flat-square&logo=react&logoColor=black)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-646cff?style=flat-square&logo=vite&logoColor=white)](https://vite.dev/)
 [![Shardwire docs](https://img.shields.io/badge/Shardwire-docs-6b46c1?style=flat-square)](https://shardwire.js.org/docs/)
@@ -18,7 +18,7 @@
 
 ---
 
-You will run **Vite and the bot/bridge** together in development. Anything prefixed with `VITE_` is compiled into the browser bundle—only put a bridge URL and secrets there that you are willing to expose to clients, and read the Shardwire docs on secret scopes first. Stop processes and delete this directory to remove the project.
+You will run **Vite and the bot/bridge** together in development. Anything prefixed with `VITE_` is compiled into the browser bundle, so this template uses a dedicated **browser-scoped** bridge secret instead of reusing a broad server-side secret. Stop processes and delete this directory to remove the project.
 
 ```bash
 npm install
@@ -37,8 +37,7 @@ You need a **browser dashboard** that reacts to Discord-backed events without ev
 
 ```text
 $ npm install
-$ cp .env.example .env   # set bot-side vars and VITE_* client vars
-$ npm run register
+$ cp .env.example .env   # set DISCORD_TOKEN + the browser-scoped VITE_* secret values
 $ npm run bot      # terminal A — bridge + Discord
 $ npm run dev      # terminal B — Vite (default http://localhost:5173)
 ```
@@ -51,16 +50,16 @@ $ npm run dev      # terminal B — Vite (default http://localhost:5173)
 npm install
 ```
 
-Requires **Node.js 22+**.
+Requires **Node.js `^20.19.0 || >=22.12.0`** (matches Vite 8).
 
 <details>
 <summary><b>Details</b> — scripts</summary>
 
-| Script                              | What it runs      |
-| ----------------------------------- | ----------------- |
-| `npm run bot`                       | `tsx bot/bot.ts`  |
-| `npm run dev` / `build` / `preview` | Vite lifecycle    |
-| `npm run register`                  | `tsx register.ts` |
+| Script                              | What it runs                                                                |
+| ----------------------------------- | --------------------------------------------------------------------------- |
+| `npm run bot`                       | `tsx bot/bot.ts`                                                            |
+| `npm run dev` / `build` / `preview` | Vite lifecycle                                                              |
+| `npm run register`                  | Optional guild slash-command helper if you add an interaction example later |
 
 </details>
 
@@ -68,7 +67,7 @@ Requires **Node.js 22+**.
 
 ## Getting Started
 
-1. Fill `.env` with Discord credentials, bridge secret, and `VITE_SHARDWIRE_URL` / related keys expected by `src/` (see comments in `.env.example`).
+1. Fill `.env` with `DISCORD_TOKEN`, a dedicated `SHARDWIRE_BROWSER_SECRET`, and the matching `VITE_*` values expected by `src/` (see `.env.example`).
 2. Run bot and Vite together during development.
 3. Read [Keeping it alive](https://shardwire.js.org/docs/guides/keeping-it-alive/) before deploying to production hosts.
 
@@ -76,7 +75,7 @@ Requires **Node.js 22+**.
 
 ## How It Works
 
-The bot process (`bot/bot.ts`) mirrors the Express Server template: Discord.js + bridge. The Vite app wraps your React tree with `ShardwireProvider` and uses hooks from `@shardwire/react` to interact with the session.
+The bot process (`bot/bot.ts`) hosts the bridge with a scoped secret id of **`browser`** derived from the shared manifest. The Vite app wraps your React tree with `ShardwireProvider`, passes the same secret id, and uses hooks from `@shardwire/react` to interact with the session.
 
 <details>
 <summary><b>Details</b> — production split</summary>

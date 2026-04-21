@@ -39,8 +39,8 @@ $ npm create shardwire@latest
 $ cd your-project
 $ npm install
 $ cp .env.example .env
-# edit .env — Discord token, SHARDWIRE_SECRET, optional application/guild ids, SHARDWIRE_URL
-$ npm run register
+# edit .env — Discord token plus the secret variables your template expects
+$ npm run register   # once, if your template includes the /hello slash-command example
 $ npm run bot    # one terminal
 $ npm run app    # or npm run dev for Vite — second terminal
 ```
@@ -57,7 +57,7 @@ The supported entry is **`npm create`**, which downloads this package on demand:
 npm create shardwire@latest
 ```
 
-Requires **Node.js 22+**.
+Requires **Node.js 18+** to run the CLI. Generated templates have their own runtime floors: the **Express Server** template targets **Node.js 22+**, while the **React App** template follows Vite’s **`^20.19.0 || >=22.12.0`** support window.
 
 <details>
 <summary><b>Details</b> — CLI binary and development</summary>

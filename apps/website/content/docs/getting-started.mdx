@@ -14,20 +14,21 @@ You are **two small programs** away from a working bot: one starts **The Connect
 
 <Callout type="info" title="Scaffold from npm (golden path)">
 
-The default **Express Server** template is **TypeScript** entrypoints (**`src/bot.ts`**, **`src/app.ts`**) run with **`tsx`**. The app process starts **Express** on **`PORT`** (default **3000**) with **`GET /health`**, then connects the bridge client. After **`npm install`**, copy **`.env.example`** → **`.env`**, set **`DISCORD_TOKEN`** and **`SHARDWIRE_SECRET`**, then run **`npm run bot`** and **`npm run app`** in two terminals. Slash-command registration is **`npm run register`** (**`src/register.ts`**) — see [**First slash command**](/docs/tutorial/first-interaction).
+The default **Express Server** template is **TypeScript** entrypoints (**`src/bot.ts`**, **`src/app.ts`**) run with **`tsx`**. The app process starts **Express** on **`PORT`** (default **3000**) with **`GET /health`**, then connects the bridge client. After **`npm install`**, copy **`.env.example`** → **`.env`**, set **`DISCORD_TOKEN`** and **`SHARDWIRE_SECRET`**, run **`npm run register`** once for the included **`/hello`** command, then run **`npm run bot`** and **`npm run app`** in two terminals. Slash-command registration lives in **`src/register.ts`** — see [**First slash command**](/docs/tutorial/first-interaction).
 
 </Callout>
 
 ## Prerequisites
 
-- **Node.js 22+** (your app uses the built-in **WebSocket**—see [**Troubleshooting**](/docs/troubleshooting) if something complains).
+- **Express Server template / any Node app using `connectBotBridge`: Node.js 22+** (that app process relies on native **`globalThis.WebSocket`**).
+- **React App template:** follow your bundler’s runtime floor (the official Vite scaffold uses **`^20.19.0 || >=22.12.0`**).
 - A Discord bot **token** and a shared **secret** string you invent (any long random string).
 
 <Steps>
 
 <Step>
 
-Create a `.env` next to the scaffold with **`DISCORD_TOKEN`** and **`SHARDWIRE_SECRET`** (same secret in both processes). For **React App** (Vite), also set **`VITE_SHARDWIRE_SECRET`** to the **same** value — see [**Connection and authentication**](/docs/troubleshooting#connection-and-auth-errors) if the app cannot connect.
+Create a `.env` next to the scaffold with **`DISCORD_TOKEN`** and the secret variables your template expects. The **Express Server** scaffold uses one shared **`SHARDWIRE_SECRET`** for the Node app process. The **React App** scaffold instead creates a dedicated **browser-scoped** secret on the bot side (**`SHARDWIRE_BROWSER_SECRET`**) and expects **`VITE_SHARDWIRE_SECRET`** plus **`VITE_SHARDWIRE_SECRET_ID=browser`** in the browser bundle — see [**Connection and authentication**](/docs/troubleshooting#connection-and-auth-errors) if the app cannot connect.
 
 </Step>
 
@@ -47,7 +48,7 @@ Run **`npm run app`** (or **`npm run dev`** for Vite) — this connects your **a
 
 ## Common mistakes (quick checks)
 
-- **Secret mismatch** — the string in **`server.secrets`** (bot) must equal **`secret`** (app). For Vite, **`VITE_SHARDWIRE_SECRET`** must match **`SHARDWIRE_SECRET`**. See [**Connection and authentication**](/docs/troubleshooting#connection-and-auth-errors).
+- **Secret mismatch** — the string in **`server.secrets`** (bot) must equal **`secret`** (app). For the React/Vite scaffold, **`VITE_SHARDWIRE_SECRET`** must match **`SHARDWIRE_BROWSER_SECRET`**, and **`VITE_SHARDWIRE_SECRET_ID`** must match the configured secret id (**`browser`** in the official template). See [**Connection and authentication**](/docs/troubleshooting#connection-and-auth-errors).
 - **Wrong URL** — path is usually **`/shardwire`**; loopback **`ws://`** vs remote **`wss://`**. See [**App URL protocol**](/docs/troubleshooting#app-url-protocol) and [**Non-loopback requires wss**](/docs/troubleshooting#app-wss-required).
 - **Bot not running first** — start the bot process before the app. See [**Connection and authentication**](/docs/troubleshooting#connection-and-auth-errors).
 
@@ -81,6 +82,12 @@ await app.ready();
 ```
 
 If you used **`npm create shardwire`** (Express Server template), **`appName`** is already set in **`src/app.ts`** to match your project’s generated manifest name.
+
+<Callout type="info" title="Browser apps should use scoped secrets">
+
+If your app runs in the **browser**, do **not** expose a broad internal secret. Use object-form **`server.secrets`** with an id plus **`allow`** derived from **`generateSecretScope(manifest)`**, then pass that secret value and id from the browser.
+
+</Callout>
 
 <Callout type="warn" title="Import path on the app">
 

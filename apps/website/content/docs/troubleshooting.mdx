@@ -13,9 +13,9 @@ Most “nothing happens” issues are **permissions and intents**, not a broken 
 
 </Callout>
 
-<h2 id="nodejs-below-22-connectbotbridge-requires-globalthiswebsocket">Node.js 22+ and WebSocket</h2>
+<h2 id="nodejs-below-22-connectbotbridge-requires-globalthiswebsocket">Node app processes and WebSocket</h2>
 
-**App** processes need **Node.js 22+** so **`globalThis.WebSocket`** works (same as modern browsers). Upgrade Node; polyfilling **`WebSocket`** on older Node is not supported.
+Only **Node app processes that call `connectBotBridge(...)`** need **Node.js 22+** so **`globalThis.WebSocket`** works like it does in the browser. Bot-only bridge processes can run on older supported Node versions, and browser apps use the browser’s own WebSocket implementation. Polyfilling **`WebSocket`** for Node app processes is not supported.
 
 <h2 id="vite-and-zlib-sync">Vite and zlib-sync</h2>
 
@@ -25,17 +25,17 @@ Bundlers may pull **`discord.js`** (and optional **`zlib-sync`**) if you import 
 
 <h2 id="vite-crypto-note">Vite and crypto</h2>
 
-Use **`shardwire` ≥ 2.0.0** on **Node 22+**; the client path uses **`globalThis.crypto`** for request IDs so Vite does not need **`node:crypto`**.
+Use **`shardwire` ≥ 2.0.0**; the client path uses **`globalThis.crypto`** for request IDs so Vite does not need **`node:crypto`**.
 
 <h2 id="websocket-not-constructor">Browser: WebSocket is not a constructor</h2>
 
-Use **Node 22+** and a current **`shardwire`** so the client build does not ship the wrong **`ws`** shim into the browser.
+Use a current **`shardwire`** build so the client path does not ship the wrong **`ws`** shim into the browser.
 
 ---
 
 <h2 id="connection-and-auth-errors">Connection and authentication</h2>
 
-The app could not open **The Connection** or the secret did not match. Check **`url`** (including path, often **`/shardwire`**), **`secret`**, and that the **bot bridge** is running.
+The app could not open **The Connection** or the secret did not match. Check **`url`** (including path, often **`/shardwire`**), **`secret`**, optional **`secretId`**, and that the **bot bridge** is running.
 
 <h2 id="app-bridge-not-connected">App bridge is not connected</h2>
 

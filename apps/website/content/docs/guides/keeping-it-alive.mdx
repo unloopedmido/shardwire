@@ -20,8 +20,8 @@ You are not learning “systems architecture”—you are picking a host and set
 
 Typical shape:
 
-- **Service A (bot)** — Node 22+, start command runs your **bot** entry (`createBotBridge`). Expose the **bridge port** (or use the platform’s private networking if both services live in the same project).
-- **Service B (app)** — Node 22+, start command runs your **app** entry (`connectBotBridge`) with **`SHARDWIRE_URL=wss://…/shardwire`** pointing at **A**.
+- **Service A (bot)** — a supported Node runtime for your bot-side bridge, start command runs your **bot** entry (`createBotBridge`). Expose the **bridge port** (or use the platform’s private networking if both services live in the same project).
+- **Service B (app)** — **Node 22+** if this is a **Node** app entry that runs **`connectBotBridge`**, with **`SHARDWIRE_URL=wss://…/shardwire`** pointing at **A**.
 
 <Callout type="tip" title="WebSockets on PaaS">
 
@@ -31,7 +31,7 @@ Confirm your platform **allows WebSocket upgrades** on the route to the bridge (
 
 **Secrets**
 
-- Put **`DISCORD_TOKEN`** and **`SHARDWIRE_SECRET`** in the host’s **secret** store, not in your repo.
+- Put **`DISCORD_TOKEN`** and whatever bridge secrets you actually use (for example **`SHARDWIRE_SECRET`** for Node apps or **`SHARDWIRE_BROWSER_SECRET`** for browser dashboards) in the host’s **secret** store, not in your repo.
 - The **app** secret must match a secret configured on the **bot** bridge.
 
 ## VPS (you control the box)
@@ -51,7 +51,7 @@ If “it connects but nothing happens,” it is often **intents**, **secret scop
 - Bridge **path** end-to-end (often **`/shardwire`**).
 - Remote URL uses **`wss://`**.
 - **Secrets** match between bot config and app env.
-- **Node 22+** on the **app** side.
+- **Node 22+** on the **Node app** side (browser apps use the browser WebSocket runtime instead).
 
 ## Reference
 

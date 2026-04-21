@@ -1,5 +1,4 @@
-import { useMemo, useState } from 'react';
-import { defineShardwireApp } from 'shardwire/client';
+import { useMemo } from 'react';
 import {
 	ShardwireProvider,
 	useShardwireCapabilities,
@@ -9,12 +8,7 @@ import {
 	useShardwirePreflight,
 	useShardwire,
 } from '@shardwire/react';
-
-const manifest = defineShardwireApp({
-	name: '{{MANIFEST_NAME}}',
-	events: ['messageCreate', 'interactionCreate'],
-	actions: ['sendMessage', 'replyToInteraction'],
-});
+import { browserSecretId, browserSecretScope, manifest } from './shardwire-manifest';
 
 function Dashboard() {
 	const conn = useShardwire();
@@ -39,8 +33,9 @@ function Dashboard() {
 					<strong>Connection error:</strong> {conn.error.message}
 				</p>
 				<p className="dashboard-muted">
-					Is the bot running (<code>npm run bot</code>) and is <code>VITE_SHARDWIRE_SECRET</code>{' '}
-					the same as <code>SHARDWIRE_SECRET</code>?
+					Is the bot running (<code>npm run bot</code>) and do <code>VITE_SHARDWIRE_SECRET</code>{' '}
+					and <code>VITE_SHARDWIRE_SECRET_ID</code> match the browser-scoped secret in{' '}
+					<code>bot/bot.ts</code>?
 				</p>
 			</div>
 		);
@@ -126,19 +121,23 @@ function Dashboard() {
 
 export function App() {
 	const viteSecret = import.meta.env.VITE_SHARDWIRE_SECRET;
+	const viteSecretId = import.meta.env.VITE_SHARDWIRE_SECRET_ID ?? browserSecretId;
 	const options = useMemo(
 		() => ({
 			url: import.meta.env.VITE_SHARDWIRE_URL ?? 'ws://127.0.0.1:3001/shardwire',
 			secret: viteSecret as string,
+			secretId: viteSecretId,
 			appName: manifest.name,
 		}),
-		[viteSecret],
+		[viteSecret, viteSecretId],
 	);
 
 	if (!viteSecret) {
 		return (
 			<main className="dashboard-shell" id="main">
-				<p role="alert">Set VITE_SHARDWIRE_SECRET in .env (see .env.example).</p>
+				<p role="alert">
+					Set VITE_SHARDWIRE_SECRET to the browser-scoped secret in .env (see .env.example).
+				</p>
 			</main>
 		);
 	}
@@ -150,6 +149,7 @@ export function App() {
 				strict: true,
 				manifest,
 				botIntents: ['Guilds', 'GuildMessages', 'GuildMembers', 'MessageContent'],
+				expectedScope: browserSecretScope,
 			}}
 		>
 			<main className="dashboard-shell" id="main">
